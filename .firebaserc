@@ -1,0 +1,11 @@
+{
+  "targets": {
+    "dadt-caisse": {
+      "hosting": {
+        "dadt-caisse": [
+          "dadt-caisse"
+        ]
+      }
+    }
+  }
+}
