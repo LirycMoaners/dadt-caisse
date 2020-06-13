@@ -1,0 +1,19 @@
+{
+  "hosting": [
+    {
+      "target": "dadt-caisse",
+      "public": "dist/dadt-caisse",
+      "ignore": [
+        "firebase.json",
+        "**/.*",
+        "**/node_modules/**"
+      ],
+      "rewrites": [
+        {
+          "source": "**",
+          "destination": "/index.html"
+        }
+      ]
+    }
+  ]
+}
