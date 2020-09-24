@@ -1,0 +1,52 @@
+.header {
+  display: flex;
+  flex-direction: row;
+  padding: 10px;
+
+  .mat-form-field {
+    flex: 1;
+    margin-right: 10px;
+  }
+}
+
+.container {
+  overflow: auto;
+  flex: 1;
+
+  .mat-header-cell {
+    justify-content: center;
+  }
+
+  .ellipsis {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .mat-column-actions {
+    justify-content: center;
+  }
+}
+
+.footer {
+  display: flex;
+  padding: 24px;
+  align-items: center;
+
+  .space {
+    flex: 5;
+  }
+
+  .total {
+    flex: 1;
+  }
+
+  button {
+    flex: 1;
+    padding: 0;
+
+    .mat-icon {
+      margin-left: 15px;
+    }
+  }
+}

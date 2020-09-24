@@ -6,6 +6,7 @@ import { ToolbarComponent } from './toolbar/toolbar.component';
 import { CustomerService } from './http-services/customer.service';
 import { ArticleService } from './http-services/article.service';
 import { ArticleCategoryService } from './http-services/article-category.service';
+import { SaleService } from './http-services/sale.service';
 
 
 
@@ -24,7 +25,8 @@ import { ArticleCategoryService } from './http-services/article-category.service
   providers: [
     CustomerService,
     ArticleService,
-    ArticleCategoryService
+    ArticleCategoryService,
+    SaleService
   ]
 })
 export class CoreModule { }

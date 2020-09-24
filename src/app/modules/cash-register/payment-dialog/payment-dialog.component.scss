@@ -1,0 +1,16 @@
+.mat-dialog-content {
+  display: flex;
+
+  div {
+    flex: 1;
+    padding: 10px;
+
+    ::ng-deep .mat-form-field-infix {
+      width: auto;
+    }
+
+    button {
+      width: 100%;
+    }
+  }
+}
