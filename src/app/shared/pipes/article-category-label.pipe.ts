@@ -1,12 +1,22 @@
 import { Pipe, PipeTransform } from '@angular/core';
-import { ArticleCategory } from '../models/article-category.model';
+import { Observable } from 'rxjs';
+import { map } from 'rxjs/operators';
+
+import { ArticleCategoryService } from '../../core/http-services/article-category.service';
+
 
 @Pipe({
   name: 'articleCategoryLabel'
 })
 export class ArticleCategoryPipe implements PipeTransform {
-  transform(categoryId: string, categories: ArticleCategory[]) {
-    const category = categories.find(c => c.id === categoryId);
-    return category ? category.label : null;
+  constructor(
+    private articleCategoryService: ArticleCategoryService
+  ) {}
+
+  transform(categoryId: string): Observable<string> {
+    return this.articleCategoryService.getAll().pipe(
+      map(articleCategories => articleCategories.find(articleCategory => articleCategory.id === categoryId)),
+      map(articleCategory => articleCategory ? articleCategory.label : null)
+    );
   }
 }

@@ -1,5 +1,3 @@
-import { ArticleCategory } from './article-category.model';
-
 export class Article {
   id: string;
   reference: string;
