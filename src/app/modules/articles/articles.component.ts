@@ -5,10 +5,8 @@ import { MatDialog } from '@angular/material/dialog';
 import { of, Subscription } from 'rxjs';
 import { flatMap } from 'rxjs/operators';
 
-import { Article } from 'src/app/shared/models/article.model';
-import { ArticleCategory } from 'src/app/shared/models/article-category.model';
-import { ArticleService } from 'src/app/core/http-services/article.service';
-import { ArticleCategoryService } from 'src/app/core/http-services/article-category.service';
+import { Article } from '../../shared/models/article.model';
+import { ArticleService } from '../../core/http-services/article.service';
 import { ArticleDialogComponent } from './article-dialog/article-dialog.component';
 
 @Component({
@@ -20,19 +18,16 @@ export class ArticlesComponent implements OnInit, OnDestroy, AfterViewInit {
   @ViewChild(MatSort) sort: MatSort;
   public dataSource: MatTableDataSource<Article> = new MatTableDataSource();
   public displayedColumns: string[] = ['reference', 'label', 'category', 'buyPrice', 'sellPrice', 'quantity', 'actions'];
-  public categories: ArticleCategory[] = [];
   private readonly subscriptions: Subscription[] = [];
 
   constructor(
     private readonly dialog: MatDialog,
-    private readonly articleService: ArticleService,
-    private readonly categoryService: ArticleCategoryService
+    private readonly articleService: ArticleService
   ) { }
 
   ngOnInit(): void {
     this.subscriptions.push(
-      this.articleService.getAll().subscribe(articles => this.dataSource = new MatTableDataSource(articles)),
-      this.categoryService.getAll().subscribe(categories => this.categories = categories)
+      this.articleService.getAll().subscribe(articles => this.dataSource = new MatTableDataSource(articles))
     );
   }
 

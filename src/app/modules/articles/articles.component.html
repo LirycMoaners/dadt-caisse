@@ -29,7 +29,7 @@
     <!-- Category Column -->
     <ng-container matColumnDef="category">
       <mat-header-cell *matHeaderCellDef mat-sort-header> Catégorie </mat-header-cell>
-      <mat-cell *matCellDef="let element"> {{element.categoryId | articleCategoryLabel:categories}} </mat-cell>
+      <mat-cell *matCellDef="let element"> {{element.categoryId | articleCategoryLabel | async}} </mat-cell>
     </ng-container>
 
     <!-- Buy Price Column -->
@@ -46,7 +46,7 @@
 
     <!-- Quantity Column -->
     <ng-container matColumnDef="quantity">
-      <mat-header-cell *matHeaderCellDef mat-sort-header class="mat-column-quantity"> Quantity </mat-header-cell>
+      <mat-header-cell *matHeaderCellDef mat-sort-header class="mat-column-quantity"> Quantité </mat-header-cell>
       <mat-cell *matCellDef="let element" class="mat-column-quantity"> {{element.quantity}} </mat-cell>
     </ng-container>
 
