@@ -1,7 +1,7 @@
 import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
-import { ReactiveFormsModule } from '@angular/forms';
+import { ReactiveFormsModule, FormsModule } from '@angular/forms';
 import { LayoutModule } from '@angular/cdk/layout';
 import { MatToolbarModule } from '@angular/material/toolbar';
 import { MatButtonModule } from '@angular/material/button';
@@ -14,6 +14,7 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatDialogModule } from '@angular/material/dialog';
 import { MatSelectModule } from '@angular/material/select';
+import { MatAutocompleteModule } from '@angular/material/autocomplete';
 
 import { PhoneNumberPipe } from './pipes/phone-number.pipe';
 import { ArticleCategoryPipe } from './pipes/article-category-label.pipe';
@@ -29,6 +30,7 @@ import { ArticleCategoryPipe } from './pipes/article-category-label.pipe';
     CommonModule,
     RouterModule,
     ReactiveFormsModule,
+    FormsModule,
     LayoutModule,
     MatToolbarModule,
     MatButtonModule,
@@ -40,12 +42,14 @@ import { ArticleCategoryPipe } from './pipes/article-category-label.pipe';
     MatFormFieldModule,
     MatInputModule,
     MatDialogModule,
-    MatSelectModule
+    MatSelectModule,
+    MatAutocompleteModule
   ],
   exports: [
     CommonModule,
     RouterModule,
     ReactiveFormsModule,
+    FormsModule,
     PhoneNumberPipe,
     ArticleCategoryPipe,
     LayoutModule,
@@ -59,7 +63,8 @@ import { ArticleCategoryPipe } from './pipes/article-category-label.pipe';
     MatFormFieldModule,
     MatInputModule,
     MatDialogModule,
-    MatSelectModule
+    MatSelectModule,
+    MatAutocompleteModule
   ]
 })
 export class SharedModule { }

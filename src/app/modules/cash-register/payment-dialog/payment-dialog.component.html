@@ -1,0 +1,25 @@
+<h1 mat-dialog-title>Paiement {{ sale.total | currency:'EUR' }}</h1>
+<mat-dialog-content>
+  <div>
+    <mat-form-field>
+      <input matInput type="number" [(ngModel)]="sale.cashTotal" placeholder="0.00">
+    </mat-form-field>
+    <button mat-raised-button color="accent"><mat-icon>money</mat-icon></button>
+  </div>
+  <div>
+    <mat-form-field>
+      <input matInput type="number" [(ngModel)]="sale.creditCardTotal" placeholder="0.00">
+    </mat-form-field>
+    <button mat-raised-button color="accent"><mat-icon>credit_card</mat-icon></button>
+  </div>
+  <div>
+    <mat-form-field>
+      <input matInput type="number" [(ngModel)]="sale.checkTotal" placeholder="0.00">
+    </mat-form-field>
+    <button mat-raised-button color="accent"><mat-icon>source</mat-icon></button>
+  </div>
+</mat-dialog-content>
+<mat-dialog-actions align="end">
+  <button mat-raised-button mat-dialog-close>Annuler</button>
+  <button mat-raised-button color="accent" (click)="pay()" cdkFocusInitial>Valider</button>
+</mat-dialog-actions>

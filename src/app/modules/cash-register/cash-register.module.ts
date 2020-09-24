@@ -1,14 +1,15 @@
 import { NgModule } from '@angular/core';
-import { CommonModule } from '@angular/common';
 
 import { CashRegisterRoutingModule } from './cash-register-routing.module';
 import { CashRegisterComponent } from './cash-register.component';
+import { SharedModule } from '../../shared/shared.module';
+import { PaymentDialogComponent } from './payment-dialog/payment-dialog.component';
 
 
 @NgModule({
-  declarations: [CashRegisterComponent],
+  declarations: [CashRegisterComponent, PaymentDialogComponent],
   imports: [
-    CommonModule,
+    SharedModule,
     CashRegisterRoutingModule
   ]
 })

@@ -1,1 +1,86 @@
-<p>cash-register works!</p>
+<div class="header">
+  <mat-form-field class="example-full-width">
+    <mat-label>Rechercher</mat-label>
+    <input #searchedArticleInput
+      type="text"
+      placeholder="Ex: REF01"
+      aria-label="Référence"
+      matInput
+      [formControl]="articleControl"
+      [matAutocomplete]="auto">
+    <mat-autocomplete #auto="matAutocomplete" [displayWith]="displayArticle" (optionSelected)="addArticleToSale($event.option.value)">
+      <mat-option *ngFor="let article of filteredArticles | async" [value]="article">
+        {{article.reference}} - {{article.label}}
+      </mat-option>
+    </mat-autocomplete>
+  </mat-form-field>
+</div>
+
+<div class="container">
+  <mat-table [dataSource]="dataSource">
+    <!-- Reference Column -->
+    <ng-container matColumnDef="reference">
+      <mat-header-cell *matHeaderCellDef class="mat-column-reference"> Référence </mat-header-cell>
+      <mat-cell *matCellDef="let element" class="mat-column-reference">{{element.id}}</mat-cell>
+    </ng-container>
+
+    <!-- Label Column -->
+    <ng-container matColumnDef="label">
+      <mat-header-cell *matHeaderCellDef> Libellé </mat-header-cell>
+      <mat-cell *matCellDef="let element"> {{element.label}} </mat-cell>
+    </ng-container>
+
+    <!-- Category Column -->
+    <ng-container matColumnDef="category">
+      <mat-header-cell *matHeaderCellDef> Catégorie </mat-header-cell>
+      <mat-cell *matCellDef="let element">
+        <span class="ellipsis">{{element.categoryId | articleCategoryLabel | async}}</span>
+      </mat-cell>
+    </ng-container>
+
+    <!-- Sell Price Column -->
+    <ng-container matColumnDef="sellPrice">
+      <mat-header-cell *matHeaderCellDef class="mat-column-sell-price"> Prix </mat-header-cell>
+      <mat-cell *matCellDef="let element" class="mat-column-sell-price">
+        <input matInput type="number" [(ngModel)]="element.sellPrice">
+      </mat-cell>
+    </ng-container>
+
+    <!-- Quantity Column -->
+    <ng-container matColumnDef="quantity">
+      <mat-header-cell *matHeaderCellDef class="mat-column-quantity"> Quantité </mat-header-cell>
+      <mat-cell *matCellDef="let element" class="mat-column-quantity">
+        <input matInput type="number" [(ngModel)]="element.quantity">
+      </mat-cell>
+    </ng-container>
+
+    <!-- Total Column -->
+    <ng-container matColumnDef="total">
+      <mat-header-cell *matHeaderCellDef class="mat-column-total"> Total </mat-header-cell>
+      <mat-cell *matCellDef="let element" class="mat-column-total">
+        {{(element.sellPrice * element.quantity) | currency:'EUR'}}
+      </mat-cell>
+    </ng-container>
+
+    <!-- Actions Column -->
+    <ng-container matColumnDef="actions" stickyEnd>
+      <mat-header-cell *matHeaderCellDef class="mat-column-actions"> Actions </mat-header-cell>
+      <mat-cell *matCellDef="let element" class="mat-column-actions">
+        <button mat-icon-button (click)="deleteArticle(element)"><mat-icon>delete</mat-icon></button>
+      </mat-cell>
+    </ng-container>
+
+    <mat-header-row *matHeaderRowDef="displayedColumns; sticky: true"></mat-header-row>
+    <mat-row *matRowDef="let row; columns: displayedColumns;"></mat-row>
+  </mat-table>
+</div>
+
+<div class="footer">
+  <span class="space"></span>
+  <span class="total">{{ getTotal() | currency:'EUR' }}</span>
+  <button mat-raised-button color="accent" [disabled]="dataSource.data.length === 0" (click)="pay()">
+    Paiement
+    <mat-icon>payments</mat-icon>
+  </button>
+</div>
+
