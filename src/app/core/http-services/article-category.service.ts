@@ -1,30 +1,13 @@
 import { Injectable } from '@angular/core';
-import { Observable, of, BehaviorSubject } from 'rxjs';
+import { AngularFireDatabase } from '@angular/fire/database';
 import { ArticleCategory } from 'src/app/shared/models/article-category.model';
+import { DatabaseCollectionService } from './database-collection.service';
 
 @Injectable()
-export class ArticleCategoryService {
-  private articleCategories$: BehaviorSubject<ArticleCategory[]> = new BehaviorSubject([
-    {
-      id: '1',
-      label: 'Fil à tricoter'
-    },
-    {
-      id: '2',
-      label: 'Prêt à porter'
-    },
-    {
-      id: '3',
-      label: 'Collants/Divers'
-    }
-  ]);
-
-  constructor() { }
-
-  /**
-   * Retourne l'observable des catégories d'article
-   */
-  public getAll(): Observable<ArticleCategory[]> {
-    return this.articleCategories$;
+export class ArticleCategoryService extends DatabaseCollectionService<ArticleCategory> {
+  constructor(
+    database: AngularFireDatabase
+  ) {
+    super(database, 'article-categories');
   }
 }

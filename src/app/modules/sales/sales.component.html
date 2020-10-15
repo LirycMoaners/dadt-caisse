@@ -1,0 +1,14 @@
+<div class="header">
+  <mat-form-field (click)="date.open()">
+    <mat-label>Rechercher</mat-label>
+    <input matInput [matDatepicker]="date" [(ngModel)]="filterDate" disabled>
+    <mat-datepicker-toggle matSuffix [for]="date"></mat-datepicker-toggle>
+    <mat-datepicker #date disabled="false"></mat-datepicker>
+  </mat-form-field>
+</div>
+
+<div class="container">
+  <app-sales-tree [sales]="sales" [expandDate]="filterDate" (saleSelected)="showSaleDetails($event)"></app-sales-tree>
+  <app-sale-details *ngIf="currentSale" [sale]="currentSale"></app-sale-details>
+  <div class="space" *ngIf="!currentSale"></div>
+</div>

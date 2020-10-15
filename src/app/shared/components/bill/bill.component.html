@@ -1,0 +1,64 @@
+<div class="header">
+  <div class="title">
+    <div class="logo">
+      <img src="assets/images/logo.svg" alt="Logo de l'application">
+    </div>
+    <h1 class="mat-display-1 bill"> Facture </h1>
+  </div>
+  <div class="infos">
+    <div class="address">
+      <p>{{ settings.companyName }}</p>
+      <p>{{ settings.address }}</p>
+    </div>
+    <div class="sale">
+      <div class="labels">
+        <p>Date de la facture : </p>
+        <p>Date de la vente : </p>
+      </div>
+      <div class="data">
+        <p>{{ today | date: 'dd/MM/yyyy' }}</p>
+        <p>{{ sale.date | date: 'dd/MM/yyyy' }}</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="container">
+  <div class="bill-to">
+    <h2>Facturé à :</h2>
+    <div class="labels">
+      <p>Nom & prénom :</p>
+      <p>Entreprise :</p>
+      <p>Rue :</p>
+      <p>Code postal, Ville :</p>
+      <p>Téléphone :</p>
+    </div>
+  </div>
+  <div class="sale-articles">
+    <table>
+      <caption>Articles</caption>
+      <thead>
+        <tr>
+          <th id="reference">Référence</th>
+          <th id="label">Libellé</th>
+          <th id="quantity">Quantité</th>
+          <th id="price">Prix unitaire</th>
+          <th id="total-before-discount">Total HR</th>
+          <th id="discount">Remise</th>
+          <th id="total">Prix</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let saleArticle of sale.articles">
+          <td>{{ saleArticle.reference }}</td>
+          <td>{{ saleArticle.label }}</td>
+          <td>{{ saleArticle.quantity }}</td>
+          <td>{{ saleArticle.price | currency:'EUR' }}</td>
+          <td>{{ saleArticle.quantity * saleArticle.price | currency:'EUR' }}</td>
+          <td>{{ saleArticle.discount }} {{ saleArticle.discountType }}</td>
+          <td>{{ getSaleArticleTotal(saleArticle) }}</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>

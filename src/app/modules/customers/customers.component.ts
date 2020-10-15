@@ -69,7 +69,9 @@ export class CustomersComponent implements OnInit, AfterViewInit {
    * @param customer Le client devant être supprimé
    */
   public deleteCustomer(customer: Customer): void {
-    this.customerService.delete(customer.id).subscribe();
+    if (confirm('Souhaitez-vous réellement supprimer le/la client(e) ' + customer.lastName + ' ' + customer.firstName + ' ?')) {
+      this.customerService.delete(customer.id).subscribe();
+    }
   }
 
 }

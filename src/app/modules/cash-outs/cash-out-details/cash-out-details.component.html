@@ -1,0 +1,52 @@
+<div class="header">
+  <h2 *ngIf="cashOut.id; else addLabel">Retrait caisse "{{ cashOut.label }}" du {{ cashOut.date | date:'dd/MM/yyyy' }}</h2>
+  <ng-template #addLabel>
+    <h2>Ajout d'un retrait caisse</h2>
+  </ng-template>
+</div>
+
+<div class="container">
+  <form [formGroup]="cashOutForm">
+    <mat-form-field>
+      <mat-label>Libellé</mat-label>
+      <input matInput formControlName="label">
+    </mat-form-field>
+    <mat-form-field>
+      <mat-label>Date</mat-label>
+      <input matInput [matDatepicker]="date" formControlName="date">
+      <mat-datepicker-toggle matSuffix [for]="date"></mat-datepicker-toggle>
+      <mat-datepicker #date disabled="false"></mat-datepicker>
+    </mat-form-field>
+    <mat-form-field>
+      <mat-label>Catégorie de retrait</mat-label>
+      <mat-select formControlName="cashOutCategory" [compareWith]="cashOutCategoryCompareFunction">
+        <mat-option *ngFor="let cashOutCategory of cashOutCategories" [value]="cashOutCategory">{{ cashOutCategory.label }}</mat-option>
+      </mat-select>
+    </mat-form-field>
+    <mat-form-field>
+      <mat-label>Montant</mat-label>
+      <input
+        appNumeric
+        [decimals]='2'
+        matInput
+        type="text"
+        formControlName="total"
+        (change)="cashOut.total = toNumber($event.target.value)"
+      >
+    </mat-form-field>
+  </form>
+  <div class="actions">
+    <h3>Actions</h3>
+    <div class="actions-content">
+      <button mat-raised-button (click)="save()" [disabled]="cashOutForm.untouched">
+        Enregistrer
+        <mat-icon>save</mat-icon>
+      </button>
+      <button *ngIf="cashOut.id" mat-raised-button (click)="delete()">
+        Supprimer
+        <mat-icon>delete</mat-icon>
+      </button>
+    </div>
+  </div>
+  <mat-error>{{ errorMessage }}</mat-error>
+</div>

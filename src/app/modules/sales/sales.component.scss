@@ -1,0 +1,44 @@
+.header {
+  display: flex;
+  flex-direction: row;
+  padding: 10px;
+
+  .mat-form-field {
+    flex: 1;
+    margin-right: 10px;
+
+    .mat-datepicker-toggle {
+      font-size: 1.5em;
+    }
+  }
+}
+
+.container {
+  overflow: hidden;
+  flex: 1;
+  display: flex;
+
+  app-sales-tree {
+    flex: 1;
+    overflow-y: auto;
+    overflow-x: hidden;
+    min-width: 200px;
+  }
+
+  app-sale-details, .space {
+    flex: 3;
+    padding: 10px;
+    overflow: hidden;
+
+    @media screen {
+      display: flex;
+      flex-direction: column;
+    }
+  }
+}
+
+@media print {
+  .header, app-sales-tree, app-sale-details, .space {
+    display: none;
+  }
+}

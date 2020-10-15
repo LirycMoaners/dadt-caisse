@@ -4,10 +4,19 @@ import { CashRegisterRoutingModule } from './cash-register-routing.module';
 import { CashRegisterComponent } from './cash-register.component';
 import { SharedModule } from '../../shared/shared.module';
 import { PaymentDialogComponent } from './payment-dialog/payment-dialog.component';
+import { FidelityDialogComponent } from './fidelity-dialog/fidelity-dialog.component';
+import { CashLogPrintDialogComponent } from './cash-log-print-dialog/cash-log-print-dialog.component';
+import { CashLogComponent } from './cash-log/cash-log.component';
 
 
 @NgModule({
-  declarations: [CashRegisterComponent, PaymentDialogComponent],
+  declarations: [
+    CashRegisterComponent,
+    PaymentDialogComponent,
+    FidelityDialogComponent,
+    CashLogPrintDialogComponent,
+    CashLogComponent
+  ],
   imports: [
     SharedModule,
     CashRegisterRoutingModule

@@ -21,7 +21,9 @@
       <mat-form-field>
         <mat-label>Catégorie</mat-label>
         <mat-select formControlName="categoryId" required>
-          <mat-option *ngFor="let category of categories" [value]="category.id">{{ category.label }}</mat-option>
+          <mat-option *ngFor="let category of categories" [value]="category.id">
+            {{ category.label }}
+          </mat-option>
         </mat-select>
       </mat-form-field>
     </p>
@@ -39,6 +41,6 @@
   </form>
 </mat-dialog-content>
 <mat-dialog-actions align="end">
-  <button mat-button mat-dialog-close>Annuler</button>
-  <button mat-button cdkFocusInitial (click)="validate()" color="accent">Valider</button>
+  <button mat-raised-button mat-dialog-close>Annuler</button>
+  <button mat-raised-button cdkFocusInitial (click)="validate()" color="accent">Valider</button>
 </mat-dialog-actions>

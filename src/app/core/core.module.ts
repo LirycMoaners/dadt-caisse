@@ -7,6 +7,11 @@ import { CustomerService } from './http-services/customer.service';
 import { ArticleService } from './http-services/article.service';
 import { ArticleCategoryService } from './http-services/article-category.service';
 import { SaleService } from './http-services/sale.service';
+import { SettingsService } from './http-services/settings.service';
+import { CashOutCategoryService } from './http-services/cash-out-category.service';
+import { CashOutService } from './http-services/cash-out.service';
+import { AuthGuard } from './guards/auth.guard';
+import { AuthenticationService } from './http-services/authentication.service';
 
 
 
@@ -23,10 +28,15 @@ import { SaleService } from './http-services/sale.service';
     ToolbarComponent
   ],
   providers: [
+    AuthGuard,
+    AuthenticationService,
     CustomerService,
     ArticleService,
     ArticleCategoryService,
-    SaleService
+    SaleService,
+    CashOutCategoryService,
+    CashOutService,
+    SettingsService
   ]
 })
 export class CoreModule { }

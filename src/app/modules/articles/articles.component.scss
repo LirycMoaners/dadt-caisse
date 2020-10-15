@@ -39,3 +39,23 @@
     }
   }
 }
+
+.footer {
+  padding: 10px;
+  overflow: auto;
+  display: flex;
+
+  button {
+    flex: 0 0 auto;
+
+    &:not(:last-child) {
+      margin-right: 10px;
+    }
+  }
+}
+
+@media print {
+  :host {
+    display: none;
+  }
+}

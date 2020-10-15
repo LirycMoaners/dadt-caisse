@@ -1,0 +1,25 @@
+:host {
+  display: flex;
+  @media screen {
+    display: none;
+  }
+}
+
+table {
+  border-collapse: collapse;
+  flex: 1;
+  color: black;
+  box-sizing: border-box;
+  border: 1px solid black;
+
+  caption {
+    font-weight: bold;
+    font-size: 2em;
+    line-height: 2;
+  }
+
+  td {
+    border: 1px solid black;
+    box-sizing: border-box;
+  }
+}

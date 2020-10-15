@@ -20,67 +20,140 @@
   <mat-table [dataSource]="dataSource">
     <!-- Reference Column -->
     <ng-container matColumnDef="reference">
-      <mat-header-cell *matHeaderCellDef class="mat-column-reference"> Référence </mat-header-cell>
-      <mat-cell *matCellDef="let element" class="mat-column-reference">{{element.id}}</mat-cell>
+      <mat-header-cell *matHeaderCellDef> Référence </mat-header-cell>
+      <mat-cell *matCellDef="let element">{{element.id}}</mat-cell>
+      <mat-footer-cell *matFooterCellDef></mat-footer-cell>
     </ng-container>
 
     <!-- Label Column -->
     <ng-container matColumnDef="label">
       <mat-header-cell *matHeaderCellDef> Libellé </mat-header-cell>
       <mat-cell *matCellDef="let element"> {{element.label}} </mat-cell>
+      <mat-footer-cell *matFooterCellDef></mat-footer-cell>
     </ng-container>
 
     <!-- Category Column -->
     <ng-container matColumnDef="category">
       <mat-header-cell *matHeaderCellDef> Catégorie </mat-header-cell>
-      <mat-cell *matCellDef="let element">
-        <span class="ellipsis">{{element.categoryId | articleCategoryLabel | async}}</span>
-      </mat-cell>
+      <mat-cell *matCellDef="let element"> {{element.categoryId | articleCategoryLabel | async}} </mat-cell>
+      <mat-footer-cell *matFooterCellDef></mat-footer-cell>
     </ng-container>
 
     <!-- Sell Price Column -->
-    <ng-container matColumnDef="sellPrice">
-      <mat-header-cell *matHeaderCellDef class="mat-column-sell-price"> Prix </mat-header-cell>
-      <mat-cell *matCellDef="let element" class="mat-column-sell-price">
-        <input matInput type="number" [(ngModel)]="element.sellPrice">
+    <ng-container matColumnDef="price">
+      <mat-header-cell *matHeaderCellDef class="mat-column-price"> Prix </mat-header-cell>
+      <mat-cell *matCellDef="let element" class="mat-column-price">
+        <input
+          appNumeric
+          [decimals]='2'
+          matInput
+          type="text"
+          [ngModel]="element.price"
+          (change)="element.price = toNumber($event.target.value)"
+        >
       </mat-cell>
+      <mat-footer-cell *matFooterCellDef class="mat-column-price"></mat-footer-cell>
     </ng-container>
 
     <!-- Quantity Column -->
     <ng-container matColumnDef="quantity">
       <mat-header-cell *matHeaderCellDef class="mat-column-quantity"> Quantité </mat-header-cell>
       <mat-cell *matCellDef="let element" class="mat-column-quantity">
-        <input matInput type="number" [(ngModel)]="element.quantity">
+        <input
+          appNumeric
+          [decimals]="0"
+          matInput
+          type="text"
+          [ngModel]="element.quantity"
+          (change)="element.quantity = toNumber($event.target.value)"
+        >
       </mat-cell>
+      <mat-footer-cell *matFooterCellDef class="mat-column-quantity"></mat-footer-cell>
+    </ng-container>
+
+    <!-- Total Before Discount Column -->
+    <ng-container matColumnDef="totalBeforeDiscount">
+      <mat-header-cell *matHeaderCellDef class="mat-column-total"> Total AR </mat-header-cell>
+      <mat-cell *matCellDef="let element" class="mat-column-total">
+        {{(element.price * element.quantity) | currency:'EUR'}}
+      </mat-cell>
+      <mat-footer-cell *matFooterCellDef class="mat-column-total">
+        <span class="total">{{ getSaleArticlesTotalBeforeDiscount() | currency:'EUR' }}</span>
+      </mat-footer-cell>
+    </ng-container>
+
+    <!-- Discount Column -->
+    <ng-container matColumnDef="discount">
+      <mat-header-cell *matHeaderCellDef class="mat-column-discount"> Remise </mat-header-cell>
+      <mat-cell *matCellDef="let element" class="mat-column-discount">
+        <input
+          matInput
+          type="text"
+          [ngModel]="element.discount"
+          appNumeric
+          [decimals]='2'
+          (change)="changeDiscount(element, $event.target.value)"
+        >
+      </mat-cell>
+      <mat-footer-cell *matFooterCellDef class="mat-column-discount"></mat-footer-cell>
+    </ng-container>
+
+    <!-- Discount Type Column -->
+    <ng-container matColumnDef="discountType">
+      <mat-header-cell *matHeaderCellDef class="mat-column-discount-type"> Type </mat-header-cell>
+      <mat-cell *matCellDef="let element" class="mat-column-discount-type">
+        <mat-select [(ngModel)]="element.discountType">
+          <mat-option value="€">€</mat-option>
+          <mat-option value="%">%</mat-option>
+        </mat-select>
+      </mat-cell>
+      <mat-footer-cell *matFooterCellDef class="mat-column-discount-type"></mat-footer-cell>
     </ng-container>
 
     <!-- Total Column -->
     <ng-container matColumnDef="total">
       <mat-header-cell *matHeaderCellDef class="mat-column-total"> Total </mat-header-cell>
       <mat-cell *matCellDef="let element" class="mat-column-total">
-        {{(element.sellPrice * element.quantity) | currency:'EUR'}}
+        {{ getSaleArticleTotal(element) | currency:'EUR' }}
       </mat-cell>
+      <mat-footer-cell *matFooterCellDef class="mat-column-total">
+        <span class="total">{{ getSaleArticlesTotal() | currency:'EUR' }}</span>
+      </mat-footer-cell>
     </ng-container>
 
     <!-- Actions Column -->
     <ng-container matColumnDef="actions" stickyEnd>
       <mat-header-cell *matHeaderCellDef class="mat-column-actions"> Actions </mat-header-cell>
       <mat-cell *matCellDef="let element" class="mat-column-actions">
-        <button mat-icon-button (click)="deleteArticle(element)"><mat-icon>delete</mat-icon></button>
+        <button mat-icon-button (click)="deleteSaleArticle(element)"><mat-icon>delete</mat-icon></button>
       </mat-cell>
+      <mat-footer-cell *matFooterCellDef class="mat-column-actions">
+        <button mat-raised-button color="accent" [disabled]="dataSource.data.length === 0" (click)="pay()">
+          Paiement
+          <mat-icon>payments</mat-icon>
+        </button>
+      </mat-footer-cell>
     </ng-container>
 
     <mat-header-row *matHeaderRowDef="displayedColumns; sticky: true"></mat-header-row>
     <mat-row *matRowDef="let row; columns: displayedColumns;"></mat-row>
+    <mat-footer-row *matFooterRowDef="displayedColumns; sticky: true"></mat-footer-row>
   </mat-table>
 </div>
 
 <div class="footer">
+  <button mat-raised-button [disabled]="!lastSale" (click)="ticketCopy()">
+    Duplicata
+    <mat-icon>print</mat-icon>
+  </button>
+  <button mat-raised-button [disabled]="!lastSale" (click)="printBill()">
+    Facture
+    <mat-icon>print</mat-icon>
+  </button>
   <span class="space"></span>
-  <span class="total">{{ getTotal() | currency:'EUR' }}</span>
-  <button mat-raised-button color="accent" [disabled]="dataSource.data.length === 0" (click)="pay()">
-    Paiement
-    <mat-icon>payments</mat-icon>
+  <button class="comptability" mat-raised-button (click)="printCashLog()">
+    Journal de caisse
+    <mat-icon>print</mat-icon>
   </button>
 </div>
 

@@ -39,7 +39,7 @@ export class ArticleDialogComponent implements OnInit, OnDestroy {
       this.title = 'Edition d\'article';
       this.articleFormGroup.setValue(this.article);
     } else {
-      this.title = 'Ajout d\'aticle';
+      this.title = 'Ajout d\'article';
     }
 
     this.subscription = this.categoryService.getAll().subscribe(categories => this.categories = categories);
