@@ -1,26 +1,29 @@
 import { Injectable } from '@angular/core';
-import { BehaviorSubject, Observable, of } from 'rxjs';
+import { AngularFireDatabase } from '@angular/fire/database';
+import { BehaviorSubject, ReplaySubject } from 'rxjs';
+import { first } from 'rxjs/operators';
+import { SaleArticle } from 'src/app/shared/models/sale-article.model';
 import { Sale } from 'src/app/shared/models/sale.model';
+import { DatabaseCollectionService } from './database-collection.service';
 
 @Injectable()
-export class SaleService {
-  private sales$: BehaviorSubject<Sale[]> = new BehaviorSubject([]);
+export class SaleService extends DatabaseCollectionService<Sale> {
+  public dayTotal$: BehaviorSubject<number>;
+  public currentSaleArticles$: ReplaySubject<SaleArticle[]> = new ReplaySubject(1);
 
-  constructor() { }
-
-  /**
-   * Retourne l'observable des ventes
-   */
-  public getAll(): Observable<Sale[]> {
-    return this.sales$;
-  }
-
-  /**
-   * Appel au service de création d'une vente
-   * @param sale La vente à créer
-   */
-  public create(sale: Sale): Observable<Sale> {
-    this.sales$.next([...this.sales$.getValue(), sale]);
-    return of(sale);
+  constructor(
+    database: AngularFireDatabase
+  ) {
+    super(database, 'sales');
+    const todayMidnight = new Date();
+    todayMidnight.setHours(0);
+    todayMidnight.setMinutes(0);
+    todayMidnight.setSeconds(0);
+    todayMidnight.setMilliseconds(0);
+    this.getAll().pipe(first()).subscribe(
+      sales => this.dayTotal$ = new BehaviorSubject(
+        sales.filter(sale => sale.date.valueOf() >= todayMidnight.valueOf()).reduce((total, sale) => total + sale.total, 0)
+      )
+    );
   }
 }

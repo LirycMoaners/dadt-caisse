@@ -23,7 +23,14 @@
     white-space: nowrap;
   }
 
+  .mat-column-price, .mat-column-quantity, .mat-column-discount, .mat-column-discountType, .mat-column-total {
+    flex: 0 0 100px;
+    text-align: center;
+    justify-content: center;
+  }
+
   .mat-column-actions {
+    flex: 0 0 120px;
     justify-content: center;
   }
 }
@@ -31,22 +38,18 @@
 .footer {
   display: flex;
   padding: 24px;
-  align-items: center;
+
+  button:not(:last-child) {
+    margin-right: 10px;
+  }
 
   .space {
-    flex: 5;
-  }
-
-  .total {
     flex: 1;
   }
+}
 
-  button {
-    flex: 1;
-    padding: 0;
-
-    .mat-icon {
-      margin-left: 15px;
-    }
+@media print {
+  :host {
+    display: none;
   }
 }

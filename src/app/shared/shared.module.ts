@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { ReactiveFormsModule, FormsModule } from '@angular/forms';
 import { LayoutModule } from '@angular/cdk/layout';
+import { MatNativeDateModule } from '@angular/material/core';
 import { MatToolbarModule } from '@angular/material/toolbar';
 import { MatButtonModule } from '@angular/material/button';
 import { MatSidenavModule } from '@angular/material/sidenav';
@@ -15,16 +16,25 @@ import { MatInputModule } from '@angular/material/input';
 import { MatDialogModule } from '@angular/material/dialog';
 import { MatSelectModule } from '@angular/material/select';
 import { MatAutocompleteModule } from '@angular/material/autocomplete';
+import { MatTreeModule } from '@angular/material/tree';
+import { MatDatepickerModule } from '@angular/material/datepicker';
+import { MatCheckboxModule } from '@angular/material/checkbox';
 
 import { PhoneNumberPipe } from './pipes/phone-number.pipe';
 import { ArticleCategoryPipe } from './pipes/article-category-label.pipe';
+import { TicketComponent } from './components/ticket/ticket.component';
+import { BillComponent } from './components/bill/bill.component';
+import { NumericDirective } from './directives/numeric.directive';
 
 
 
 @NgModule({
   declarations: [
     PhoneNumberPipe,
-    ArticleCategoryPipe
+    ArticleCategoryPipe,
+    NumericDirective,
+    TicketComponent,
+    BillComponent
   ],
   imports: [
     CommonModule,
@@ -43,7 +53,11 @@ import { ArticleCategoryPipe } from './pipes/article-category-label.pipe';
     MatInputModule,
     MatDialogModule,
     MatSelectModule,
-    MatAutocompleteModule
+    MatAutocompleteModule,
+    MatTreeModule,
+    MatNativeDateModule,
+    MatDatepickerModule,
+    MatCheckboxModule
   ],
   exports: [
     CommonModule,
@@ -52,6 +66,7 @@ import { ArticleCategoryPipe } from './pipes/article-category-label.pipe';
     FormsModule,
     PhoneNumberPipe,
     ArticleCategoryPipe,
+    NumericDirective,
     LayoutModule,
     MatToolbarModule,
     MatButtonModule,
@@ -64,7 +79,11 @@ import { ArticleCategoryPipe } from './pipes/article-category-label.pipe';
     MatInputModule,
     MatDialogModule,
     MatSelectModule,
-    MatAutocompleteModule
+    MatAutocompleteModule,
+    MatTreeModule,
+    MatNativeDateModule,
+    MatDatepickerModule,
+    MatCheckboxModule
   ]
 })
 export class SharedModule { }

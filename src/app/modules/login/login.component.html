@@ -1,0 +1,15 @@
+<div class="login">
+  <img src="assets/images/logo.svg" alt="Logo de l'application">
+</div>
+<form [formGroup]="loginForm" (ngSubmit)="signIn()">
+  <mat-form-field>
+    <mat-label>Email</mat-label>
+    <input matInput type="email" formControlName="email">
+  </mat-form-field>
+  <mat-form-field>
+    <mat-label>Mot de passe</mat-label>
+    <input matInput type="password" formControlName="password">
+  </mat-form-field>
+  <button mat-raised-button type="submit">Connexion</button>
+</form>
+<mat-error>{{ errorMessage }}</mat-error>

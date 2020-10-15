@@ -1,0 +1,19 @@
+<table>
+  <caption>Inventaire {{ articleCategoryLabel ? articleCategoryLabel : 'Complet' }}</caption>
+  <thead>
+    <tr>
+      <th id="reference">Ref.</th>
+      <th id="label">Libellé</th>
+      <th id="category">Catégorie</th>
+      <th id="quantity">Quantité</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr *ngFor="let article of articles">
+      <td>{{ article.reference }}</td>
+      <td>{{ article.label }}</td>
+      <td>{{ article.categoryId | articleCategoryLabel | async }}</td>
+      <td>{{ article.quantity }}</td>
+    </tr>
+  </tbody>
+</table>

@@ -1,0 +1,19 @@
+:host {
+  display: flex;
+  flex-direction: column;
+}
+
+.mat-tree {
+  flex: 1;
+  overflow-x: auto;
+
+  .mat-tree-node {
+    &:hover {
+      background-color: #00000020;
+    }
+
+    &.isSelected {
+      background-color: #303030;
+    }
+  }
+}

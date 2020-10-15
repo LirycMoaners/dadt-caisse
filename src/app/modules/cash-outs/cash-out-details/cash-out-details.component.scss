@@ -1,0 +1,30 @@
+.header {
+  display: flex;
+
+  h2 {
+    flex: 1;
+  }
+}
+
+.container {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+
+  form > .mat-form-field:not(:last-child) {
+    margin-right: 10px;
+  }
+
+  .actions-content {
+    text-align: center;
+
+    button {
+      margin-right: 10px;
+    }
+  }
+
+  .mat-error {
+    text-align: center;
+  }
+}

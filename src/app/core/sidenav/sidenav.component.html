@@ -1,23 +1,53 @@
 <mat-sidenav-container class="sidenav-container">
-  <mat-sidenav #drawer class="sidenav" fixedInViewport
-      [attr.role]="(isHandset$ | async) ? 'dialog' : 'navigation'"
-      [mode]="(isHandset$ | async) ? 'over' : 'side'"
-      [opened]="(isHandset$ | async) === false">
+  <mat-sidenav
+    *ngIf="isSignedIn"
+    #drawer
+    class="sidenav"
+    fixedInViewport
+    [attr.role]="(isHandset$ | async) ? 'dialog' : 'navigation'"
+    [mode]="(isHandset$ | async) ? 'over' : 'side'"
+    [opened]="(isHandset$ | async) === false"
+  >
     <mat-toolbar>
       <img src="assets/images/logo.svg" alt="Logo de l'application">
     </mat-toolbar>
     <mat-nav-list>
       <a
-        *ngFor="let route of this.routes"
+        *ngFor="let route of routes"
         mat-list-item
         [routerLink]="route.path"
         routerLinkActive="list-item-active"
         (click)="closeSidenav()"
       >{{ route.data.title }}</a>
     </mat-nav-list>
+    <mat-form-field class="day-total">
+      <input
+        matInput
+        [type]="isDayTotalShown ? 'text' : 'password'"
+        [ngModel]="dayTotal"
+        disabled
+        placeholder="Total de la journée"
+      >
+      <button
+        matSuffix
+        mat-icon-button
+        (mousedown)="isDayTotalShown = true"
+        (pointerdown)="isDayTotalShown = true"
+        (mouseup)="isDayTotalShown = false"
+        (pointerup)="isDayTotalShown = false"
+      >
+        <mat-icon>{{ isDayTotalShown ? 'visibility_off' : 'visibility' }}</mat-icon>
+      </button>
+    </mat-form-field>
+    <div class="sign-out">
+      <button mat-raised-button color="primary" (click)="signOut()">
+        Déconnexion
+        <mat-icon>exit_to_app</mat-icon>
+      </button>
+    </div>
   </mat-sidenav>
   <mat-sidenav-content>
-    <app-toolbar *ngIf="isHandset$ | async" (menuButtonClicked)="drawer.toggle()"></app-toolbar>
+    <app-toolbar *ngIf="(isHandset$ | async) && isSignedIn" (menuButtonClicked)="drawer.toggle()"></app-toolbar>
     <ng-content></ng-content>
   </mat-sidenav-content>
 </mat-sidenav-container>

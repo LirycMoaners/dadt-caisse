@@ -1,7 +1,7 @@
 <div class="header">
   <mat-form-field>
     <mat-label>Rechercher</mat-label>
-    <input matInput (keyup)="applyFilter($event)" placeholder="Ex. Dupont">
+    <input matInput (keyup)="applyFilter($event)" placeholder="Ex. REF1">
     <mat-icon matSuffix>search</mat-icon>
   </mat-form-field>
 
@@ -62,4 +62,15 @@
     <mat-header-row *matHeaderRowDef="displayedColumns; sticky: true"></mat-header-row>
     <mat-row *matRowDef="let row; columns: displayedColumns;"></mat-row>
   </mat-table>
+</div>
+
+<div class="footer">
+  <button mat-raised-button (click)="printInventory()">
+    Inventaire Complet
+    <mat-icon>print</mat-icon>
+  </button>
+  <button *ngFor="let articleCategory of articleCategories" mat-raised-button (click)="printInventory(articleCategory)">
+    Inventaire {{ articleCategory.label }}
+    <mat-icon>print</mat-icon>
+  </button>
 </div>

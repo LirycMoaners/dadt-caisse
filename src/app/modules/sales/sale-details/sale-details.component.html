@@ -1,0 +1,184 @@
+<div class="header">
+  <h2>Vente du {{ sale.date | date:'dd/MM/yyyy à HH:mm:ss' }}</h2>
+  <h3>Client(e) : {{ sale.customer ? sale.customer.lastName + ' ' + sale.customer.firstName : 'Non renseigné' }}</h3>
+</div>
+
+<div class="container">
+  <div class="articles">
+    <h3>Articles</h3>
+    <div class="articles-content">
+      <mat-table [dataSource]="dataSource">
+        <!-- Reference Column -->
+        <ng-container matColumnDef="reference">
+          <mat-header-cell *matHeaderCellDef> Référence </mat-header-cell>
+          <mat-cell *matCellDef="let element">{{element.id}}</mat-cell>
+          <mat-footer-cell *matFooterCellDef class="saleTotalLabel">
+            <div *ngIf="sale.discount">Total HR</div>
+            <div>Total</div>
+          </mat-footer-cell>
+        </ng-container>
+
+        <!-- Label Column -->
+        <ng-container matColumnDef="label">
+          <mat-header-cell *matHeaderCellDef> Libellé </mat-header-cell>
+          <mat-cell *matCellDef="let element"> {{element.label}} </mat-cell>
+          <mat-footer-cell *matFooterCellDef></mat-footer-cell>
+        </ng-container>
+
+        <!-- Category Column -->
+        <ng-container matColumnDef="category">
+          <mat-header-cell *matHeaderCellDef> Catégorie </mat-header-cell>
+          <mat-cell *matCellDef="let element">
+            <span class="ellipsis">{{element.categoryId | articleCategoryLabel | async}}</span>
+          </mat-cell>
+          <mat-footer-cell *matFooterCellDef></mat-footer-cell>
+        </ng-container>
+
+        <!-- Price Column -->
+        <ng-container matColumnDef="price">
+          <mat-header-cell *matHeaderCellDef> Prix </mat-header-cell>
+          <mat-cell *matCellDef="let element"> {{ element.price | currency:'EUR' }}</mat-cell>
+          <mat-footer-cell *matFooterCellDef></mat-footer-cell>
+        </ng-container>
+
+        <!-- Quantity Column -->
+        <ng-container matColumnDef="quantity">
+          <mat-header-cell *matHeaderCellDef> Quantité </mat-header-cell>
+          <mat-cell *matCellDef="let element"> {{ element.quantity }} </mat-cell>
+          <mat-footer-cell *matFooterCellDef></mat-footer-cell>
+        </ng-container>
+
+        <!-- Total Before Discount Column -->
+        <ng-container matColumnDef="totalBeforeDiscount">
+          <mat-header-cell *matHeaderCellDef> Total AR </mat-header-cell>
+          <mat-cell *matCellDef="let element">
+            {{(element.price * element.quantity) | currency:'EUR'}}
+          </mat-cell>
+          <mat-footer-cell *matFooterCellDef></mat-footer-cell>
+        </ng-container>
+
+        <!-- Discount Column -->
+        <ng-container matColumnDef="discount">
+          <mat-header-cell *matHeaderCellDef> Remise </mat-header-cell>
+          <mat-cell *matCellDef="let element">
+            {{ element.discount }} {{ element.discountType }}
+          </mat-cell>
+          <mat-footer-cell *matFooterCellDef class="saleDiscount">
+            <div></div>
+            <div *ngIf="sale.discount">- {{ sale.discount }} {{ sale.discountType }}</div>
+          </mat-footer-cell>
+        </ng-container>
+
+        <!-- Total Column -->
+        <ng-container matColumnDef="total">
+          <mat-header-cell *matHeaderCellDef> Total </mat-header-cell>
+          <mat-cell *matCellDef="let element">
+            {{getSaleArticleTotal(element) | currency:'EUR'}}
+          </mat-cell>
+          <mat-footer-cell *matFooterCellDef class="saleTotal">
+            <div *ngIf="sale.discount">{{ getTotalBeforeSaleDiscount() | currency:'EUR' }}</div>
+            <div>{{ sale.total | currency:'EUR' }}</div>
+          </mat-footer-cell>
+        </ng-container>
+
+        <mat-header-row *matHeaderRowDef="displayedColumns; sticky: true"></mat-header-row>
+        <mat-row *matRowDef="let row; columns: displayedColumns;"></mat-row>
+        <mat-footer-row *matFooterRowDef="displayedColumns; sticky: true"></mat-footer-row>
+      </mat-table>
+    </div>
+  </div>
+
+  <form class="totals" [formGroup]="saleForm">
+    <h3>Paiement</h3>
+    <mat-table [dataSource]="saleDataSource">
+      <!-- Cash Column -->
+      <ng-container matColumnDef="cash">
+        <mat-header-cell *matHeaderCellDef class="center"> Liquide </mat-header-cell>
+        <mat-cell *matCellDef="let element" class="center">
+          <mat-form-field>
+            <input
+              appNumeric
+              [decimals]='2'
+              matInput
+              type="text"
+              formControlName="cashTotal"
+              (change)="element.cashTotal = toNumber($event.target.value)"
+            >
+          </mat-form-field>
+        </mat-cell>
+      </ng-container>
+
+      <!-- Credit Card Column -->
+      <ng-container matColumnDef="card">
+        <mat-header-cell *matHeaderCellDef class="center"> Carte de crédit </mat-header-cell>
+        <mat-cell *matCellDef="let element" class="center">
+          <mat-form-field>
+            <input
+              appNumeric
+              [decimals]='2'
+              matInput
+              type="text"
+              formControlName="cardTotal"
+              (change)="element.cardTotal = toNumber($event.target.value)"
+            >
+          </mat-form-field>
+        </mat-cell>
+      </ng-container>
+
+      <!-- Check Column -->
+      <ng-container matColumnDef="check">
+        <mat-header-cell *matHeaderCellDef class="center"> Chèque </mat-header-cell>
+        <mat-cell *matCellDef="let element" class="center">
+          <mat-form-field>
+            <input
+              appNumeric
+              [decimals]='2'
+              matInput
+              type="text"
+              formControlName="checkTotal"
+              (change)="element.checkTotal = toNumber($event.target.value)"
+            >
+          </mat-form-field>
+        </mat-cell>
+      </ng-container>
+
+      <!-- Credit Column -->
+      <ng-container matColumnDef="credit">
+        <mat-header-cell *matHeaderCellDef class="center"> Avoir </mat-header-cell>
+        <mat-cell *matCellDef="let element" class="center">
+          <mat-form-field>
+            <input
+              appNumeric
+              [decimals]='2'
+              matInput
+              type="text"
+              formControlName="creditTotal"
+              (change)="element.creditTotal = toNumber($event.target.value)"
+            >
+          </mat-form-field>
+        </mat-cell>
+      </ng-container>
+
+      <mat-header-row *matHeaderRowDef="saleDisplayedColumns; sticky: true"></mat-header-row>
+      <mat-row *matRowDef="let row; columns: saleDisplayedColumns;"></mat-row>
+    </mat-table>
+  </form>
+  <div class="actions">
+    <h3>Actions</h3>
+    <div class="actions-content">
+      <button mat-raised-button (click)="print('ticket')">
+        Ticket
+        <mat-icon>print</mat-icon>
+      </button>
+      <button mat-raised-button (click)="print('bill')">
+        Facture
+        <mat-icon>print</mat-icon>
+      </button>
+      <button *ngIf="saleForm" mat-raised-button (click)="save()" [disabled]="saleForm.untouched">
+        Enregistrer
+        <mat-icon>save</mat-icon>
+      </button>
+    </div>
+  </div>
+  <mat-error>{{ errorMessage }}</mat-error>
+</div>

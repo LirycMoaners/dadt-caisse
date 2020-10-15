@@ -1,4 +1,4 @@
-export interface ArticleCategory {
+export class ArticleCategory {
   id: string;
   label: string;
 }
