@@ -43,7 +43,7 @@ export class SalesTreeComponent implements OnInit, OnChanges {
       );
 
       if (
-        this.sales.find(sale => sale.date.toString().substring(0, 9) === this.expandDate.toString().substring(0, 9)
+        this.sales.find(sale => sale.createDate.toString().substring(0, 9) === this.expandDate.toString().substring(0, 9)
       )) {
         const yearNode = this.saleFlatNodes.find(saleFlatNode => saleFlatNode.label === this.expandDate.getFullYear().toString());
         yearNode.isExpanded = true;
@@ -84,7 +84,7 @@ export class SalesTreeComponent implements OnInit, OnChanges {
    * Garde le noeud sélectionné et émet sa valeur au composant parent
    * @param saleFlatNode Le noeud sélectionné
    */
-  public onClickSaleFlatNode(saleFlatNode: FlatNode<Sale>) {
+  public onClickSaleFlatNode(saleFlatNode: FlatNode<Sale>): void {
     this.saleFlatNodes.forEach(sfn => sfn.isSelected = false);
     saleFlatNode.isSelected = true;
     this.saleSelected.emit(saleFlatNode.value);
@@ -93,7 +93,7 @@ export class SalesTreeComponent implements OnInit, OnChanges {
   /**
    * Réduit tous les noeuds sauf ceux contenant le noeud sélectionné
    */
-  public collapseAll() {
+  public collapseAll(): void {
     const selectedSaleFlatNode = this.saleFlatNodes.find(saleFlatNode => saleFlatNode.isSelected);
     this.saleFlatNodes.forEach(saleFlatNode => saleFlatNode.isExpanded = false);
     if (selectedSaleFlatNode) {
@@ -110,18 +110,20 @@ export class SalesTreeComponent implements OnInit, OnChanges {
    * @param sales Les vente à convertir
    */
   private getSaleFlatNodes(sales: Sale[]): FlatNode<Sale>[] {
-    const orderedSales: Sale[] = [...sales].sort((saleA, saleB) => saleB.date.valueOf() - saleA.date.valueOf());
+    const orderedSales: Sale[] = [...sales].sort((saleA, saleB) =>
+      (saleB.createDate as Date).valueOf() - (saleA.createDate as Date).valueOf()
+    );
     const saleFlatNodes: FlatNode<Sale>[] = [];
     let startLevelToPush: number;
     let currentTreeSaleLabel: string;
 
     for (const sale of orderedSales) {
       startLevelToPush = 0;
-      if (saleFlatNodes.some(saleFlatNode => saleFlatNode.label === sale.date.getFullYear().toString())) {
+      if (saleFlatNodes.some(saleFlatNode => saleFlatNode.label === (sale.createDate as Date).getFullYear().toString())) {
         startLevelToPush++;
-        if (saleFlatNodes.some(saleFlatNode => saleFlatNode.label === this.months[sale.date.getMonth()])) {
+        if (saleFlatNodes.some(saleFlatNode => saleFlatNode.label === this.months[(sale.createDate as Date).getMonth()])) {
           startLevelToPush++;
-          if (saleFlatNodes.some(saleFlatNode => saleFlatNode.label === sale.date.getDate().toString())) {
+          if (saleFlatNodes.some(saleFlatNode => saleFlatNode.label === (sale.createDate as Date).getDate().toString())) {
             startLevelToPush++;
           }
         }
@@ -130,16 +132,16 @@ export class SalesTreeComponent implements OnInit, OnChanges {
       for (let i = startLevelToPush; i <= 3; i++) {
         switch (i) {
           case 0:
-            currentTreeSaleLabel = sale.date.getFullYear().toString();
+            currentTreeSaleLabel = (sale.createDate as Date).getFullYear().toString();
             break;
           case 1:
-            currentTreeSaleLabel = this.months[sale.date.getMonth()];
+            currentTreeSaleLabel = this.months[(sale.createDate as Date).getMonth()];
             break;
           case 2:
-            currentTreeSaleLabel = sale.date.getDate().toString();
+            currentTreeSaleLabel = (sale.createDate as Date).getDate().toString();
             break;
           default:
-            currentTreeSaleLabel = sale.date.toString();
+            currentTreeSaleLabel = sale.createDate.toString();
             break;
         }
 
@@ -159,7 +161,7 @@ export class SalesTreeComponent implements OnInit, OnChanges {
    * Retourne le noeud parent de celui passé en paramètre
    * @param saleFlatNode Le noeud pour lequel on cherche le parent
    */
-  private getParentNode(saleFlatNode: FlatNode<Sale>) {
+  private getParentNode(saleFlatNode: FlatNode<Sale>): FlatNode<Sale> {
     const nodeIndex = this.saleFlatNodes.indexOf(saleFlatNode);
 
     for (let i = nodeIndex - 1; i >= 0; i--) {

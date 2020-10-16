@@ -62,7 +62,7 @@ export class CashOutsTreeComponent implements OnInit, OnChanges {
    * Garde le noeud sélectionné et émet sa valeur au composant parent
    * @param cashOutFlatNode Le noeud sélectionné
    */
-  public onClickCashOutFlatNode(cashOutFlatNode: FlatNode<CashOut>) {
+  public onClickCashOutFlatNode(cashOutFlatNode: FlatNode<CashOut>): void {
     this.cashOutFlatNodes.forEach(sfn => sfn.isSelected = false);
     cashOutFlatNode.isSelected = true;
     this.lastSelectedCashOutFlatNode = cashOutFlatNode;
@@ -72,7 +72,7 @@ export class CashOutsTreeComponent implements OnInit, OnChanges {
   /**
    * Réduit tous les noeuds sauf ceux contenant le noeud sélectionné
    */
-  public collapseAll() {
+  public collapseAll(): void {
     const selectedCashOutFlatNode = this.cashOutFlatNodes.find(cashOutFlatNode => cashOutFlatNode.isSelected);
     this.cashOutFlatNodes.forEach(cashOutFlatNode => cashOutFlatNode.isExpanded = false);
     if (selectedCashOutFlatNode) {
@@ -89,18 +89,20 @@ export class CashOutsTreeComponent implements OnInit, OnChanges {
    * @param cashOuts Les retraits caisse à convertir
    */
   private getCashOutFlatNodes(cashOuts: CashOut[]): FlatNode<CashOut>[] {
-    const orderedCashOuts: CashOut[] = [...cashOuts].sort((cashOutA, cashOutB) => cashOutB.date.valueOf() - cashOutA.date.valueOf());
+    const orderedCashOuts: CashOut[] = [...cashOuts].sort(
+      (cashOutA, cashOutB) => (cashOutB.createDate as Date).valueOf() - (cashOutA.createDate as Date).valueOf()
+    );
     const cashOutFlatNodes: FlatNode<CashOut>[] = [];
     let startLevelToPush: number;
     let currentTreeCashOutLabel: string;
 
     for (const cashOut of orderedCashOuts) {
       startLevelToPush = 0;
-      if (cashOutFlatNodes.some(cashOutFlatNode => cashOutFlatNode.label === cashOut.date.getFullYear().toString())) {
+      if (cashOutFlatNodes.some(cashOutFlatNode => cashOutFlatNode.label === (cashOut.createDate as Date).getFullYear().toString())) {
         startLevelToPush++;
-        if (cashOutFlatNodes.some(cashOutFlatNode => cashOutFlatNode.label === this.months[cashOut.date.getMonth()])) {
+        if (cashOutFlatNodes.some(cashOutFlatNode => cashOutFlatNode.label === this.months[(cashOut.createDate as Date).getMonth()])) {
           startLevelToPush++;
-          if (cashOutFlatNodes.some(cashOutFlatNode => cashOutFlatNode.label === cashOut.date.getDate().toString())) {
+          if (cashOutFlatNodes.some(cashOutFlatNode => cashOutFlatNode.label === (cashOut.createDate as Date).getDate().toString())) {
             startLevelToPush++;
           }
         }
@@ -109,13 +111,13 @@ export class CashOutsTreeComponent implements OnInit, OnChanges {
       for (let i = startLevelToPush; i <= 3; i++) {
         switch (i) {
           case 0:
-            currentTreeCashOutLabel = cashOut.date.getFullYear().toString();
+            currentTreeCashOutLabel = (cashOut.createDate as Date).getFullYear().toString();
             break;
           case 1:
-            currentTreeCashOutLabel = this.months[cashOut.date.getMonth()];
+            currentTreeCashOutLabel = this.months[(cashOut.createDate as Date).getMonth()];
             break;
           case 2:
-            currentTreeCashOutLabel = cashOut.date.getDate().toString();
+            currentTreeCashOutLabel = (cashOut.createDate as Date).getDate().toString();
             break;
           default:
             currentTreeCashOutLabel = cashOut.label + ' - ';
@@ -137,7 +139,7 @@ export class CashOutsTreeComponent implements OnInit, OnChanges {
    * Retourne le noeud parent de celui passé en paramètre
    * @param cashOutFlatNode Le noeud pour lequel on cherche le parent
    */
-  private getParentNode(cashOutFlatNode: FlatNode<CashOut>) {
+  private getParentNode(cashOutFlatNode: FlatNode<CashOut>): FlatNode<CashOut> {
     const nodeIndex = this.cashOutFlatNodes.indexOf(cashOutFlatNode);
 
     for (let i = nodeIndex - 1; i >= 0; i--) {
@@ -183,7 +185,7 @@ export class CashOutsTreeComponent implements OnInit, OnChanges {
       }
 
       const cashOutFlatNodeSelected = this.cashOutFlatNodes.find(cashOutFlatNode => cashOutFlatNode.isSelected);
-      const dateToExpand = cashOutFlatNodeSelected ? cashOutFlatNodeSelected.value.date : this.expandDate;
+      const dateToExpand = cashOutFlatNodeSelected ? (cashOutFlatNodeSelected.value.createDate as Date) : this.expandDate;
       this.expandToDate(dateToExpand);
     }
   }
@@ -199,7 +201,7 @@ export class CashOutsTreeComponent implements OnInit, OnChanges {
 
     this.cashOutSelected.emit(null);
 
-    if (this.cashOuts.find(cashOut => cashOut.date.toString().substring(0, 9) === this.expandDate.toString().substring(0, 9))) {
+    if (this.cashOuts.find(cashOut => cashOut.createDate.toString().substring(0, 9) === this.expandDate.toString().substring(0, 9))) {
       this.expandToDate(this.expandDate);
     }
   }
@@ -208,7 +210,7 @@ export class CashOutsTreeComponent implements OnInit, OnChanges {
    * Déplis l'arbre jusqu'à la date passée en paramètre
    * @param date La date jusqu'à laquelle déplier l'arbre
    */
-  private expandToDate(date: Date) {
+  private expandToDate(date: Date): void {
     const yearNode = this.cashOutFlatNodes.find(cashOutFlatNode => cashOutFlatNode.label === date.getFullYear().toString());
     yearNode.isExpanded = true;
     const monthNode = this.treeControl.getDescendants(yearNode)

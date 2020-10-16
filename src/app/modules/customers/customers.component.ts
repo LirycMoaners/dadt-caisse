@@ -3,7 +3,7 @@ import { MatTableDataSource } from '@angular/material/table';
 import { MatSort } from '@angular/material/sort';
 import { MatDialog } from '@angular/material/dialog';
 import { of } from 'rxjs';
-import { flatMap } from 'rxjs/operators';
+import { mergeMap } from 'rxjs/operators';
 
 import { CustomerService } from 'src/app/core/http-services/customer.service';
 import { Customer } from 'src/app/shared/models/customer.model';
@@ -48,7 +48,7 @@ export class CustomersComponent implements OnInit, AfterViewInit {
     const dialogRef = this.dialog.open(CustomerDialogComponent);
 
     dialogRef.afterClosed().pipe(
-      flatMap((customer: Customer) => customer ? this.customerService.create(customer) : of(null))
+      mergeMap((customer: Customer) => customer ? this.customerService.create(customer) : of(null))
     ).subscribe();
   }
 
@@ -60,7 +60,7 @@ export class CustomersComponent implements OnInit, AfterViewInit {
     const dialogRef = this.dialog.open(CustomerDialogComponent, {data: customer});
 
     dialogRef.afterClosed().pipe(
-      flatMap((newCustomer: Customer) => this.customerService.update(newCustomer))
+      mergeMap((newCustomer: Customer) => this.customerService.update(newCustomer))
     ).subscribe();
   }
 

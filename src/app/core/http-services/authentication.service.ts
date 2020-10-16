@@ -25,7 +25,7 @@ export class AuthenticationService {
   /**
    * Log in with email & password
    */
-  public signIn(email: string, password: string) {
+  public signIn(email: string, password: string): Promise<any> {
     return new Promise<any>((resolve, reject) =>
       this.fireAuth.signInWithEmailAndPassword(email, password).then(
         res => {
@@ -40,7 +40,7 @@ export class AuthenticationService {
   /**
    * Log in with Google account
    */
-  public signInWithGoogle() {
+  public signInWithGoogle(): Promise<any> {
     return new Promise<any>((resolve, reject) =>
       this.fireAuth.signInWithPopup(new firebase.auth.GoogleAuthProvider()).then(
         res => {
@@ -55,7 +55,7 @@ export class AuthenticationService {
   /**
    * Log out
    */
-  public signOut() {
+  public signOut(): Promise<void> {
     return this.fireAuth.signOut();
   }
 }

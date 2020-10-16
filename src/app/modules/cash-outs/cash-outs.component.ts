@@ -27,8 +27,11 @@ export class CashOutsComponent implements OnInit, OnDestroy {
         }
         if (this.currentCashOut) {
           const cashOutToExpand = this.cashOuts.find(cashOut => cashOut.id === this.currentCashOut.id);
-          if (cashOutToExpand && cashOutToExpand.date.toString().substring(0, 9) !== this.currentCashOut.date.toString().substring(0, 9)) {
-            this.filterDate = cashOutToExpand.date;
+          if (
+            cashOutToExpand
+            && cashOutToExpand.createDate.toString().substring(0, 9) !== this.currentCashOut.createDate.toString().substring(0, 9)
+          ) {
+            this.filterDate = cashOutToExpand.createDate as Date;
           }
         }
       })
@@ -45,14 +48,14 @@ export class CashOutsComponent implements OnInit, OnDestroy {
    * Passe le retrait caisse au composant de détail pour l'afficher
    * @param cashOut Le retrait caisse à afficher
    */
-  public showCashOutDetails(cashOut: CashOut) {
+  public showCashOutDetails(cashOut: CashOut): void {
     this.currentCashOut = cashOut ? {...cashOut} : null;
   }
 
   /**
    * Passe un nouveau retrait caisse au composant de détail pour l'éditer
    */
-  public addCashOut() {
+  public addCashOut(): void {
     this.currentCashOut = new CashOut();
   }
 }

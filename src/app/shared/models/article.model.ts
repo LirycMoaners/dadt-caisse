@@ -1,5 +1,6 @@
-export class Article {
-  id: string;
+import { DatabaseObject } from './database-object.model';
+
+export class Article extends DatabaseObject {
   reference: string;
   label: string;
   categoryId: string;

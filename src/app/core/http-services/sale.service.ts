@@ -22,7 +22,7 @@ export class SaleService extends DatabaseCollectionService<Sale> {
     todayMidnight.setMilliseconds(0);
     this.getAll().pipe(first()).subscribe(
       sales => this.dayTotal$ = new BehaviorSubject(
-        sales.filter(sale => sale.date.valueOf() >= todayMidnight.valueOf()).reduce((total, sale) => total + sale.total, 0)
+        sales.filter(sale => sale.createDate.valueOf() >= todayMidnight.valueOf()).reduce((total, sale) => total + sale.total, 0)
       )
     );
   }

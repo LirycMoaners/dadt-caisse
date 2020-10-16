@@ -3,7 +3,7 @@ import { FormControl } from '@angular/forms';
 import { MatTableDataSource } from '@angular/material/table';
 import { MatDialog } from '@angular/material/dialog';
 import { Subscription, Observable, of } from 'rxjs';
-import { startWith, map, flatMap, first } from 'rxjs/operators';
+import { startWith, map, mergeMap, first } from 'rxjs/operators';
 
 import { Article } from '../../shared/models/article.model';
 import { ArticleService } from '../../core/http-services/article.service';
@@ -123,18 +123,25 @@ export class CashRegisterComponent implements OnInit, OnDestroy {
   public pay(): void {
     let savedSale: Sale;
     const sale: Sale = new Sale();
-    sale.articles = this.dataSource.data;
     sale.total = this.getSaleArticlesTotal();
 
     const dialogRef = this.dialog.open(PaymentDialogComponent, { width: '500px', data: sale });
 
     dialogRef.afterClosed().pipe(
-      flatMap(result => result ? this.saleService.create(result) : of(null)),
-      flatMap(s => {
+      mergeMap(result => {
+        if (!!result) {
+          result.articles = this.dataSource.data;
+          result.createDate = new Date();
+          result.updateDate = new Date();
+          return this.saleService.create(result);
+        }
+        return of(null);
+      }),
+      mergeMap(s => {
         savedSale = s;
         return !!savedSale && sale.customer ? this.customerService.addPoints(sale.customer, sale.total) : of(null);
       }),
-      flatMap(isFidelityDiscount => isFidelityDiscount ? this.dialog.open(FidelityDialogComponent).afterClosed() : of(null))
+      mergeMap(isFidelityDiscount => isFidelityDiscount ? this.dialog.open(FidelityDialogComponent).afterClosed() : of(null))
     ).subscribe(() => {
       if (savedSale) {
         this.lastSale = {...savedSale};
@@ -166,7 +173,7 @@ export class CashRegisterComponent implements OnInit, OnDestroy {
    * @param saleArticle L'article pour lequel appliquer la remise
    * @param discount La remise sous forme de chaine
    */
-  public changeDiscount(saleArticle: SaleArticle, discount: string) {
+  public changeDiscount(saleArticle: SaleArticle, discount: string): void {
     saleArticle.discount = this.toNumber(discount);
     saleArticle.discountType = discount ? saleArticle.discountType ? saleArticle.discountType : '€' : null;
   }
@@ -181,12 +188,12 @@ export class CashRegisterComponent implements OnInit, OnDestroy {
   /**
    * Ouvre la modale de choix de période avant d'exporter le journal de caisse
    */
-  public printCashLog() {
+  public printCashLog(): void {
     const dialogRef = this.dialog.open(CashLogPrintDialogComponent);
     let period: {from: Date, to: Date};
 
     dialogRef.afterClosed().pipe(
-      flatMap((p: {from: Date, to: Date}) => {
+      mergeMap((p: {from: Date, to: Date}) => {
         if (p) {
           period = p;
           this.componentRef = PrintTools.createComponent(this.cfr, this.viewContainerRef, CashLogComponent, this.componentRef);
@@ -197,7 +204,7 @@ export class CashRegisterComponent implements OnInit, OnDestroy {
     ).subscribe((sales: Sale[]) => {
       if (sales) {
         (this.componentRef.instance as CashLogComponent).sales = sales.filter(
-          (sale) => sale.date.valueOf() >= period.from.valueOf() && sale.date.valueOf() <= period.to.valueOf()
+          (sale) => sale.createDate.valueOf() >= period.from.valueOf() && sale.createDate.valueOf() <= period.to.valueOf()
         );
         setTimeout(() => print(), 0);
       }

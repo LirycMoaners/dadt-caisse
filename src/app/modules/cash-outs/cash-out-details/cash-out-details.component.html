@@ -1,5 +1,5 @@
 <div class="header">
-  <h2 *ngIf="cashOut.id; else addLabel">Retrait caisse "{{ cashOut.label }}" du {{ cashOut.date | date:'dd/MM/yyyy' }}</h2>
+  <h2 *ngIf="cashOut.id; else addLabel">Retrait caisse "{{ cashOut.label }}" du {{ cashOut.createDate | date:'dd/MM/yyyy' }}</h2>
   <ng-template #addLabel>
     <h2>Ajout d'un retrait caisse</h2>
   </ng-template>
@@ -13,7 +13,7 @@
     </mat-form-field>
     <mat-form-field>
       <mat-label>Date</mat-label>
-      <input matInput [matDatepicker]="date" formControlName="date">
+      <input matInput [matDatepicker]="date" formControlName="createDate">
       <mat-datepicker-toggle matSuffix [for]="date"></mat-datepicker-toggle>
       <mat-datepicker #date disabled="false"></mat-datepicker>
     </mat-form-field>

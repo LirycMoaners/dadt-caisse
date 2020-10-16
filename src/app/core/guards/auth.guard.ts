@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { ActivatedRouteSnapshot, CanActivate, RouterStateSnapshot, Router } from '@angular/router';
 import { Observable, of } from 'rxjs';
-import { first, flatMap } from 'rxjs/operators';
+import { first, mergeMap } from 'rxjs/operators';
 
 import { AuthenticationService } from '../http-services/authentication.service';
 
@@ -16,7 +16,7 @@ export class AuthGuard implements CanActivate {
   public canActivate(route: ActivatedRouteSnapshot, state: RouterStateSnapshot): Observable<boolean> {
     return this.authenticationService.user$.pipe(
       first(),
-      flatMap(user => {
+      mergeMap(user => {
         const lastUrlFragment = route.url.pop();
         if (!user && lastUrlFragment && lastUrlFragment.path !== 'login') {
           this.router.navigate(['/login']);

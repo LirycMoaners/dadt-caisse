@@ -1,7 +1,7 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { FormArray, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { combineLatest, of, Subscription } from 'rxjs';
-import { first, flatMap } from 'rxjs/operators';
+import { first, mergeMap } from 'rxjs/operators';
 import { ArticleCategoryService } from 'src/app/core/http-services/article-category.service';
 import { CashOutCategoryService } from 'src/app/core/http-services/cash-out-category.service';
 import { SettingsService } from 'src/app/core/http-services/settings.service';
@@ -33,7 +33,7 @@ export class SettingsComponent implements OnInit, OnDestroy {
         this.articleCategoryService.getAll().pipe(first()),
         this.cashOutCategoryService.getAll().pipe(first())
       ]).pipe(
-        flatMap(([settings, articleCategories, cashOutCategories]: [Settings, ArticleCategory[], CashOutCategory[]]) => {
+        mergeMap(([settings, articleCategories, cashOutCategories]: [Settings, ArticleCategory[], CashOutCategory[]]) => {
           this.form = this.fb.group({
             settings: this.fb.group({
               eurosToPoint: [settings.eurosToPoint, [Validators.required]],
@@ -56,26 +56,30 @@ export class SettingsComponent implements OnInit, OnDestroy {
           });
           return combineLatest([
             this.form.get('settings').valueChanges.pipe(
-              flatMap((s: Settings) =>
+              mergeMap((s: Settings) =>
                 this.form.get('settings').valid ? this.settingsService.updateSettings(s) : of(null)
               )
             ),
             ...(this.form.get('articleCategories') as FormArray).controls
               .map((control, index) => control.valueChanges.pipe(
-                flatMap((articleCategory: ArticleCategory) =>
-                  (this.form.get('articleCategories') as FormArray).controls[index].valid
-                  ? this.articleCategoryService.update(articleCategory)
-                  : of(null)
-                )
+                mergeMap((articleCategory: ArticleCategory) => {
+                  if ((this.form.get('articleCategories') as FormArray).controls[index].valid) {
+                    articleCategory.updateDate = new Date();
+                    return this.articleCategoryService.update(articleCategory);
+                  }
+                  return of(null);
+                })
               )
             ),
             ...(this.form.get('cashOutCategories') as FormArray).controls
               .map((control, index) => control.valueChanges.pipe(
-                flatMap((cashOutCategory: CashOutCategory) =>
-                  (this.form.get('cashOutCategories') as FormArray).controls[index].valid
-                  ? this.cashOutCategoryService.update(cashOutCategory)
-                  : of(null)
-                )
+                mergeMap((cashOutCategory: CashOutCategory) => {
+                  if ((this.form.get('cashOutCategories') as FormArray).controls[index].valid) {
+                    cashOutCategory.updateDate = new Date();
+                    return this.cashOutCategoryService.update(cashOutCategory);
+                  }
+                  return of(null);
+                })
               )
             )
           ]);
@@ -109,8 +113,8 @@ export class SettingsComponent implements OnInit, OnDestroy {
    */
   public addArticleCategory(): void {
     this.subscriptions.push(
-      this.articleCategoryService.create({id: '', label: ''}).pipe(
-        flatMap(articleCategory => {
+      this.articleCategoryService.create({id: '', label: '', createDate: new Date(), updateDate: new Date()}).pipe(
+        mergeMap(articleCategory => {
           const newArticleCategoryFormGroup = this.fb.group(
             {id: [articleCategory.id, []], label: [articleCategory.label, [Validators.required]]}
           );
@@ -118,7 +122,7 @@ export class SettingsComponent implements OnInit, OnDestroy {
             newArticleCategoryFormGroup
           );
           return newArticleCategoryFormGroup.valueChanges.pipe(
-            flatMap((ac: ArticleCategory) =>
+            mergeMap((ac: ArticleCategory) =>
             newArticleCategoryFormGroup.valid
               ? this.articleCategoryService.update(ac)
               : of(null)
@@ -149,7 +153,7 @@ export class SettingsComponent implements OnInit, OnDestroy {
   public addCashOutCategory(): void {
     this.subscriptions.push(
       this.cashOutCategoryService.create(new CashOutCategory()).pipe(
-        flatMap(cashOutCategory => {
+        mergeMap(cashOutCategory => {
           const newCashOutCategoryFormGroup = this.fb.group(
             {id: [cashOutCategory.id, []], label: [cashOutCategory.label, [Validators.required]]}
           );
@@ -157,7 +161,7 @@ export class SettingsComponent implements OnInit, OnDestroy {
             newCashOutCategoryFormGroup
           );
           return newCashOutCategoryFormGroup.valueChanges.pipe(
-            flatMap((coc: CashOutCategory) =>
+            mergeMap((coc: CashOutCategory) =>
             newCashOutCategoryFormGroup.valid
               ? this.cashOutCategoryService.update(coc)
               : of(null)

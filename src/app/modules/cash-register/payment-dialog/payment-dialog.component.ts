@@ -136,7 +136,7 @@ export class PaymentDialogComponent implements OnInit, OnDestroy {
    * Assigne la bonne valeur de remise, assigne la valeur par défaut au type de remise et calcul le total de la vente
    * @param discount La remise sous forme de chaine
    */
-  public changeDiscount(discount: string) {
+  public changeDiscount(discount: string): void {
     this.saleForm.get('discount').setValue(this.toNumber(discount));
     this.saleForm.get('discountType').setValue(
       discount ? this.saleForm.get('discountType').value ? this.saleForm.get('discountType').value : '€' : null
@@ -147,7 +147,7 @@ export class PaymentDialogComponent implements OnInit, OnDestroy {
   /**
    * Calcule le total de la vente après changement du type de remise
    */
-  public changeDiscountType() {
+  public changeDiscountType(): void {
     this.sale.total = this.getTotal();
   }
 

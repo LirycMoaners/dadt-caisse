@@ -40,7 +40,7 @@ export class SalesComponent implements OnInit, OnDestroy {
    * Passe la vente au composant de détail pour l'afficher
    * @param sale La vente à afficher
    */
-  public showSaleDetails(sale: Sale) {
+  public showSaleDetails(sale: Sale): void {
     this.currentSale = sale;
   }
 }
