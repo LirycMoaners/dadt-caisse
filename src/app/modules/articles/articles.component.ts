@@ -3,7 +3,7 @@ import { MatSort } from '@angular/material/sort';
 import { MatTableDataSource } from '@angular/material/table';
 import { MatDialog } from '@angular/material/dialog';
 import { of, Subscription } from 'rxjs';
-import { flatMap } from 'rxjs/operators';
+import { mergeMap } from 'rxjs/operators';
 
 import { Article } from '../../shared/models/article.model';
 import { ArticleService } from '../../core/http-services/article.service';
@@ -69,7 +69,7 @@ export class ArticlesComponent implements OnInit, OnDestroy, AfterViewInit {
     const dialogRef = this.dialog.open(ArticleDialogComponent);
 
     dialogRef.afterClosed().pipe(
-      flatMap((article: Article) => article ? this.articleService.create(article) : of(null))
+      mergeMap((article: Article) => article ? this.articleService.create(article) : of(null))
     ).subscribe();
   }
 
@@ -81,7 +81,7 @@ export class ArticlesComponent implements OnInit, OnDestroy, AfterViewInit {
     const dialogRef = this.dialog.open(ArticleDialogComponent, {data: article});
 
     dialogRef.afterClosed().pipe(
-      flatMap((newArticle: Article) => this.articleService.update(newArticle))
+      mergeMap((newArticle: Article) => this.articleService.update(newArticle))
     ).subscribe();
   }
 

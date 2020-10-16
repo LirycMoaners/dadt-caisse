@@ -1,5 +1,5 @@
 <div class="header">
-  <h2>Vente du {{ sale.date | date:'dd/MM/yyyy à HH:mm:ss' }}</h2>
+  <h2>Vente du {{ sale.createDate | date:'dd/MM/yyyy à HH:mm:ss' }}</h2>
   <h3>Client(e) : {{ sale.customer ? sale.customer.lastName + ' ' + sale.customer.firstName : 'Non renseigné' }}</h3>
 </div>
 
@@ -11,7 +11,7 @@
         <!-- Reference Column -->
         <ng-container matColumnDef="reference">
           <mat-header-cell *matHeaderCellDef> Référence </mat-header-cell>
-          <mat-cell *matCellDef="let element">{{element.id}}</mat-cell>
+          <mat-cell *matCellDef="let element">{{element.reference}}</mat-cell>
           <mat-footer-cell *matFooterCellDef class="saleTotalLabel">
             <div *ngIf="sale.discount">Total HR</div>
             <div>Total</div>

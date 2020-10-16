@@ -12,7 +12,7 @@ export class NumericDirective {
    * Vérifie que la valeur respecte le template d'un nombre avec le nombre de décimales en paramètre de la directive
    * @param value La valeur à vérifier
    */
-  private check(value: string) {
+  private check(value: string): RegExpMatchArray {
       if (this.decimals <= 0) {
           return String(value).match(new RegExp(/^\d+$/));
       } else {
@@ -30,7 +30,7 @@ export class NumericDirective {
    * Lance la vérification de la nouvelle valeur du champ
    * @param oldValue L'ancienne valeur du champ devant être remise dans le champ si la vérification échoue
    */
-  private run(oldValue: number) {
+  private run(oldValue: number): void {
       setTimeout(() => {
           const currentValue: string = this.el.nativeElement.value;
           if (currentValue !== '' && !this.check(currentValue)) {
@@ -40,12 +40,12 @@ export class NumericDirective {
   }
 
   @HostListener('keydown', ['$event'])
-  onKeyDown(event: KeyboardEvent) {
+  onKeyDown(event: KeyboardEvent): void {
       this.run(this.el.nativeElement.value);
   }
 
   @HostListener('paste', ['$event'])
-  onPaste(event: ClipboardEvent) {
+  onPaste(event: ClipboardEvent): void {
       this.run(this.el.nativeElement.value);
   }
 

@@ -41,7 +41,12 @@ export class CustomerDialogComponent implements OnInit {
    */
   public validate(): void {
     if (this.customerFormGroup.valid) {
-      this.ref.close(this.customerFormGroup.value as Customer);
+      const customer: Customer = this.customerFormGroup.value;
+      customer.updateDate = new Date();
+      if (!this.customer) {
+        customer.createDate = new Date();
+      }
+      this.ref.close(customer);
     } else {
       this.customerFormGroup.markAllAsTouched();
     }

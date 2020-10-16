@@ -56,6 +56,10 @@ export class ArticleDialogComponent implements OnInit, OnDestroy {
     if (this.articleFormGroup.valid) {
       const article: Article = this.articleFormGroup.value;
       article.quantity = article.quantity || 0;
+      article.updateDate = new Date();
+      if (!this.article) {
+        article.createDate = new Date();
+      }
       this.ref.close(article);
     } else {
       this.articleFormGroup.markAllAsTouched();

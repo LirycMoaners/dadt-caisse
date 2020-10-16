@@ -31,13 +31,13 @@ export class CashOutDetailsComponent implements OnInit, OnChanges {
     this.cashOutCategoryService.getAll().pipe(first()).subscribe(cashOutCategories => this.cashOutCategories = cashOutCategories);
   }
 
-  ngOnChanges(changes: SimpleChanges) {
+  ngOnChanges(changes: SimpleChanges): void {
     if (changes.cashOut && this.cashOut) {
       this.cashOutForm = this.fb.group({
         label: [this.cashOut.label, [Validators.required]],
         cashOutCategory: [this.cashOut.cashOutCategory, [Validators.required]],
         total: [this.cashOut.total, [Validators.required]],
-        date: this.fb.control({value: this.cashOut.date, disabled: true}, Validators.required)
+        createDate: this.fb.control({value: this.cashOut.createDate, disabled: true}, Validators.required)
       });
     }
   }
@@ -53,9 +53,14 @@ export class CashOutDetailsComponent implements OnInit, OnChanges {
   /**
    * Appel au service d'ajout ou de modification de retrait caisse si les données saisies sont valides
    */
-  public save() {
+  public save(): void {
     if (this.cashOutForm.valid) {
-      this.cashOut = { id: this.cashOut.id, date: this.cashOutForm.get('date').value, ...this.cashOutForm.value };
+      this.cashOut = {
+        id: this.cashOut.id,
+        createDate: this.cashOutForm.get('createDate').value,
+        updateDate: new Date(),
+        ...this.cashOutForm.value
+      };
       this.errorMessage = '';
       (
         !!this.cashOut.id
@@ -70,8 +75,8 @@ export class CashOutDetailsComponent implements OnInit, OnChanges {
   /**
    * Appel au service de suppression de retrait caisse si l'utilisateur confirme la suppression
    */
-  public delete() {
-    if (confirm('Souhaitez-vous réellement supprimer le retrait caisse ' + this.cashOut.label + ' du ' + this.cashOut.date + ' ?')) {
+  public delete(): void {
+    if (confirm('Souhaitez-vous réellement supprimer le retrait caisse ' + this.cashOut.label + ' du ' + this.cashOut.createDate + ' ?')) {
       this.cashOutService.delete(this.cashOut.id).subscribe(() => {
         this.cashOutDeleted.emit();
       });

@@ -1,8 +1,9 @@
 import { AngularFireDatabase } from '@angular/fire/database';
 import { BehaviorSubject, from, Observable, of } from 'rxjs';
-import { flatMap } from 'rxjs/operators';
+import { mergeMap } from 'rxjs/operators';
+import { DatabaseObject } from 'src/app/shared/models/database-object.model';
 
-export class DatabaseCollectionService<T extends { id: string }> {
+export class DatabaseCollectionService<T extends DatabaseObject> {
   private datasRef: firebase.database.Reference;
   private datas$: BehaviorSubject<T[]> = new BehaviorSubject([]);
 
@@ -12,11 +13,17 @@ export class DatabaseCollectionService<T extends { id: string }> {
   ) {
     this.datasRef = this.database.database.ref(collectionName);
     this.datasRef.on('child_added', (data) => {
-      this.datas$.next([...this.datas$.value, data.val()]);
+      const value = data.val() as T;
+      value.createDate = new Date(value.createDate);
+      value.updateDate = new Date(value.updateDate);
+      this.datas$.next([...this.datas$.value, value]);
     });
     this.datasRef.on('child_changed', (data) => {
+      const value = data.val() as T;
+      value.createDate = new Date(value.createDate);
+      value.updateDate = new Date(value.updateDate);
       const newDatas = this.datas$.value;
-      newDatas.splice(this.datas$.value.findIndex(d => d.id === data.key), 1, data.val());
+      newDatas.splice(this.datas$.value.findIndex(d => d.id === data.key), 1, value);
       this.datas$.next(newDatas);
     });
     this.datasRef.on('child_removed', (data) => {
@@ -40,7 +47,15 @@ export class DatabaseCollectionService<T extends { id: string }> {
   public create(data: T): Observable<T> {
     const newDataRef = this.datasRef.push();
     data.id = newDataRef.key;
-    return from(newDataRef.set(data)).pipe(flatMap(() => of(data)));
+    data.createDate = (data.createDate as Date).toJSON();
+    data.updateDate = (data.updateDate as Date).toJSON();
+    return from(newDataRef.set(data)).pipe(
+      mergeMap(() => {
+        data.createDate = new Date(data.createDate);
+        data.updateDate = new Date(data.updateDate);
+        return of(data);
+      })
+    );
   }
 
   /**
@@ -48,7 +63,15 @@ export class DatabaseCollectionService<T extends { id: string }> {
    * @param customer La donnée mise à jour
    */
   public update(data: T): Observable<T> {
-    return from(this.datasRef.child(data.id).update(data)).pipe(flatMap(() => of(data)));
+    data.createDate = (data.createDate as Date).toJSON();
+    data.updateDate = (data.updateDate as Date).toJSON();
+    return from(this.datasRef.child(data.id).update(data)).pipe(
+      mergeMap(() => {
+        data.createDate = new Date(data.createDate);
+        data.updateDate = new Date(data.updateDate);
+        return of(data);
+      })
+    );
   }
 
   /**

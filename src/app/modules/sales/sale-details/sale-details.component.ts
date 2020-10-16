@@ -44,7 +44,7 @@ export class SaleDetailsComponent implements OnInit, OnChanges {
 
   ngOnInit(): void { }
 
-  ngOnChanges(changes: SimpleChanges) {
+  ngOnChanges(changes: SimpleChanges): void {
     if (changes.sale && this.sale) {
       this.dataSource = new MatTableDataSource(this.sale.articles);
       this.saleDataSource = new MatTableDataSource([this.sale]);
@@ -103,9 +103,10 @@ export class SaleDetailsComponent implements OnInit, OnChanges {
   /**
    * Met à jour la vente si les données sont valides ou affiche une erreur
    */
-  public save() {
+  public save(): void {
     if (this.saleForm.valid) {
       this.errorMessage = '';
+      this.sale.updateDate = new Date();
       this.saleService.update(this.sale).subscribe(() => this.saleForm.markAsUntouched());
     } else {
       this.errorMessage = this.saleForm.errors.totalNotEqualToCumulated;

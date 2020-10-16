@@ -1,7 +1,7 @@
 <div class="header">
   <div class="title">
     <div class="logo">
-      <img src="assets/images/logo.svg" alt="Logo de l'application">
+      <img src="assets/images/logo-grey.svg" alt="Logo de l'application">
     </div>
     <h1 class="mat-display-1 bill"> Facture </h1>
   </div>
@@ -17,7 +17,7 @@
       </div>
       <div class="data">
         <p>{{ today | date: 'dd/MM/yyyy' }}</p>
-        <p>{{ sale.date | date: 'dd/MM/yyyy' }}</p>
+        <p>{{ sale.createDate | date: 'dd/MM/yyyy' }}</p>
       </div>
     </div>
   </div>
