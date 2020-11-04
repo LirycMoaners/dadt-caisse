@@ -6,6 +6,7 @@ export class Sale extends DatabaseObject {
   articles: SaleArticle[];
   discount: number;
   discountType: '€' | '%';
+  isFidelityDiscount: boolean;
   total: number;
   cardTotal: number;
   cashTotal: number;

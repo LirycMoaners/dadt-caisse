@@ -1,4 +1,5 @@
 import { SaleArticle } from '../models/sale-article.model';
+import { MathTools } from './math.tools';
 
 export class SaleArticleTools {
 
@@ -34,5 +35,18 @@ export class SaleArticleTools {
       + '.'
       + totalString.substring(totalString.length - 2, totalString.length);
     return Number(totalString);
+  }
+
+  /**
+   * Retourne le total de la vente avant les remises
+   */
+  public static getSaleArticlesTotalBeforeDiscount(saleArticles: SaleArticle[]): number {
+    return saleArticles.reduce((total, saleArticle) => {
+      const totalString = Math.round(Math.round(saleArticle.price * 100) * saleArticle.quantity).toString();
+      return MathTools.sum(
+        total,
+        Number(totalString.substring(0, totalString.length - 2) + '.' + totalString.substring(totalString.length - 2, totalString.length))
+      );
+    }, 0);
   }
 }

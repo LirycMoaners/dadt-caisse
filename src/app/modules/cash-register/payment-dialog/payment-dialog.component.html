@@ -1,6 +1,6 @@
 <h1 mat-dialog-title>Paiement {{ sale.total | currency:'EUR' }}</h1>
 <mat-dialog-content>
-  <form [formGroup]="saleForm">
+  <form *ngIf="saleForm" [formGroup]="saleForm">
     <mat-form-field class="customer">
       <mat-label>Client</mat-label>
       <input #searchedCustomerInput
@@ -36,6 +36,19 @@
           <mat-option value="%">%</mat-option>
         </mat-select>
       </mat-form-field>
+      <mat-checkbox
+        *ngIf="
+          saleForm.controls.customer.value
+          && saleForm.controls.customer.value.lastDiscountGaveDate
+          && (
+            !saleForm.controls.customer.value.lastDiscountUsedDate
+            || saleForm.controls.customer.value.lastDiscountGaveDate.getTime() > saleForm.controls.customer.value.lastDiscountUsedDate.getTime()
+          )"
+        formControlName="isFidelityDiscount"
+        (change)="switchFidelityDiscount($event.checked)"
+      >
+        Remise fidélité
+      </mat-checkbox>
     </div>
 
     <div class="payment">
@@ -47,7 +60,7 @@
             matInput
             type="text"
             formControlName="cashTotal"
-            (change)="sale.cashTotal = toNumber($event.target.value)"
+            (change)="saleForm.get('cashTotal').setValue(toNumber($event.target.value))"
             placeholder="Liquide"
           >
         </mat-form-field>
@@ -61,7 +74,7 @@
             matInput
             type="text"
             formControlName="cardTotal"
-            (change)="sale.cardTotal = toNumber($event.target.value)"
+            (change)="saleForm.get('cardTotal').setValue(toNumber($event.target.value))"
             placeholder="Carte"
           >
         </mat-form-field>
@@ -75,7 +88,7 @@
             matInput
             type="text"
             formControlName="checkTotal"
-            (change)="sale.checkTotal = toNumber($event.target.value)"
+            (change)="saleForm.get('checkTotal').setValue(toNumber($event.target.value))"
             placeholder="Chèque"
           >
         </mat-form-field>
@@ -89,7 +102,7 @@
             matInput
             type="text"
             formControlName="creditTotal"
-            (change)="sale.creditTotal = toNumber($event.target.value)"
+            (change)="saleForm.get('creditTotal').setValue(toNumber($event.target.value))"
             placeholder="Avoir"
           >
         </mat-form-field>

@@ -20,12 +20,17 @@ export class CustomerDialogComponent implements OnInit {
 
   ngOnInit(): void {
     this.customerFormGroup = new FormGroup({
-      id: new FormControl(''),
-      firstName: new FormControl('', Validators.required),
-      lastName: new FormControl('', Validators.required),
-      emailAddress: new FormControl('', [Validators.email]),
-      phoneNumber: new FormControl('', [Validators.pattern('^[0-9]{10}$')]),
-      loyaltyPoints: new FormControl('', [Validators.pattern('^[0-9]*$')])
+      id: new FormControl(this.customer ? this.customer.id : ''),
+      firstName: new FormControl(this.customer ? this.customer.firstName : '', Validators.required),
+      lastName: new FormControl(this.customer ? this.customer.lastName : '', Validators.required),
+      emailAddress: new FormControl(this.customer ? this.customer.emailAddress : '', [Validators.email]),
+      phoneNumber: new FormControl(this.customer ? this.customer.phoneNumber : '', [Validators.pattern('^[0-9]{10}$')]),
+      loyaltyPoints: new FormControl(this.customer ? this.customer.loyaltyPoints : '', [Validators.pattern('^[0-9]*$')]),
+      createDate: new FormControl(this.customer ? this.customer.createDate : ''),
+      updateDate: new FormControl(this.customer ? this.customer.updateDate : ''),
+      lastDiscountGaveDate: new FormControl(this.customer ? this.customer.lastDiscountGaveDate : ''),
+      lastDiscountUsedDate: new FormControl(this.customer ? this.customer.lastDiscountUsedDate : ''),
+      resourceName: new FormControl(this.customer ? this.customer.resourceName : '')
     });
 
     if (this.customer) {

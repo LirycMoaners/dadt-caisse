@@ -1,18 +1,3 @@
-.header {
-  display: flex;
-  flex-direction: row;
-  padding: 10px;
-
-  .mat-form-field {
-    flex: 1;
-    margin-right: 10px;
-
-    .mat-datepicker-toggle {
-      font-size: 1.5em;
-    }
-  }
-}
-
 .container {
   overflow: hidden;
   flex: 1;
@@ -38,7 +23,7 @@
 }
 
 @media print {
-  .header, app-sales-tree, app-sale-details, .space {
+  app-sales-tree, app-sale-details, .space {
     display: none;
   }
 }

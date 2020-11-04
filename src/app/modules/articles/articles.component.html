@@ -65,11 +65,11 @@
 </div>
 
 <div class="footer">
-  <button mat-raised-button (click)="printInventory()">
+  <button mat-raised-button (click)="exportInventory()">
     Inventaire Complet
     <mat-icon>print</mat-icon>
   </button>
-  <button *ngFor="let articleCategory of articleCategories" mat-raised-button (click)="printInventory(articleCategory)">
+  <button *ngFor="let articleCategory of articleCategories" mat-raised-button (click)="exportInventory(articleCategory)">
     Inventaire {{ articleCategory.label }}
     <mat-icon>print</mat-icon>
   </button>

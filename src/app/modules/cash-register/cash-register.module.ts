@@ -6,7 +6,6 @@ import { SharedModule } from '../../shared/shared.module';
 import { PaymentDialogComponent } from './payment-dialog/payment-dialog.component';
 import { FidelityDialogComponent } from './fidelity-dialog/fidelity-dialog.component';
 import { CashLogPrintDialogComponent } from './cash-log-print-dialog/cash-log-print-dialog.component';
-import { CashLogComponent } from './cash-log/cash-log.component';
 
 
 @NgModule({
@@ -14,8 +13,7 @@ import { CashLogComponent } from './cash-log/cash-log.component';
     CashRegisterComponent,
     PaymentDialogComponent,
     FidelityDialogComponent,
-    CashLogPrintDialogComponent,
-    CashLogComponent
+    CashLogPrintDialogComponent
   ],
   imports: [
     SharedModule,

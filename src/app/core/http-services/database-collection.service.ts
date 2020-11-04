@@ -1,43 +1,52 @@
-import { AngularFireDatabase } from '@angular/fire/database';
-import { BehaviorSubject, from, Observable, of } from 'rxjs';
-import { mergeMap } from 'rxjs/operators';
+import { AngularFireDatabase, AngularFireList } from '@angular/fire/database';
+import { from, Observable, of } from 'rxjs';
+import { map, mergeMap } from 'rxjs/operators';
 import { DatabaseObject } from 'src/app/shared/models/database-object.model';
 
 export class DatabaseCollectionService<T extends DatabaseObject> {
-  private datasRef: firebase.database.Reference;
-  private datas$: BehaviorSubject<T[]> = new BehaviorSubject([]);
+  private datasRef: AngularFireList<T>;
 
   constructor(
     private readonly database: AngularFireDatabase,
     collectionName: string
   ) {
-    this.datasRef = this.database.database.ref(collectionName);
-    this.datasRef.on('child_added', (data) => {
-      const value = data.val() as T;
-      value.createDate = new Date(value.createDate);
-      value.updateDate = new Date(value.updateDate);
-      this.datas$.next([...this.datas$.value, value]);
-    });
-    this.datasRef.on('child_changed', (data) => {
-      const value = data.val() as T;
-      value.createDate = new Date(value.createDate);
-      value.updateDate = new Date(value.updateDate);
-      const newDatas = this.datas$.value;
-      newDatas.splice(this.datas$.value.findIndex(d => d.id === data.key), 1, value);
-      this.datas$.next(newDatas);
-    });
-    this.datasRef.on('child_removed', (data) => {
-      const newDatas = this.datas$.value;
-      newDatas.splice(this.datas$.value.findIndex(d => d.id === data.key), 1);
-      this.datas$.next(newDatas);
-    });
+    this.datasRef = this.database.list(collectionName);
   }
+
+  /**
+   * Retourne le stream des données
+   */
+  public getAll(): Observable<T[]> {
+    return this.datasRef.snapshotChanges().pipe(
+      map(changes => changes.map(c => {
+        const data = {id: c.payload.key, ...c.payload.val()};
+        data.createDate = new Date(data.createDate);
+        data.updateDate = new Date(data.updateDate);
+        return data;
+      }))
+    );
+  }
+
 
   /**
    * Retourne l'observable des données
    */
-  public getAll(): Observable<T[]> {
-    return this.datas$;
+  public getAllOneTime(): Observable<T[]> {
+    return from(this.datasRef.query.once('value')).pipe(
+      map(data => data.val() ? Object.entries(data.val()).map((entry: [string, T]) => ({
+        id: entry[0],
+        ...entry[1],
+        createDate: new Date(entry[1].createDate),
+        updateDate: new Date(entry[1].updateDate)
+      })) : null)
+    );
+  }
+
+  /**
+   * Retourne l'observable de la donnée dont l'id est en paramètre
+   */
+  public get(id: string): Observable<T> {
+    return this.getAll().pipe(map(datas => datas.find(data => data.id === id)));
   }
 
   /**
@@ -45,12 +54,13 @@ export class DatabaseCollectionService<T extends DatabaseObject> {
    * @param customer La donnée à ajouter
    */
   public create(data: T): Observable<T> {
-    const newDataRef = this.datasRef.push();
-    data.id = newDataRef.key;
+    data.id = null;
     data.createDate = (data.createDate as Date).toJSON();
     data.updateDate = (data.updateDate as Date).toJSON();
-    return from(newDataRef.set(data)).pipe(
+    const newDataRef = this.datasRef.push(data);
+    return from(newDataRef).pipe(
       mergeMap(() => {
+        data.id = newDataRef.key;
         data.createDate = new Date(data.createDate);
         data.updateDate = new Date(data.updateDate);
         return of(data);
@@ -63,10 +73,13 @@ export class DatabaseCollectionService<T extends DatabaseObject> {
    * @param customer La donnée mise à jour
    */
   public update(data: T): Observable<T> {
+    const id = data.id;
+    data.id = null;
     data.createDate = (data.createDate as Date).toJSON();
     data.updateDate = (data.updateDate as Date).toJSON();
-    return from(this.datasRef.child(data.id).update(data)).pipe(
+    return from(this.datasRef.update(id, data)).pipe(
       mergeMap(() => {
+        data.id = id;
         data.createDate = new Date(data.createDate);
         data.updateDate = new Date(data.updateDate);
         return of(data);
@@ -78,8 +91,8 @@ export class DatabaseCollectionService<T extends DatabaseObject> {
    * Appel le service de suppression d'une donnée
    * @param id Id de la donnée à supprimer
    */
-  public delete(id: string): Observable<T> {
-    return from(this.datasRef.child(id).remove());
+  public delete(data: T): Observable<void> {
+    return from(this.datasRef.remove(data.id));
   }
 
 }

@@ -1,23 +1,69 @@
-<button mat-raised-button (click)="collapseAll()">Tout réduire</button>
-<mat-tree [dataSource]="dataSource" [treeControl]="treeControl">
-  <mat-tree-node
-    *matTreeNodeDef="let saleFlatNode"
-    matTreeNodePadding
-    [class.isSelected]="saleFlatNode.isSelected"
-    [style.display]="shouldRender(saleFlatNode) ? 'flex': 'none'"
-    (click)="saleFlatNode.value ? onClickSaleFlatNode(saleFlatNode): null"
-  >
-    <button
-      mat-icon-button
-      matTreeNodeToggle
-      [attr.aria-label]="'Ouvre' + saleFlatNode.label"
-      (click)="saleFlatNode.isExpanded = !saleFlatNode.isExpanded"
-      [style.display]="saleFlatNode.isExpandable ? 'inline-block' : 'none'"
-    >
-      <mat-icon class="mat-icon-rtl-mirror">
-        {{saleFlatNode.isExpanded ? 'expand_more' : 'chevron_right'}}
-      </mat-icon>
-    </button>
-    {{ saleFlatNode.level === 3 ? (saleFlatNode.label | date:'HH:mm:ss') + ' - ' + (saleFlatNode.value.total | currency:'EUR') : saleFlatNode.label }}
-  </mat-tree-node>
-</mat-tree>
+
+<mat-tab-group>
+  <mat-tab label="Date">
+    <div class="head">
+      <button mat-icon-button (click)="collapseAll()">
+        <mat-icon>remove</mat-icon>
+      </button>
+      <mat-form-field (click)="date.open()">
+        <input matInput [matDatepicker]="date" [(ngModel)]="dateFilter" (ngModelChange)="filterByDate()" readonly>
+        <mat-datepicker-toggle matSuffix [for]="date"></mat-datepicker-toggle>
+        <mat-datepicker #date disabled="false"></mat-datepicker>
+      </mat-form-field>
+    </div>
+    <mat-tree [dataSource]="dataSourceByDate" [treeControl]="treeControlByDate">
+      <mat-tree-node
+        *matTreeNodeDef="let saleFlatNode"
+        matTreeNodePadding
+        [class.isSelected]="saleFlatNode.isSelected"
+        [style.display]="shouldRender(saleFlatNode) ? 'flex': 'none'"
+        (click)="saleFlatNode.value ? onClickSaleFlatNode(saleFlatNode): null"
+      >
+        <button
+          mat-icon-button
+          matTreeNodeToggle
+          [attr.aria-label]="'Ouvre' + saleFlatNode.label"
+          (click)="saleFlatNode.isExpanded = !saleFlatNode.isExpanded"
+          [style.display]="saleFlatNode.isExpandable ? 'inline-block' : 'none'"
+        >
+          <mat-icon class="mat-icon-rtl-mirror">
+            {{saleFlatNode.isExpanded ? 'expand_more' : 'chevron_right'}}
+          </mat-icon>
+        </button>
+        {{ saleFlatNode.level === 3 ? (saleFlatNode.label | date:'HH:mm:ss') + ' - ' + (saleFlatNode.value.total | currency:'EUR') : saleFlatNode.label }}
+      </mat-tree-node>
+    </mat-tree>
+  </mat-tab>
+  <mat-tab label="Client">
+    <div class="head">
+      <button mat-icon-button (click)="collapseAll(false)">
+        <mat-icon>remove</mat-icon>
+      </button>
+      <mat-form-field>
+        <input matInput [(ngModel)]="textFilter" (ngModelChange)="filterByText()" placeholder="Rechercher">
+      </mat-form-field>
+    </div>
+    <mat-tree [dataSource]="dataSourceByCustomer" [treeControl]="treeControlByCustomer">
+      <mat-tree-node
+        *matTreeNodeDef="let saleFlatNode"
+        matTreeNodePadding
+        [class.isSelected]="saleFlatNode.isSelected"
+        [style.display]="shouldRender(saleFlatNode, false) ? 'flex': 'none'"
+        (click)="saleFlatNode.value ? onClickSaleFlatNode(saleFlatNode, false): null"
+      >
+        <button
+          mat-icon-button
+          matTreeNodeToggle
+          [attr.aria-label]="'Ouvre' + saleFlatNode.label"
+          (click)="saleFlatNode.isExpanded = !saleFlatNode.isExpanded"
+          [style.display]="saleFlatNode.isExpandable ? 'inline-block' : 'none'"
+        >
+          <mat-icon class="mat-icon-rtl-mirror">
+            {{saleFlatNode.isExpanded ? 'expand_more' : 'chevron_right'}}
+          </mat-icon>
+        </button>
+        {{ saleFlatNode.level === 1 ? (saleFlatNode.label | date:'dd/MM/yyyy à HH:mm:ss') + ' - ' + (saleFlatNode.value.total | currency:'EUR') : saleFlatNode.label }}
+      </mat-tree-node>
+    </mat-tree>
+  </mat-tab>
+</mat-tab-group>

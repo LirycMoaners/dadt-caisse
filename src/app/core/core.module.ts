@@ -12,6 +12,8 @@ import { CashOutCategoryService } from './http-services/cash-out-category.servic
 import { CashOutService } from './http-services/cash-out.service';
 import { AuthGuard } from './guards/auth.guard';
 import { AuthenticationService } from './http-services/authentication.service';
+import { GoogleService } from './http-services/google.service';
+import { HttpClientModule } from '@angular/common/http';
 
 
 
@@ -21,7 +23,8 @@ import { AuthenticationService } from './http-services/authentication.service';
     ToolbarComponent
   ],
   imports: [
-    SharedModule
+    SharedModule,
+    HttpClientModule
   ],
   exports: [
     SidenavComponent,
@@ -36,7 +39,8 @@ import { AuthenticationService } from './http-services/authentication.service';
     SaleService,
     CashOutCategoryService,
     CashOutService,
-    SettingsService
+    SettingsService,
+    GoogleService
   ]
 })
 export class CoreModule { }

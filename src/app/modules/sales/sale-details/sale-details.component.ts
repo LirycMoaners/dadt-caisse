@@ -10,7 +10,9 @@ import {
 } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { MatTableDataSource } from '@angular/material/table';
+import { first } from 'rxjs/operators';
 import { SaleService } from 'src/app/core/http-services/sale.service';
+import { SettingsService } from 'src/app/core/http-services/settings.service';
 import { BillComponent } from 'src/app/shared/components/bill/bill.component';
 import { TicketComponent } from 'src/app/shared/components/ticket/ticket.component';
 import { SaleArticle } from 'src/app/shared/models/sale-article.model';
@@ -39,7 +41,8 @@ export class SaleDetailsComponent implements OnInit, OnChanges {
     private readonly cfr: ComponentFactoryResolver,
     private readonly viewContainerRef: ViewContainerRef,
     private readonly fb: FormBuilder,
-    private readonly saleService: SaleService
+    private readonly saleService: SaleService,
+    private readonly settingsService: SettingsService
   ) { }
 
   ngOnInit(): void { }
@@ -68,14 +71,17 @@ export class SaleDetailsComponent implements OnInit, OnChanges {
       this.viewContainerRef,
       type === 'ticket' ? TicketComponent : BillComponent,
       this.componentRef
-    ) as ComponentRef<TicketComponent | BillComponent>;
+    );
 
     this.componentRef.instance.sale = this.sale;
     if (type === 'ticket') {
       (this.componentRef.instance as TicketComponent).isDuplicata = true;
     }
 
-    setTimeout(() => print(), 0);
+    this.settingsService.getSettings().pipe(first()).subscribe(settings => {
+      this.componentRef.instance.settings = settings;
+      setTimeout(() => print(), 1000);
+    });
   }
 
   /**
@@ -88,8 +94,8 @@ export class SaleDetailsComponent implements OnInit, OnChanges {
   /**
    * Retourne le total de la vente avant application de la remise globale de la vente
    */
-  public getTotalBeforeSaleDiscount(): number {
-    return this.sale.articles.reduce((total, saleArticle) => total + this.getSaleArticleTotal(saleArticle), 0);
+  public getSaleTotalBeforeDiscount(): number {
+    return SaleTools.getSaleTotalBeforeDiscount(this.sale);
   }
 
   /**

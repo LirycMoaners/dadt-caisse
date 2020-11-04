@@ -1,5 +1,7 @@
 import { ValidatorFn } from '@angular/forms';
 import { Sale } from '../models/sale.model';
+import { Settings } from '../models/settings.model';
+import { SaleArticleTools } from './sale-article.tools';
 
 export class SaleTools {
 
@@ -17,5 +19,20 @@ export class SaleTools {
       ).toString()
         ? null
         : {totalNotEqualToCumulated: 'La somme des totaux n\'est pas égale au total de la vente !'};
+  }
+
+  /**
+   * Retourne le total de la vente avant application de la remise globale de la vente
+   */
+  public static getSaleTotalBeforeDiscount(sale: Sale): number {
+    return sale.articles.reduce((total, saleArticle) => total + SaleArticleTools.getSaleArticleTotal(saleArticle), 0);
+  }
+
+  /**
+   * Retourne le total de la vente avant application de la TVA
+   */
+  public static getSaleTotalBeforeTaxe(sale: Sale, settings: Settings): number {
+    const total = Math.round(Math.round(sale.total * 100) - Math.round(sale.total * settings.taxeRate)).toString();
+    return Number(total.substring(0, total.length - 2) + '.' + total.substring(total.length - 2, total.length));
   }
 }

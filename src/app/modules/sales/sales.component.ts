@@ -12,8 +12,7 @@ import { Sale } from 'src/app/shared/models/sale.model';
 export class SalesComponent implements OnInit, OnDestroy {
   private readonly subscriptions: Subscription[] = [];
   public sales: Sale[];
-  public currentSale: Sale;
-  public filterDate: Date;
+  public currentSale: Sale = null;
 
   constructor(
     private readonly saleService: SaleService
@@ -23,9 +22,6 @@ export class SalesComponent implements OnInit, OnDestroy {
     this.subscriptions.push(
       this.saleService.getAll().subscribe(sales => {
         this.sales = sales;
-        if (!this.filterDate) {
-          setTimeout(() => this.filterDate = new Date(), 0);
-        }
       })
     );
   }

@@ -44,6 +44,18 @@
       <mat-cell *matCellDef="let element" class="mat-column-loyalty-points"> {{element.loyaltyPoints}} </mat-cell>
     </ng-container>
 
+    <!-- Last Fidelity Discount Gave Column -->
+    <ng-container matColumnDef="lastDiscountGaveDate">
+      <mat-header-cell *matHeaderCellDef mat-sort-header> Denière remise donnée </mat-header-cell>
+      <mat-cell *matCellDef="let element"> {{ element.lastDiscountGaveDate ? (element.lastDiscountGaveDate | date:'dd/MM/yyyy à HH:mm') : '' }} </mat-cell>
+    </ng-container>
+
+    <!-- Last Fidelity Discount Used Column -->
+    <ng-container matColumnDef="lastDiscountUsedDate">
+      <mat-header-cell *matHeaderCellDef mat-sort-header> Dernière remise utilisée </mat-header-cell>
+      <mat-cell *matCellDef="let element"> {{ element.lastDiscountUsedDate ? (element.lastDiscountUsedDate | date:'dd/MM/yyyy à HH:mm') : '' }} </mat-cell>
+    </ng-container>
+
     <!-- Actions Column -->
     <ng-container matColumnDef="actions" stickyEnd>
       <mat-header-cell *matHeaderCellDef class="mat-column-actions"> Actions </mat-header-cell>

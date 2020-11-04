@@ -1,32 +1,33 @@
 import { Injectable } from '@angular/core';
-import { AngularFireDatabase } from '@angular/fire/database';
-import { BehaviorSubject, from, Observable } from 'rxjs';
+import { AngularFireDatabase, AngularFireObject } from '@angular/fire/database';
+import { from, Observable } from 'rxjs';
+import { map } from 'rxjs/operators';
 import { Settings } from 'src/app/shared/models/settings.model';
 
 @Injectable()
 export class SettingsService {
-  private settingsRef: firebase.database.Reference;
-  private settings$: BehaviorSubject<Settings> = new BehaviorSubject(new Settings());
+  private settingsRef: AngularFireObject<Settings>;
 
   constructor(
     private readonly database: AngularFireDatabase
   ) {
-    this.settingsRef = this.database.database.ref('settings');
-    this.settingsRef.on('value', settingsSnapshot => this.settings$.next(settingsSnapshot.val()));
+    this.settingsRef = this.database.object('settings');
   }
 
   /**
    * Appel au service de récupération des paramètres de l'application
    */
   public getSettings(): Observable<Settings> {
-    return this.settings$;
+    return this.settingsRef.snapshotChanges().pipe(
+      map(c => c.payload.val())
+    );
   }
 
   /**
    * Appel au service de mise à jour des paramètres de l'application
    * @param newSettings Les nouveaux paramètres de l'application
    */
-  public updateSettings(newSettings: Settings): Observable<Settings> {
+  public updateSettings(newSettings: Settings): Observable<void> {
     return from(this.settingsRef.update(newSettings));
   }
 }

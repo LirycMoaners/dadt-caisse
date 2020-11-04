@@ -13,8 +13,19 @@
       <mat-datepicker-toggle matSuffix [for]="toDate"></mat-datepicker-toggle>
       <mat-datepicker #toDate disabled="false"></mat-datepicker>
     </mat-form-field>
+    <mat-form-field>
+      <mat-label>Solde de départ</mat-label>
+      <input
+        appNumeric
+        [decimals]='2'
+        matInput
+        type="text"
+        formControlName="balance"
+        (change)="periodForm.get('balance').setValue(toNumber($event.target.value))"
+      >
+    </mat-form-field>
   </form>
 </mat-dialog-content>
 <mat-dialog-actions align="end">
-  <button mat-raised-button color="accent" (click)="print()" [disabled]="periodForm.invalid">Imprimer</button>
+  <button mat-raised-button color="accent" (click)="export()" [disabled]="periodForm.invalid">Télécharger</button>
 </mat-dialog-actions>

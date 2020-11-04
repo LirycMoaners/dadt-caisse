@@ -6,4 +6,8 @@ export class Customer extends DatabaseObject {
   emailAddress: string;
   phoneNumber: string;
   loyaltyPoints: number;
+  lastDiscountGaveDate: Date | string;
+  lastDiscountUsedDate: Date | string;
+  resourceName: string;
+  etag?: string;
 }

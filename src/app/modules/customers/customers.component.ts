@@ -17,7 +17,7 @@ import { CustomerDialogComponent } from './customer-dialog/customer-dialog.compo
 export class CustomersComponent implements OnInit, AfterViewInit {
   @ViewChild(MatSort) sort: MatSort;
   public dataSource: MatTableDataSource<Customer> = new MatTableDataSource();
-  public displayedColumns: string[] = ['firstName', 'lastName', 'emailAddress', 'phoneNumber', 'loyaltyPoints', 'actions'];
+  public displayedColumns: string[] = ['firstName', 'lastName', 'emailAddress', 'phoneNumber', 'loyaltyPoints', 'lastDiscountGaveDate', 'lastDiscountUsedDate', 'actions'];
 
   constructor(
     private readonly dialog: MatDialog,
@@ -70,7 +70,7 @@ export class CustomersComponent implements OnInit, AfterViewInit {
    */
   public deleteCustomer(customer: Customer): void {
     if (confirm('Souhaitez-vous réellement supprimer le/la client(e) ' + customer.lastName + ' ' + customer.firstName + ' ?')) {
-      this.customerService.delete(customer.id).subscribe();
+      this.customerService.delete(customer).subscribe();
     }
   }
 

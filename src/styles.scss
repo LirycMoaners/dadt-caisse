@@ -59,3 +59,8 @@ body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; }
   color: mat-color($dadt-caisse-accent, lighter) !important;
   background: rgba(255, 255, 255, 0.04);
 }
+
+@page {
+  size:  auto;
+  margin: 0mm;
+}
