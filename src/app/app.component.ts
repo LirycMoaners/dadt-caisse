@@ -7,8 +7,9 @@ import { SwUpdate } from '@angular/service-worker';
   styleUrls: ['./app.component.scss']
 })
 export class AppComponent implements OnInit {
+
   constructor(
-    private readonly swUpdate: SwUpdate,
+    private readonly swUpdate: SwUpdate
   ) { }
 
   ngOnInit(): void {

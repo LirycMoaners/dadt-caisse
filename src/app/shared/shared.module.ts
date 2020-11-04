@@ -19,6 +19,7 @@ import { MatAutocompleteModule } from '@angular/material/autocomplete';
 import { MatTreeModule } from '@angular/material/tree';
 import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatCheckboxModule } from '@angular/material/checkbox';
+import { MatTabsModule } from '@angular/material/tabs';
 
 import { PhoneNumberPipe } from './pipes/phone-number.pipe';
 import { ArticleCategoryPipe } from './pipes/article-category-label.pipe';
@@ -57,7 +58,8 @@ import { NumericDirective } from './directives/numeric.directive';
     MatTreeModule,
     MatNativeDateModule,
     MatDatepickerModule,
-    MatCheckboxModule
+    MatCheckboxModule,
+    MatTabsModule
   ],
   exports: [
     CommonModule,
@@ -83,7 +85,8 @@ import { NumericDirective } from './directives/numeric.directive';
     MatTreeModule,
     MatNativeDateModule,
     MatDatepickerModule,
-    MatCheckboxModule
+    MatCheckboxModule,
+    MatTabsModule
   ]
 })
 export class SharedModule { }

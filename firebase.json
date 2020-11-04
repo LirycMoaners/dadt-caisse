@@ -19,10 +19,17 @@
       ],
       "rewrites": [
         {
+          "source": "/robots.txt",
+          "destination": "/robots.txt"
+        },
+        {
           "source": "**",
           "destination": "/index.html"
         }
       ]
     }
-  ]
+  ],
+  "database": {
+    "rules": "database.rules.json"
+  }
 }

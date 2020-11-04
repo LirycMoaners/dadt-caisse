@@ -31,7 +31,12 @@
             "styles": [
               "src/styles.scss"
             ],
-            "scripts": []
+            "scripts": [],
+            "allowedCommonJsDependencies": [
+              "firebase/app",
+              "@firebase/auth",
+              "exceljs"
+            ]
           },
           "configurations": {
             "production": {

@@ -11,7 +11,7 @@ import { CashOut } from 'src/app/shared/models/cash-out.model';
 export class CashOutsComponent implements OnInit, OnDestroy {
   private readonly subscriptions: Subscription[] = [];
   public cashOuts: CashOut[];
-  public currentCashOut: CashOut;
+  public currentCashOut: CashOut = null;
   public filterDate: Date;
 
   constructor(
@@ -49,7 +49,7 @@ export class CashOutsComponent implements OnInit, OnDestroy {
    * @param cashOut Le retrait caisse à afficher
    */
   public showCashOutDetails(cashOut: CashOut): void {
-    this.currentCashOut = cashOut ? {...cashOut} : null;
+    setTimeout(() => this.currentCashOut = cashOut ? {...cashOut} : null, 0);
   }
 
   /**

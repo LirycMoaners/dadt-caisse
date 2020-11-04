@@ -77,7 +77,7 @@ export class CashOutDetailsComponent implements OnInit, OnChanges {
    */
   public delete(): void {
     if (confirm('Souhaitez-vous réellement supprimer le retrait caisse ' + this.cashOut.label + ' du ' + this.cashOut.createDate + ' ?')) {
-      this.cashOutService.delete(this.cashOut.id).subscribe(() => {
+      this.cashOutService.delete(this.cashOut).subscribe(() => {
         this.cashOutDeleted.emit();
       });
     }

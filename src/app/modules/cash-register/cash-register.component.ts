@@ -1,8 +1,8 @@
-import { Component, OnInit, OnDestroy, ComponentFactoryResolver, ComponentRef, ViewContainerRef } from '@angular/core';
+import { Component, OnInit, OnDestroy, ComponentFactoryResolver, ComponentRef, ViewContainerRef, NgZone } from '@angular/core';
 import { FormControl } from '@angular/forms';
 import { MatTableDataSource } from '@angular/material/table';
-import { MatDialog } from '@angular/material/dialog';
-import { Subscription, Observable, of } from 'rxjs';
+import { MatDialog, MatDialogRef } from '@angular/material/dialog';
+import { Subscription, Observable, of, combineLatest } from 'rxjs';
 import { startWith, map, mergeMap, first } from 'rxjs/operators';
 
 import { Article } from '../../shared/models/article.model';
@@ -15,11 +15,12 @@ import { BillComponent } from 'src/app/shared/components/bill/bill.component';
 import { SaleArticle } from 'src/app/shared/models/sale-article.model';
 import { CustomerService } from 'src/app/core/http-services/customer.service';
 import { FidelityDialogComponent } from './fidelity-dialog/fidelity-dialog.component';
-import { CashLogComponent } from './cash-log/cash-log.component';
 import { CashLogPrintDialogComponent } from './cash-log-print-dialog/cash-log-print-dialog.component';
 import { SaleArticleTools } from 'src/app/shared/tools/sale-article.tools';
 import { NumberTools } from 'src/app/shared/tools/number.tools';
 import { PrintTools } from 'src/app/shared/tools/print.tools';
+import { SettingsService } from 'src/app/core/http-services/settings.service';
+import { Settings } from 'src/app/shared/models/settings.model';
 
 
 @Component({
@@ -34,21 +35,25 @@ export class CashRegisterComponent implements OnInit, OnDestroy {
   public articles: Article[] = [];
   public filteredArticles: Observable<Article[]>;
   public lastSale: Sale;
-  private componentRef: ComponentRef<TicketComponent | BillComponent | CashLogComponent>;
+  private componentRef: ComponentRef<TicketComponent | BillComponent>;
+  private settings: Settings;
   private readonly subscriptions: Subscription[] = [];
 
   constructor(
     private readonly dialog: MatDialog,
+    private readonly ngZone: NgZone,
     private readonly cfr: ComponentFactoryResolver,
     private readonly viewContainerRef: ViewContainerRef,
     private readonly articleService: ArticleService,
     private readonly saleService: SaleService,
-    private readonly customerService: CustomerService
+    private readonly customerService: CustomerService,
+    private readonly settingsService: SettingsService
   ) { }
 
   ngOnInit(): void {
     this.subscriptions.push(
-      this.articleService.getAll().subscribe(articles => this.articles = articles)
+      this.articleService.getAll().subscribe(articles => this.articles = articles),
+      this.settingsService.getSettings().subscribe(settings => this.settings = settings)
     );
 
     this.filteredArticles = this.articleControl.valueChanges.pipe(
@@ -100,7 +105,7 @@ export class CashRegisterComponent implements OnInit, OnDestroy {
    * Retourne le total de la vente avant les remises
    */
   public getSaleArticlesTotalBeforeDiscount(): number {
-    return this.dataSource.data.reduce((total, saleArticle) => total + (saleArticle.price * saleArticle.quantity), 0);
+    return SaleArticleTools.getSaleArticlesTotalBeforeDiscount(this.dataSource.data);
   }
 
   /**
@@ -139,9 +144,28 @@ export class CashRegisterComponent implements OnInit, OnDestroy {
       }),
       mergeMap(s => {
         savedSale = s;
-        return !!savedSale && sale.customer ? this.customerService.addPoints(sale.customer, sale.total) : of(null);
-      }),
-      mergeMap(isFidelityDiscount => isFidelityDiscount ? this.dialog.open(FidelityDialogComponent).afterClosed() : of(null))
+        return !!savedSale
+          ? combineLatest([
+            ...savedSale.articles.map(saleArticle => {
+              const article = this.articles.find(a => a.id === saleArticle.id);
+              article.quantity -= saleArticle.quantity;
+              return this.articleService.update(article);
+            }),
+            savedSale.customer
+              ? this.customerService.addPoints({...savedSale.customer}, savedSale.total, savedSale.isFidelityDiscount).pipe(
+                mergeMap(isFidelityDiscount => {
+                  if (isFidelityDiscount) {
+                    let ref: MatDialogRef<FidelityDialogComponent>;
+                    this.ngZone.run(() => ref = this.dialog.open(FidelityDialogComponent));
+                    return ref.afterClosed();
+                  }
+                  return of(null);
+                })
+              )
+              : of(null)
+          ])
+          : of(null);
+      })
     ).subscribe(() => {
       if (savedSale) {
         this.lastSale = {...savedSale};
@@ -189,26 +213,7 @@ export class CashRegisterComponent implements OnInit, OnDestroy {
    * Ouvre la modale de choix de période avant d'exporter le journal de caisse
    */
   public printCashLog(): void {
-    const dialogRef = this.dialog.open(CashLogPrintDialogComponent);
-    let period: {from: Date, to: Date};
-
-    dialogRef.afterClosed().pipe(
-      mergeMap((p: {from: Date, to: Date}) => {
-        if (p) {
-          period = p;
-          this.componentRef = PrintTools.createComponent(this.cfr, this.viewContainerRef, CashLogComponent, this.componentRef);
-          return this.saleService.getAll();
-        }
-        return of(null);
-      })
-    ).subscribe((sales: Sale[]) => {
-      if (sales) {
-        (this.componentRef.instance as CashLogComponent).sales = sales.filter(
-          (sale) => sale.createDate.valueOf() >= period.from.valueOf() && sale.createDate.valueOf() <= period.to.valueOf()
-        );
-        setTimeout(() => print(), 0);
-      }
-    });
+    this.dialog.open(CashLogPrintDialogComponent);
   }
 
   /**
@@ -231,7 +236,8 @@ export class CashRegisterComponent implements OnInit, OnDestroy {
     this.componentRef = PrintTools.createComponent(this.cfr, this.viewContainerRef, TicketComponent, this.componentRef);
     (this.componentRef.instance as TicketComponent).isDuplicata = isDuplicata;
     (this.componentRef.instance as TicketComponent).sale = this.lastSale;
-    setTimeout(() => print(), 0);
+    (this.componentRef.instance as TicketComponent).settings = this.settings;
+    setTimeout(() => print(), 1000);
   }
 
 }

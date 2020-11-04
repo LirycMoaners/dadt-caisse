@@ -1,1 +1,100 @@
-<p>ticket works!</p>
+<div class="header">
+  <img alt="Logo du magasin" src="assets/images/logo-grey.svg">
+  <div [innerHTML]="settings.address"></div>
+  <div *ngIf="isDuplicata" class="center duplicata">DUPLICATA</div>
+</div>
+<div class="container">
+  <div class="articles">
+    <ng-container *ngFor="let saleArticle of sale.articles">
+      <div class="row">
+        <div>{{ saleArticle.reference }}</div>
+        <div>{{ saleArticle.label }}</div>
+      </div>
+      <div class="row">
+        <div>{{ saleArticle.price | currency:'EUR' }}</div>
+        <div class="center small">x</div>
+        <div class="center">{{ saleArticle.quantity }}</div>
+        <div class="center small">{{ saleArticle.discount ? '-' : '' }}</div>
+        <div class="center">{{ saleArticle.discount ? saleArticle.discount + ' ' + saleArticle.discountType : '' }}</div>
+        <div class="center small">=</div>
+        <div>{{ getSaleArticleTotal(saleArticle) | currency:'EUR' }}</div>
+      </div>
+    </ng-container>
+  </div>
+
+  <div class="total-container">
+    <div *ngIf="sale.discount" class="row">
+      <div>Total des articles</div>
+      <div>{{ getSaleArticlesTotal() | currency:'EUR' }}</div>
+    </div>
+    <div *ngIf="sale.discount" class="row">
+      <div>Remise</div>
+      <div>- {{ sale.discount + ' ' + sale.discountType }}</div>
+    </div>
+    <div class="row total">
+      <div>Total</div>
+      <div>{{ sale.total | currency:'EUR' }}</div>
+    </div>
+  </div>
+
+  <div class="payment">
+    <div *ngIf="sale.cardTotal" class="row">
+      <div>Carte bancaire</div>
+      <div>{{ sale.cardTotal | currency:'EUR' }}</div>
+    </div>
+    <div *ngIf="sale.checkTotal" class="row">
+      <div>Chèque</div>
+      <div>{{ sale.checkTotal | currency:'EUR' }}</div>
+    </div>
+    <div *ngIf="sale.cashTotal" class="row">
+      <div>Espèces</div>
+      <div>{{ sale.cashTotal | currency:'EUR' }}</div>
+    </div>
+    <div *ngIf="sale.creditTotal" class="row">
+      <div>Avoir</div>
+      <div>{{ sale.creditTotal | currency:'EUR' }}</div>
+    </div>
+  </div>
+
+  <div class="discount-container">
+    <div class="row">
+      <div>Total hors remises</div>
+      <div>{{ getSaleArticlesTotalBeforeDiscount() | currency:'EUR' }}</div>
+    </div>
+    <div class="row">
+      <div>Total des remises</div>
+      <div>{{ getTotalDiscounts() | currency:'EUR' }}</div>
+    </div>
+    <div class="row">
+      <div>Net à payer</div>
+      <div>{{ sale.total | currency:'EUR' }}</div>
+    </div>
+  </div>
+
+  <div class="taxe-container">
+    <div class="row">
+      <div class="center">Taux TVA</div>
+      <div class="center">Montant H.T</div>
+      <div class="center">TVA</div>
+    </div>
+    <div class="row">
+      <div class="center">{{ settings.taxeRate + ' %' }}</div>
+      <div class="center">{{ getSaleTotalBeforeTaxe() | currency:'EUR' }}</div>
+      <div class="center">{{ getTaxe() | currency:'EUR' }}</div>
+    </div>
+  </div>
+
+  <div *ngIf="sale.customer" class="fidelity">
+    <div class="row">
+      <div>Points cumulés</div>
+      <div>{{ getLoyaltyPoints() }}</div>
+    </div>
+    <div class="row">
+      <div>Total des points</div>
+      <div>{{ getTotalLoyaltyPoints() }}</div>
+    </div>
+  </div>
+</div>
+<div class="footer">
+  <div class="row" [innerHTML]="settings.ticketFooter"></div>
+</div>

@@ -31,7 +31,7 @@
         matInput
         type="text"
         formControlName="total"
-        (change)="cashOut.total = toNumber($event.target.value)"
+        (change)="cashOutForm.get('total').setValue(toNumber($event.target.value))"
       >
     </mat-form-field>
   </form>

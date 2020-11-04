@@ -1,14 +1,7 @@
 <form [formGroup]="form">
-  <ng-container formGroupName="settings">
+  <ng-container *ngIf="form.controls['settings']" formGroupName="settings">
     <div class="general">
       <h2>Général</h2>
-      <mat-form-field>
-        <mat-label>Nom de société</mat-label>
-        <input
-          matInput
-          formControlName="companyName"
-        >
-      </mat-form-field>
       <mat-form-field>
         <mat-label>Adresse postale</mat-label>
         <textarea
@@ -27,6 +20,31 @@
           formControlName="taxeRate"
         >
       </mat-form-field>
+      <mat-form-field>
+        <mat-label>Texte en bas du ticket</mat-label>
+        <textarea
+          class="address"
+          matInput
+          formControlName="ticketFooter"
+        ></textarea>
+      </mat-form-field>
+
+      <mat-form-field *ngIf="contactGroups; else signIn">
+        <mat-label>Groupe de contact Google</mat-label>
+        <mat-select formControlName="contactGroup">
+          <mat-option *ngFor="let contactGroup of contactGroups" [value]="contactGroup.resourceName">
+            {{ contactGroup.name }}
+          </mat-option>
+        </mat-select>
+      </mat-form-field>
+      <ng-template #signIn>
+        <div>
+          <button mat-raised-button (click)="googleSignIn()">
+            Connexion Google
+            <mat-icon>login</mat-icon>
+          </button>
+        </div>
+      </ng-template>
     </div>
 
     <div class="fidelity">
@@ -64,6 +82,25 @@
             type="text"
             formControlName="pointsForDiscount"
           >
+        </mat-form-field>
+      </div>
+      <div>
+        <mat-form-field>
+          <mat-label>Remise</mat-label>
+          <input
+            matInput
+            type="text"
+            formControlName="discount"
+            appNumeric
+            [decimals]='2'
+          >
+        </mat-form-field>
+        <mat-form-field>
+          <mat-label>Type</mat-label>
+          <mat-select formControlName="discountType">
+            <mat-option value="€">€</mat-option>
+            <mat-option value="%">%</mat-option>
+          </mat-select>
         </mat-form-field>
       </div>
     </div>

@@ -25,6 +25,9 @@ export class LoginComponent implements OnInit {
     });
   }
 
+  /**
+   * Connecte l'utilisateur à l'application
+   */
   public signIn(): void {
     if (this.loginForm.valid) {
       this.authenticationService.signIn(this.loginForm.value.email, this.loginForm.value.password).then(

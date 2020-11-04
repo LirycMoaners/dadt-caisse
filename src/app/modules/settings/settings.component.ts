@@ -1,9 +1,10 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { FormArray, FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { combineLatest, of, Subscription } from 'rxjs';
-import { first, mergeMap } from 'rxjs/operators';
+import { combineLatest, Observable, of, Subscription } from 'rxjs';
+import { map, mergeMap } from 'rxjs/operators';
 import { ArticleCategoryService } from 'src/app/core/http-services/article-category.service';
 import { CashOutCategoryService } from 'src/app/core/http-services/cash-out-category.service';
+import { GoogleService } from 'src/app/core/http-services/google.service';
 import { SettingsService } from 'src/app/core/http-services/settings.service';
 import { ArticleCategory } from 'src/app/shared/models/article-category.model';
 import { CashOutCategory } from 'src/app/shared/models/cash-out-category.model';
@@ -16,50 +17,56 @@ import { Settings } from 'src/app/shared/models/settings.model';
 })
 export class SettingsComponent implements OnInit, OnDestroy {
   public form: FormGroup;
-  public articleCategories: ArticleCategory[];
+  public contactGroups: gapi.client.people.ContactGroup[];
   private readonly subscriptions: Subscription[] = [];
 
   constructor(
     private readonly fb: FormBuilder,
     private readonly settingsService: SettingsService,
     private readonly articleCategoryService: ArticleCategoryService,
-    private readonly cashOutCategoryService: CashOutCategoryService
+    private readonly cashOutCategoryService: CashOutCategoryService,
+    private readonly googleService: GoogleService
   ) { }
 
   ngOnInit(): void {
+    this.form = this.fb.group({});
     this.subscriptions.push(
-      combineLatest([
-        this.settingsService.getSettings().pipe(first()),
-        this.articleCategoryService.getAll().pipe(first()),
-        this.cashOutCategoryService.getAll().pipe(first())
-      ]).pipe(
-        mergeMap(([settings, articleCategories, cashOutCategories]: [Settings, ArticleCategory[], CashOutCategory[]]) => {
-          this.form = this.fb.group({
-            settings: this.fb.group({
-              eurosToPoint: [settings.eurosToPoint, [Validators.required]],
-              pointsToEuro: [settings.pointsToEuro, [Validators.required]],
-              pointsForDiscount: [settings.pointsForDiscount, [Validators.required]],
-              companyName: [settings.companyName, [Validators.required]],
-              address: [settings.address, [Validators.required]],
-              taxeRate: [settings.taxeRate, [Validators.required]]
-            }),
-            articleCategories: this.fb.array(
-              articleCategories.map(
-                articleCategory => this.fb.group({id: [articleCategory.id, []], label: [articleCategory.label, [Validators.required]]})
-              )
-            ),
-            cashOutCategories: this.fb.array(
-              cashOutCategories.map(
-                cashOutCategory => this.fb.group({id: [cashOutCategory.id, []], label: [cashOutCategory.label, [Validators.required]]})
-              )
-            )
-          });
+      this.settingsService.getSettings().pipe(
+        mergeMap((settings) => {
+          this.form.setControl('settings', this.fb.group({
+            address: [settings.address, [Validators.required]],
+            taxeRate: [settings.taxeRate, [Validators.required]],
+            ticketFooter: [settings.ticketFooter, []],
+            contactGroup: [settings.contactGroup, []],
+            eurosToPoint: [settings.eurosToPoint, [Validators.required]],
+            pointsToEuro: [settings.pointsToEuro, [Validators.required]],
+            pointsForDiscount: [settings.pointsForDiscount, [Validators.required]],
+            discount: [settings.discount, [Validators.required]],
+            discountType: [settings.discountType, [Validators.required]]
+          }));
           return combineLatest([
+            settings.contactGroup ? this.googleSignIn() : of(),
             this.form.get('settings').valueChanges.pipe(
               mergeMap((s: Settings) =>
                 this.form.get('settings').valid ? this.settingsService.updateSettings(s) : of(null)
               )
-            ),
+            )
+          ]);
+        })
+      ).subscribe(),
+      this.articleCategoryService.getAll().pipe(
+        mergeMap((articleCategories) => {
+          this.form.setControl('articleCategories', this.fb.array(
+            articleCategories.map(
+              articleCategory => this.fb.group({
+                id: [articleCategory.id, []],
+                label: [articleCategory.label, [Validators.required]],
+                createDate: [articleCategory.createDate, [Validators.required]],
+                updateDate: [articleCategory.updateDate, [Validators.required]]
+              }, { updateOn: 'blur' })
+            )
+          ));
+          return combineLatest([
             ...(this.form.get('articleCategories') as FormArray).controls
               .map((control, index) => control.valueChanges.pipe(
                 mergeMap((articleCategory: ArticleCategory) => {
@@ -70,7 +77,23 @@ export class SettingsComponent implements OnInit, OnDestroy {
                   return of(null);
                 })
               )
-            ),
+            )
+          ]);
+        })
+      ).subscribe(),
+      this.cashOutCategoryService.getAll().pipe(
+        mergeMap((cashOutCategories) => {
+          this.form.setControl('cashOutCategories', this.fb.array(
+            cashOutCategories.map(
+              cashOutCategory => this.fb.group({
+                id: [cashOutCategory.id, []],
+                label: [cashOutCategory.label, [Validators.required]],
+                createDate: [cashOutCategory.createDate, [Validators.required]],
+                updateDate: [cashOutCategory.updateDate, [Validators.required]]
+              }, { updateOn: 'blur' })
+            )
+          ));
+          return combineLatest([
             ...(this.form.get('cashOutCategories') as FormArray).controls
               .map((control, index) => control.valueChanges.pipe(
                 mergeMap((cashOutCategory: CashOutCategory) => {
@@ -102,7 +125,7 @@ export class SettingsComponent implements OnInit, OnDestroy {
     const articleCategoriesFormArray: FormArray = this.form.get('articleCategories') as FormArray;
     const articleCategory = articleCategoriesFormArray.controls[index].value;
     if (confirm('Souhaitez-vous réellement supprimer la catégorie ' + articleCategory.label + ' ?')) {
-      this.articleCategoryService.delete(articleCategory.id).subscribe(() =>
+      this.articleCategoryService.delete(articleCategory).subscribe(() =>
         articleCategoriesFormArray.removeAt(index)
       );
     }
@@ -112,25 +135,7 @@ export class SettingsComponent implements OnInit, OnDestroy {
    * Ajoute une catégorie d'article vierge au formulaire
    */
   public addArticleCategory(): void {
-    this.subscriptions.push(
-      this.articleCategoryService.create({id: '', label: '', createDate: new Date(), updateDate: new Date()}).pipe(
-        mergeMap(articleCategory => {
-          const newArticleCategoryFormGroup = this.fb.group(
-            {id: [articleCategory.id, []], label: [articleCategory.label, [Validators.required]]}
-          );
-          (this.form.get('articleCategories') as FormArray).push(
-            newArticleCategoryFormGroup
-          );
-          return newArticleCategoryFormGroup.valueChanges.pipe(
-            mergeMap((ac: ArticleCategory) =>
-            newArticleCategoryFormGroup.valid
-              ? this.articleCategoryService.update(ac)
-              : of(null)
-            )
-          );
-        })
-      ).subscribe()
-    );
+    this.articleCategoryService.create({id: '', label: '', createDate: new Date(), updateDate: new Date()}).subscribe();
   }
 
   /**
@@ -141,7 +146,7 @@ export class SettingsComponent implements OnInit, OnDestroy {
     const cashOutCategoriesFormArray: FormArray = this.form.get('cashOutCategories') as FormArray;
     const cashOutCategory = cashOutCategoriesFormArray.controls[index].value;
     if (confirm('Souhaitez-vous réellement supprimer la catégorie ' + cashOutCategory.label + ' ?')) {
-      this.cashOutCategoryService.delete(cashOutCategory.id).subscribe(() =>
+      this.cashOutCategoryService.delete(cashOutCategory).subscribe(() =>
       cashOutCategoriesFormArray.removeAt(index)
       );
     }
@@ -151,24 +156,18 @@ export class SettingsComponent implements OnInit, OnDestroy {
    * Ajoute une catégorie de retrait caisse vierge au formulaire
    */
   public addCashOutCategory(): void {
-    this.subscriptions.push(
-      this.cashOutCategoryService.create(new CashOutCategory()).pipe(
-        mergeMap(cashOutCategory => {
-          const newCashOutCategoryFormGroup = this.fb.group(
-            {id: [cashOutCategory.id, []], label: [cashOutCategory.label, [Validators.required]]}
-          );
-          (this.form.get('cashOutCategories') as FormArray).push(
-            newCashOutCategoryFormGroup
-          );
-          return newCashOutCategoryFormGroup.valueChanges.pipe(
-            mergeMap((coc: CashOutCategory) =>
-            newCashOutCategoryFormGroup.valid
-              ? this.cashOutCategoryService.update(coc)
-              : of(null)
-            )
-          );
-        })
-      ).subscribe()
+    this.cashOutCategoryService.create({id: '', label: '', createDate: new Date(), updateDate: new Date()}).subscribe();
+  }
+
+  /**
+   * Enclenche le processus d'authorisation d'accès aux contacts d'un utilisateur Google
+   */
+  public googleSignIn(): Observable<void>{
+    return this.googleService.signIn().pipe(
+      mergeMap(result => result ? this.googleService.getContactGroupList() : of()),
+      map((contactGroups: gapi.client.people.ContactGroup[]) => {
+        this.contactGroups = contactGroups;
+      })
     );
   }
 

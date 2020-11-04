@@ -26,13 +26,15 @@ export class ArticleDialogComponent implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     this.articleFormGroup = new FormGroup({
-      id: new FormControl(''),
-      reference: new FormControl('', Validators.required),
-      label: new FormControl('', Validators.required),
-      categoryId: new FormControl('', Validators.required),
-      buyPrice: new FormControl('', Validators.pattern('^[0-9]*([,|\.][0-9]{2})?$')),
-      sellPrice: new FormControl('', [Validators.required, Validators.pattern('^[0-9]*([,|\.][0-9]{2})?$')]),
-      quantity: new FormControl('', [Validators.pattern('^[0-9]*$')])
+      id: new FormControl(this.article ? this.article.id : ''),
+      reference: new FormControl(this.article ? this.article.reference : '', Validators.required),
+      label: new FormControl(this.article ? this.article.label : '', Validators.required),
+      categoryId: new FormControl(this.article ? this.article.categoryId : '', Validators.required),
+      buyPrice: new FormControl(this.article ? this.article.buyPrice : '', Validators.pattern('^[0-9]*([,|\.][0-9]{2})?$')),
+      sellPrice: new FormControl(this.article ? this.article.sellPrice : '', [Validators.required, Validators.pattern('^[0-9]*([,|\.][0-9]{2})?$')]),
+      quantity: new FormControl(this.article ? this.article.quantity : '', [Validators.pattern('^[0-9]*$')]),
+      createDate: new FormControl(this.article ? this.article.createDate : ''),
+      updateDate: new FormControl(this.article ? this.article.updateDate : '')
     });
 
     if (this.article) {

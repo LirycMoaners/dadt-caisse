@@ -54,7 +54,10 @@
           <mat-cell *matCellDef="let element">
             {{(element.price * element.quantity) | currency:'EUR'}}
           </mat-cell>
-          <mat-footer-cell *matFooterCellDef></mat-footer-cell>
+          <mat-footer-cell *matFooterCellDef class="saleDiscountLabel">
+            <div *ngIf="sale.discount"></div>
+            <div>{{ sale.isFidelityDiscount ? '(fidélité)' : '' }}</div>
+          </mat-footer-cell>
         </ng-container>
 
         <!-- Discount Column -->
@@ -76,7 +79,7 @@
             {{getSaleArticleTotal(element) | currency:'EUR'}}
           </mat-cell>
           <mat-footer-cell *matFooterCellDef class="saleTotal">
-            <div *ngIf="sale.discount">{{ getTotalBeforeSaleDiscount() | currency:'EUR' }}</div>
+            <div *ngIf="sale.discount">{{ getSaleTotalBeforeDiscount() | currency:'EUR' }}</div>
             <div>{{ sale.total | currency:'EUR' }}</div>
           </mat-footer-cell>
         </ng-container>
