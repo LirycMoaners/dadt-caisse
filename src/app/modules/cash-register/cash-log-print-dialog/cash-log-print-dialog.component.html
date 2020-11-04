@@ -1,0 +1,31 @@
+<h2 matDialogTitle>Impression journal de caisse sur la période</h2>
+<mat-dialog-content>
+  <form [formGroup]="periodForm">
+    <mat-form-field>
+      <mat-label>Du</mat-label>
+      <input matInput formControlName="from" [matDatepicker]="fromDate">
+      <mat-datepicker-toggle matSuffix [for]="fromDate"></mat-datepicker-toggle>
+      <mat-datepicker #fromDate disabled="false"></mat-datepicker>
+    </mat-form-field>
+    <mat-form-field>
+      <mat-label>Au</mat-label>
+      <input matInput formControlName="to" [matDatepicker]="toDate">
+      <mat-datepicker-toggle matSuffix [for]="toDate"></mat-datepicker-toggle>
+      <mat-datepicker #toDate disabled="false"></mat-datepicker>
+    </mat-form-field>
+    <mat-form-field>
+      <mat-label>Solde de départ</mat-label>
+      <input
+        appNumeric
+        [decimals]='2'
+        matInput
+        type="text"
+        formControlName="balance"
+        (change)="periodForm.get('balance').setValue(toNumber($event.target.value))"
+      >
+    </mat-form-field>
+  </form>
+</mat-dialog-content>
+<mat-dialog-actions align="end">
+  <button mat-raised-button color="accent" (click)="export()" [disabled]="periodForm.invalid">Télécharger</button>
+</mat-dialog-actions>

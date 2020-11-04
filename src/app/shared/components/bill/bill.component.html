@@ -1,0 +1,115 @@
+<div class="header">
+  <div class="title">
+    <div class="logo">
+      <img src="assets/images/logo-grey.svg" alt="Logo de l'application">
+    </div>
+    <h1 class="bill"> Facture </h1>
+  </div>
+  <div class="infos">
+    <div class="address">
+      <p [innerHTML]="settings.address"></p>
+    </div>
+    <div class="sale">
+      <div class="labels">
+        <p>Date de la facture : </p>
+        <p>Date de la vente : </p>
+      </div>
+      <div class="data">
+        <p>{{ today | date: 'dd/MM/yyyy' }}</p>
+        <p>{{ sale.createDate | date: 'dd/MM/yyyy' }}</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="container">
+  <div class="bill-to">
+    <h2>Facturé à</h2>
+    <div class="labels">
+      <div>
+        <p>Nom & prénom :</p>
+        <p>Entreprise :</p>
+        <p>Téléphone :</p>
+      </div>
+      <div>
+        <p>Rue :</p>
+        <p>Code postal :</p>
+        <p>Ville :</p>
+      </div>
+    </div>
+  </div>
+  <div class="sale-articles">
+    <table>
+      <caption>Articles</caption>
+      <thead>
+        <tr>
+          <th id="reference">Référence</th>
+          <th id="label">Libellé</th>
+          <th id="quantity">Quantité</th>
+          <th id="price">Prix unitaire</th>
+          <th id="total-before-discount">Total HR</th>
+          <th id="discount">Remise</th>
+          <th id="total">Total</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let saleArticle of sale.articles">
+          <td>{{ saleArticle.reference }}</td>
+          <td>{{ saleArticle.label }}</td>
+          <td>{{ saleArticle.quantity }}</td>
+          <td>{{ saleArticle.price | currency:'EUR' }}</td>
+          <td>{{ saleArticle.quantity * saleArticle.price | currency:'EUR' }}</td>
+          <td>{{ saleArticle.discount }} {{ saleArticle.discountType }}</td>
+          <td>{{ getSaleArticleTotal(saleArticle) | currency:'EUR' }}</td>
+        </tr>
+      </tbody>
+      <tfoot>
+        <tr *ngIf="sale.discount">
+          <td>Total HR</td>
+          <td></td>
+          <td></td>
+          <td></td>
+          <td></td>
+          <td></td>
+          <td>{{ getSaleTotalBeforeDiscount() | currency:'EUR' }}</td>
+        </tr>
+        <tr>
+          <td>Total</td>
+          <td></td>
+          <td></td>
+          <td></td>
+          <td></td>
+          <td>{{ sale.discount ? '- ' + sale.discount : '' }} {{ sale.discountType }}</td>
+          <td>{{ sale.total | currency:'EUR' }}</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td></td>
+          <td></td>
+          <td></td>
+          <td>Total HT</td>
+          <td></td>
+          <td>{{ getSaleTotalBeforeTaxe() | currency:'EUR' }}</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td></td>
+          <td></td>
+          <td></td>
+          <td>TVA</td>
+          <td></td>
+          <td>{{ settings.taxeRate }} %</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td></td>
+          <td></td>
+          <td></td>
+          <td>Total</td>
+          <td></td>
+          <td>{{ sale.total | currency:'EUR' }}</td>
+        </tr>
+      </tfoot>
+    </table>
+  </div>
+</div>

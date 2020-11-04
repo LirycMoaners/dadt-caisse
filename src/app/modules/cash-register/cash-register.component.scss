@@ -1,0 +1,55 @@
+.header {
+  display: flex;
+  flex-direction: row;
+  padding: 10px;
+
+  .mat-form-field {
+    flex: 1;
+    margin-right: 10px;
+  }
+}
+
+.container {
+  overflow: auto;
+  flex: 1;
+
+  .mat-header-cell {
+    justify-content: center;
+  }
+
+  .ellipsis {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .mat-column-price, .mat-column-quantity, .mat-column-discount, .mat-column-discountType, .mat-column-total {
+    flex: 0 0 100px;
+    text-align: center;
+    justify-content: center;
+  }
+
+  .mat-column-actions {
+    flex: 0 0 120px;
+    justify-content: center;
+  }
+}
+
+.footer {
+  display: flex;
+  padding: 24px;
+
+  button:not(:last-child) {
+    margin-right: 10px;
+  }
+
+  .space {
+    flex: 1;
+  }
+}
+
+@media print {
+  :host {
+    display: none;
+  }
+}

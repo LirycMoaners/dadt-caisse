@@ -1,0 +1,24 @@
+form {
+  text-align: center;
+
+  .discount > .mat-form-field:not(:last-child) {
+    margin-right: 10px;
+  }
+
+  .payment {
+    display: flex;
+
+    div {
+      flex: 1;
+      padding: 10px;
+
+      ::ng-deep .mat-form-field-infix {
+        width: auto;
+      }
+
+      button {
+        width: 100%;
+      }
+    }
+  }
+}

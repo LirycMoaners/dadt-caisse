@@ -1,0 +1,41 @@
+.header {
+  display: flex;
+  flex-direction: row;
+  padding: 10px;
+
+  .mat-form-field {
+    flex: 1;
+    margin-right: 10px;
+  }
+
+  .add {
+    line-height: 56px;
+  }
+}
+
+.container {
+  overflow: auto;
+  flex: 1;
+
+  .mat-table {
+    min-width: 650px;
+
+    .mat-header-cell {
+      justify-content: center;
+    }
+
+    .mat-column-first-name {
+      padding-left: 10px;
+    }
+
+    .mat-column-loyalty-points {
+      flex: 0 0 50px;
+      justify-content: center;
+    }
+
+    .mat-column-actions {
+      flex: 0 0 80px;
+      padding-right: 0;
+    }
+  }
+}

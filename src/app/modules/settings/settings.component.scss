@@ -1,0 +1,21 @@
+form > div {
+  display: inline-block;
+  vertical-align: top;
+  padding: 20px;
+}
+
+.general > .mat-form-field {
+  display: block;
+
+  .address {
+    min-height: 60px;
+  }
+}
+
+.mat-form-field:not(:last-child) {
+  margin-right: 10px;
+}
+
+.mat-form-field:not(:first-child) {
+  margin-left: 10px;
+}

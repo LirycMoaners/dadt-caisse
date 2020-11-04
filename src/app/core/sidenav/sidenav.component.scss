@@ -1,0 +1,63 @@
+.sidenav-container {
+  height: 100%;
+
+  .sidenav {
+    width: 200px;
+
+    @media print {
+      display: none;
+    }
+
+    ::ng-deep .mat-drawer-inner-container {
+      display: flex;
+      flex-direction: column;
+
+      .mat-toolbar {
+        background: inherit;
+
+        img {
+          width: 100%;
+        }
+      }
+
+      .mat-nav-list {
+        flex: 1;
+      }
+
+      .day-total {
+        padding: 10px;
+        box-sizing: border-box;
+        width: 100%;
+      }
+
+      .sign-out {
+        padding: 5px;
+
+        button {
+          width: 100%;
+        }
+      }
+    }
+  }
+
+  .mat-drawer-content {
+    display: flex;
+    flex-direction: column;
+
+    app-toolbar {
+      @media print {
+        display: none;
+      }
+    }
+
+    @media print {
+      margin-left: 0 !important;
+    }
+  }
+}
+
+.mat-toolbar.mat-primary {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+}

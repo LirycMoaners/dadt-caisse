@@ -1,0 +1,71 @@
+<div class="header">
+  <mat-form-field>
+    <mat-label>Rechercher</mat-label>
+    <input matInput (keyup)="applyFilter($event)" placeholder="Ex. Dupont">
+    <mat-icon matSuffix>search</mat-icon>
+  </mat-form-field>
+
+  <div class="add">
+    <button mat-raised-button (click)="addCustomer()">+ Ajouter</button>
+  </div>
+</div>
+
+<div class="container">
+  <mat-table [dataSource]="dataSource" matSort>
+    <!-- Firstname Column -->
+    <ng-container matColumnDef="firstName">
+      <mat-header-cell *matHeaderCellDef mat-sort-header class="mat-column-first-name"> Prénom </mat-header-cell>
+      <mat-cell *matCellDef="let element" class="mat-column-first-name">
+        {{element.firstName}}
+      </mat-cell>
+    </ng-container>
+
+    <!-- Lastname Column -->
+    <ng-container matColumnDef="lastName">
+      <mat-header-cell *matHeaderCellDef mat-sort-header> Nom </mat-header-cell>
+      <mat-cell *matCellDef="let element"> {{element.lastName}} </mat-cell>
+    </ng-container>
+
+    <!-- Email Address Column -->
+    <ng-container matColumnDef="emailAddress">
+      <mat-header-cell *matHeaderCellDef mat-sort-header> Email </mat-header-cell>
+      <mat-cell *matCellDef="let element"> {{element.emailAddress}} </mat-cell>
+    </ng-container>
+
+    <!-- Phone Number Column -->
+    <ng-container matColumnDef="phoneNumber">
+      <mat-header-cell *matHeaderCellDef mat-sort-header> Téléphone </mat-header-cell>
+      <mat-cell *matCellDef="let element"> {{element.phoneNumber | phoneNumber }} </mat-cell>
+    </ng-container>
+
+    <!-- Loyalty Points Column -->
+    <ng-container matColumnDef="loyaltyPoints">
+      <mat-header-cell *matHeaderCellDef mat-sort-header class="mat-column-loyalty-points"> Points </mat-header-cell>
+      <mat-cell *matCellDef="let element" class="mat-column-loyalty-points"> {{element.loyaltyPoints}} </mat-cell>
+    </ng-container>
+
+    <!-- Last Fidelity Discount Gave Column -->
+    <ng-container matColumnDef="lastDiscountGaveDate">
+      <mat-header-cell *matHeaderCellDef mat-sort-header> Denière remise donnée </mat-header-cell>
+      <mat-cell *matCellDef="let element"> {{ element.lastDiscountGaveDate ? (element.lastDiscountGaveDate | date:'dd/MM/yyyy à HH:mm') : '' }} </mat-cell>
+    </ng-container>
+
+    <!-- Last Fidelity Discount Used Column -->
+    <ng-container matColumnDef="lastDiscountUsedDate">
+      <mat-header-cell *matHeaderCellDef mat-sort-header> Dernière remise utilisée </mat-header-cell>
+      <mat-cell *matCellDef="let element"> {{ element.lastDiscountUsedDate ? (element.lastDiscountUsedDate | date:'dd/MM/yyyy à HH:mm') : '' }} </mat-cell>
+    </ng-container>
+
+    <!-- Actions Column -->
+    <ng-container matColumnDef="actions" stickyEnd>
+      <mat-header-cell *matHeaderCellDef class="mat-column-actions"> Actions </mat-header-cell>
+      <mat-cell *matCellDef="let element" class="mat-column-actions">
+        <button mat-icon-button (click)="editCustomer(element)"><mat-icon>edit</mat-icon></button>
+        <button mat-icon-button (click)="deleteCustomer(element)"><mat-icon>delete</mat-icon></button>
+      </mat-cell>
+    </ng-container>
+
+    <mat-header-row *matHeaderRowDef="displayedColumns; sticky: true"></mat-header-row>
+    <mat-row *matRowDef="let row; columns: displayedColumns;"></mat-row>
+  </mat-table>
+</div>

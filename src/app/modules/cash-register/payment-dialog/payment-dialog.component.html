@@ -1,0 +1,118 @@
+<h1 mat-dialog-title>Paiement {{ sale.total | currency:'EUR' }}</h1>
+<mat-dialog-content>
+  <form *ngIf="saleForm" [formGroup]="saleForm">
+    <mat-form-field class="customer">
+      <mat-label>Client</mat-label>
+      <input #searchedCustomerInput
+        type="text"
+        placeholder="Ex: Dupont"
+        aria-label="Client"
+        matInput
+        formControlName="customer"
+        [matAutocomplete]="auto">
+      <mat-autocomplete #auto="matAutocomplete" [displayWith]="displayCustomer">
+        <mat-option *ngFor="let customer of filteredCustomers | async" [value]="customer">
+          {{customer.lastName}} {{customer.firstName}}
+        </mat-option>
+      </mat-autocomplete>
+    </mat-form-field>
+
+    <div class="discount">
+      <mat-form-field>
+        <mat-label>Remise</mat-label>
+        <input
+          matInput
+          type="text"
+          formControlName="discount"
+          appNumeric
+          [decimals]='2'
+          (change)="changeDiscount($event.target.value)"
+        >
+      </mat-form-field>
+      <mat-form-field>
+        <mat-label>Type</mat-label>
+        <mat-select formControlName="discountType" (selectionChange)="changeDiscountType()">
+          <mat-option value="€">€</mat-option>
+          <mat-option value="%">%</mat-option>
+        </mat-select>
+      </mat-form-field>
+      <mat-checkbox
+        *ngIf="
+          saleForm.controls.customer.value
+          && saleForm.controls.customer.value.lastDiscountGaveDate
+          && (
+            !saleForm.controls.customer.value.lastDiscountUsedDate
+            || saleForm.controls.customer.value.lastDiscountGaveDate.getTime() > saleForm.controls.customer.value.lastDiscountUsedDate.getTime()
+          )"
+        formControlName="isFidelityDiscount"
+        (change)="switchFidelityDiscount($event.checked)"
+      >
+        Remise fidélité
+      </mat-checkbox>
+    </div>
+
+    <div class="payment">
+      <div>
+        <mat-form-field>
+          <input
+            appNumeric
+            [decimals]='2'
+            matInput
+            type="text"
+            formControlName="cashTotal"
+            (change)="saleForm.get('cashTotal').setValue(toNumber($event.target.value))"
+            placeholder="Liquide"
+          >
+        </mat-form-field>
+        <button mat-raised-button color="accent" (click)="selectPaymentMethod(PaymentMethod.cash)"><mat-icon>money</mat-icon></button>
+      </div>
+      <div>
+        <mat-form-field>
+          <input
+            appNumeric
+            [decimals]='2'
+            matInput
+            type="text"
+            formControlName="cardTotal"
+            (change)="saleForm.get('cardTotal').setValue(toNumber($event.target.value))"
+            placeholder="Carte"
+          >
+        </mat-form-field>
+        <button mat-raised-button color="accent" (click)="selectPaymentMethod(PaymentMethod.card)"><mat-icon>credit_card</mat-icon></button>
+      </div>
+      <div>
+        <mat-form-field>
+          <input
+            appNumeric
+            [decimals]='2'
+            matInput
+            type="text"
+            formControlName="checkTotal"
+            (change)="saleForm.get('checkTotal').setValue(toNumber($event.target.value))"
+            placeholder="Chèque"
+          >
+        </mat-form-field>
+        <button mat-raised-button color="accent" (click)="selectPaymentMethod(PaymentMethod.check)"><mat-icon>source</mat-icon></button>
+      </div>
+      <div>
+        <mat-form-field>
+          <input
+            appNumeric
+            [decimals]='2'
+            matInput
+            type="text"
+            formControlName="creditTotal"
+            (change)="saleForm.get('creditTotal').setValue(toNumber($event.target.value))"
+            placeholder="Avoir"
+          >
+        </mat-form-field>
+        <button mat-raised-button color="accent" (click)="selectPaymentMethod(PaymentMethod.credit)"><mat-icon>pan_tool</mat-icon></button>
+      </div>
+    </div>
+  </form>
+  <mat-error *ngIf="errorMessage">{{ errorMessage }}</mat-error>
+</mat-dialog-content>
+<mat-dialog-actions align="end">
+  <button mat-raised-button mat-dialog-close>Annuler</button>
+  <button mat-raised-button color="accent" (click)="pay()" cdkFocusInitial>Valider</button>
+</mat-dialog-actions>

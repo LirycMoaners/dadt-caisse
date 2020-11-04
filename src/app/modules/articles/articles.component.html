@@ -1,0 +1,76 @@
+<div class="header">
+  <mat-form-field>
+    <mat-label>Rechercher</mat-label>
+    <input matInput (keyup)="applyFilter($event)" placeholder="Ex. REF1">
+    <mat-icon matSuffix>search</mat-icon>
+  </mat-form-field>
+
+  <div class="add">
+    <button mat-raised-button (click)="addArticle()">+ Ajouter</button>
+  </div>
+</div>
+
+<div class="container">
+  <mat-table [dataSource]="dataSource" matSort>
+    <!-- Reference Column -->
+    <ng-container matColumnDef="reference">
+      <mat-header-cell *matHeaderCellDef mat-sort-header class="mat-column-reference"> Référence </mat-header-cell>
+      <mat-cell *matCellDef="let element" class="mat-column-reference">
+        {{element.reference}}
+      </mat-cell>
+    </ng-container>
+
+    <!-- Label Column -->
+    <ng-container matColumnDef="label">
+      <mat-header-cell *matHeaderCellDef mat-sort-header> Libellé </mat-header-cell>
+      <mat-cell *matCellDef="let element"> {{element.label}} </mat-cell>
+    </ng-container>
+
+    <!-- Category Column -->
+    <ng-container matColumnDef="category">
+      <mat-header-cell *matHeaderCellDef mat-sort-header> Catégorie </mat-header-cell>
+      <mat-cell *matCellDef="let element"> {{element.categoryId | articleCategoryLabel | async}} </mat-cell>
+    </ng-container>
+
+    <!-- Buy Price Column -->
+    <ng-container matColumnDef="buyPrice">
+      <mat-header-cell *matHeaderCellDef mat-sort-header class="mat-column-buy-price"> Prix d'achat </mat-header-cell>
+      <mat-cell *matCellDef="let element" class="mat-column-buy-price"> {{element.buyPrice | currency:'EUR'}} </mat-cell>
+    </ng-container>
+
+    <!-- Sell Price Column -->
+    <ng-container matColumnDef="sellPrice">
+      <mat-header-cell *matHeaderCellDef mat-sort-header class="mat-column-sell-price"> Prix de vente </mat-header-cell>
+      <mat-cell *matCellDef="let element" class="mat-column-sell-price"> {{element.sellPrice | currency:'EUR'}} </mat-cell>
+    </ng-container>
+
+    <!-- Quantity Column -->
+    <ng-container matColumnDef="quantity">
+      <mat-header-cell *matHeaderCellDef mat-sort-header class="mat-column-quantity"> Quantité </mat-header-cell>
+      <mat-cell *matCellDef="let element" class="mat-column-quantity"> {{element.quantity}} </mat-cell>
+    </ng-container>
+
+    <!-- Actions Column -->
+    <ng-container matColumnDef="actions" stickyEnd>
+      <mat-header-cell *matHeaderCellDef class="mat-column-actions"> Actions </mat-header-cell>
+      <mat-cell *matCellDef="let element" class="mat-column-actions">
+        <button mat-icon-button (click)="editArticle(element)"><mat-icon>edit</mat-icon></button>
+        <button mat-icon-button (click)="deleteArticle(element)"><mat-icon>delete</mat-icon></button>
+      </mat-cell>
+    </ng-container>
+
+    <mat-header-row *matHeaderRowDef="displayedColumns; sticky: true"></mat-header-row>
+    <mat-row *matRowDef="let row; columns: displayedColumns;"></mat-row>
+  </mat-table>
+</div>
+
+<div class="footer">
+  <button mat-raised-button (click)="exportInventory()">
+    Inventaire Complet
+    <mat-icon>print</mat-icon>
+  </button>
+  <button *ngFor="let articleCategory of articleCategories" mat-raised-button (click)="exportInventory(articleCategory)">
+    Inventaire {{ articleCategory.label }}
+    <mat-icon>print</mat-icon>
+  </button>
+</div>

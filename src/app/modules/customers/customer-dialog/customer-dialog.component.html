@@ -1,0 +1,36 @@
+<h2 mat-dialog-title>{{ title }}</h2>
+<mat-dialog-content class="mat-typography">
+  <form [formGroup]="customerFormGroup">
+    <p class="names">
+      <mat-form-field>
+        <mat-label>Nom</mat-label>
+        <input matInput formControlName="firstName" required>
+      </mat-form-field>
+      <mat-form-field>
+        <mat-label>Prénom</mat-label>
+        <input matInput formControlName="lastName" required>
+      </mat-form-field>
+    </p>
+    <p>
+      <mat-form-field>
+        <mat-label>Email</mat-label>
+        <mat-icon matSuffix>email</mat-icon>
+        <input matInput type="email" formControlName="emailAddress">
+      </mat-form-field>
+      <mat-form-field>
+        <mat-label>Téléphone</mat-label>
+        <mat-icon matSuffix>phone</mat-icon>
+        <input matInput type="tel" formControlName="phoneNumber">
+      </mat-form-field>
+    </p>
+    <mat-form-field>
+      <mat-label>Points</mat-label>
+      <mat-icon matSuffix>loyalty</mat-icon>
+      <input matInput type="number" formControlName="loyaltyPoints">
+    </mat-form-field>
+  </form>
+</mat-dialog-content>
+<mat-dialog-actions align="end">
+  <button mat-raised-button mat-dialog-close>Annuler</button>
+  <button mat-raised-button cdkFocusInitial (click)="validate()" color="accent">Valider</button>
+</mat-dialog-actions>

@@ -1,8 +1,9 @@
+/* To learn more about this file see: https://angular.io/config/tsconfig. */
 {
   "extends": "./tsconfig.json",
   "compilerOptions": {
     "outDir": "./out-tsc/app",
-    "types": []
+    "types": ["node","gapi", "gapi.auth2","gapi.client.people"]
   },
   "files": [
     "src/main.ts",

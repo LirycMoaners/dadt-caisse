@@ -1,0 +1,75 @@
+.header {
+  display: flex;
+
+  h2 {
+    flex: 1;
+  }
+}
+
+.container {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+
+  .articles {
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+
+    .articles-content {
+      overflow: auto;
+      margin-bottom: 15px;
+
+      .mat-table {
+        min-width: 500px;
+
+        .mat-footer-row {
+          border-top-color: rgba(255, 255, 255, 0.12);
+          border-top-width: 1px;
+
+          .saleTotalLabel, .saleTotal, .saleDiscountLabel, .saleDiscount {
+            flex-direction: column;
+            justify-content: center;
+            align-items: flex-start;
+
+            div {
+              height: 49px;
+              line-height: 49px;
+            }
+          }
+        }
+      }
+    }
+  }
+
+  .totals {
+    overflow: auto;
+    flex-shrink: 0;
+
+    .mat-table {
+      min-width: 300px;
+      margin-bottom: 15px;
+
+      .center {
+        justify-content: center;
+      }
+
+      ::ng-deep .mat-form-field-infix {
+        width: auto;
+      }
+    }
+  }
+
+  .actions-content {
+    text-align: center;
+
+    button {
+      margin-right: 10px;
+    }
+  }
+
+  .mat-error {
+    text-align: center;
+  }
+}

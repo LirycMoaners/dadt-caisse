@@ -1,0 +1,29 @@
+.container {
+  overflow: hidden;
+  flex: 1;
+  display: flex;
+
+  app-sales-tree {
+    flex: 1;
+    overflow-y: auto;
+    overflow-x: hidden;
+    min-width: 200px;
+  }
+
+  app-sale-details, .space {
+    flex: 3;
+    padding: 10px;
+    overflow: hidden;
+
+    @media screen {
+      display: flex;
+      flex-direction: column;
+    }
+  }
+}
+
+@media print {
+  app-sales-tree, app-sale-details, .space {
+    display: none;
+  }
+}

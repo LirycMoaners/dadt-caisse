@@ -1,1 +1,66 @@
+
+// Custom Theming for Angular Material
+// For more information: https://material.angular.io/guide/theming
+@import '~@angular/material/theming';
+// Plus imports for other components in your app.
+
+// Include the common styles for Angular Material. We include this here so that you only
+// have to load a single css file for Angular Material in your app.
+// Be sure that you only ever include this mixin once!
+@include mat-core();
+
+// Define the palettes for your theme using the Material Design palettes available in palette.scss
+// (imported above). For each palette, you can optionally specify a default, lighter, and darker
+// hue. Available color palettes: https://material.io/design/color/
+$dadt-caisse-primary: mat-palette($mat-grey, 700);
+$dadt-caisse-accent: mat-palette($mat-grey, 50);
+
+// The warn palette is optional (defaults to red).
+$dadt-caisse-warn: mat-palette($mat-red);
+
+// Create the theme object (a Sass map containing all of the palettes).
+$dadt-caisse-theme: mat-dark-theme($dadt-caisse-primary, $dadt-caisse-accent, $dadt-caisse-warn);
+
+// Include theme styles for core and each component used in your app.
+// Alternatively, you can import and @include the theme mixins for each component
+// that you are using.
+@include angular-material-theme($dadt-caisse-theme);
+
 /* You can add global styles to this file, and also import other style files */
+
+@font-face {
+  font-family: 'Material Icons';
+  font-style: normal;
+  font-weight: 400;
+  src: url('./assets/fonts/flUhRq6tzZclQEJ-Vdg-IuiaDsNc.woff2') format('woff2');
+}
+
+.material-icons {
+  font-family: 'Material Icons';
+  font-weight: normal;
+  font-style: normal;
+  font-size: 24px;
+  line-height: 1;
+  letter-spacing: normal;
+  text-transform: none;
+  display: inline-block;
+  white-space: nowrap;
+  word-wrap: normal;
+  direction: ltr;
+  -webkit-font-feature-settings: 'liga';
+  -webkit-font-smoothing: antialiased;
+}
+
+html, body { height: 100%; }
+body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; }
+
+.list-item-active {
+  font-weight: bold;
+  color: mat-color($dadt-caisse-accent, lighter) !important;
+  background: rgba(255, 255, 255, 0.04);
+}
+
+@page {
+  size:  auto;
+  margin: 0mm;
+}

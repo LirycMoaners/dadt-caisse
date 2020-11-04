@@ -1,0 +1,48 @@
+:host {
+  color: black;
+  display: flex;
+  flex-direction: column;
+  width: 260px;
+  font-size: small;
+
+  @media screen {
+    display: none;
+  }
+}
+
+.header, .articles, .total-container, .payment, .discount-container, .taxe-container, .fidelity {
+  padding: 10px 0;
+}
+
+.header, .articles {
+  border-bottom: 1px solid black;
+}
+
+.duplicata {
+  padding-top: 10px;
+  font-weight: bold;
+}
+
+.row {
+  display: flex;
+
+  &.total {
+    font-weight: bold;
+  }
+
+  div {
+    flex: 2;
+
+    &:last-child:not(.center) {
+      text-align: right;
+    }
+
+    &.small {
+      flex: 1;
+    }
+  }
+}
+
+.center {
+  text-align: center;
+}
