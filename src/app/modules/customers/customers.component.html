@@ -35,7 +35,7 @@
     <!-- Phone Number Column -->
     <ng-container matColumnDef="phoneNumber">
       <mat-header-cell *matHeaderCellDef mat-sort-header> Téléphone </mat-header-cell>
-      <mat-cell *matCellDef="let element"> {{element.phoneNumber | phoneNumber }} </mat-cell>
+      <mat-cell *matCellDef="let element"> {{ element.phoneNumber ? (element.phoneNumber | phoneNumber) : '' }} </mat-cell>
     </ng-container>
 
     <!-- Loyalty Points Column -->
@@ -69,3 +69,4 @@
     <mat-row *matRowDef="let row; columns: displayedColumns;"></mat-row>
   </mat-table>
 </div>
+<mat-paginator [pageSizeOptions]="[100, 200, 500, 1000]"></mat-paginator>
