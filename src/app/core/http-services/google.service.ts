@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { combineLatest, concat, from, Observable, of, ReplaySubject } from 'rxjs';
+import { asyncScheduler, combineLatest, concat, from, Observable, of, ReplaySubject } from 'rxjs';
 import { delay, first, map, mergeMap, takeLast } from 'rxjs/operators';
 import { Customer } from 'src/app/shared/models/customer.model';
 import { CustomerService } from './customer.service';
@@ -155,13 +155,14 @@ export class GoogleService {
           ...customersToAddInFirebase.map(customer => customerService.create(customer, true)),
           ...customersToUpdateInFirebase.map(customer => customerService.update(customer, true)),
           ...customersToAddInGoogle.map(customer => this.createContact(customer).pipe(
+            delay(1000),
             mergeMap(person => {
               customer.resourceName = person.resourceName;
+              customer.etag = person.etag;
               return customerService.update(customer, true);
-            }),
-            delay(500)
+            })
           )),
-          ...customersToUpdateInGoogle.map(customer => this.updateContact(customer).pipe(delay(500)))
+          ...customersToUpdateInGoogle.map(customer => this.updateContact(customer).pipe(delay(1000)))
         );
       }),
       takeLast(1)
@@ -197,11 +198,11 @@ export class GoogleService {
           },
           {
             key: 'Caisse - Dernière remise fidélité donnée',
-            value: customer.lastDiscountGaveDate as string
+            value: customer.lastDiscountGaveDate as string || 'N/A'
           },
           {
             key: 'Caisse - Dernière remise fidélité utilisée',
-            value: customer.lastDiscountUsedDate as string
+            value: customer.lastDiscountUsedDate as string || 'N/A'
           },
           {
             key: 'Caisse - Création',
@@ -213,7 +214,7 @@ export class GoogleService {
           }
         ]
       }
-    })).pipe(
+    }), asyncScheduler).pipe(
       map(result => result.result)
     );
   }

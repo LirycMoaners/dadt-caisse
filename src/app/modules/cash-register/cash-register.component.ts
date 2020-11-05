@@ -52,7 +52,9 @@ export class CashRegisterComponent implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     this.subscriptions.push(
-      this.articleService.getAll().subscribe(articles => this.articles = articles),
+      this.articleService.getAll().subscribe(articles =>
+        this.articles = [...articles].sort((articleA, articleB) => articleA.reference.localeCompare(articleB.reference))
+      ),
       this.settingsService.getSettings().subscribe(settings => this.settings = settings)
     );
 

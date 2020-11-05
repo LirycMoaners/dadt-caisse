@@ -159,10 +159,14 @@ export class SettingsComponent implements OnInit, OnDestroy {
     this.cashOutCategoryService.create({id: '', label: '', createDate: new Date(), updateDate: new Date()}).subscribe();
   }
 
+  public signIn(): void {
+    this.googleSignIn().subscribe();
+  }
+
   /**
    * Enclenche le processus d'authorisation d'accès aux contacts d'un utilisateur Google
    */
-  public googleSignIn(): Observable<void>{
+  private googleSignIn(): Observable<void>{
     return this.googleService.signIn().pipe(
       mergeMap(result => result ? this.googleService.getContactGroupList() : of()),
       map((contactGroups: gapi.client.people.ContactGroup[]) => {

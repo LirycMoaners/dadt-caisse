@@ -16,6 +16,7 @@
 .container {
   overflow: auto;
   flex: 1;
+  will-change: transform;
 
   .mat-table {
     min-width: 650px;

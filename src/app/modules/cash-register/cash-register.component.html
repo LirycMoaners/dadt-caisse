@@ -9,7 +9,7 @@
       [formControl]="articleControl"
       [matAutocomplete]="auto">
     <mat-autocomplete #auto="matAutocomplete" [displayWith]="displayArticle" (optionSelected)="addArticleToSale($event.option.value)">
-      <mat-option *ngFor="let article of filteredArticles | async" [value]="article">
+      <mat-option *ngFor="let article of filteredArticles | async | slice : 0 : 50" [value]="article">
         {{article.reference}} - {{article.label}}
       </mat-option>
     </mat-autocomplete>
