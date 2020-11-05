@@ -14,6 +14,8 @@ import { ArticleCategory } from 'src/app/shared/models/article-category.model';
 import { DatePipe } from '@angular/common';
 import { XlsxTools } from 'src/app/shared/tools/xlsx.tools';
 import { MathTools } from 'src/app/shared/tools/math.tools';
+import as from 'src/assets/secure/article.json';
+import { MatPaginator } from '@angular/material/paginator';
 
 @Component({
   selector: 'app-articles',
@@ -21,6 +23,7 @@ import { MathTools } from 'src/app/shared/tools/math.tools';
   styleUrls: ['./articles.component.scss']
 })
 export class ArticlesComponent implements OnInit, OnDestroy, AfterViewInit {
+  @ViewChild(MatPaginator) paginator: MatPaginator;
   @ViewChild(MatSort) sort: MatSort;
   public dataSource: MatTableDataSource<Article> = new MatTableDataSource();
   public displayedColumns: string[] = ['reference', 'label', 'category', 'buyPrice', 'sellPrice', 'quantity', 'actions'];
@@ -35,9 +38,16 @@ export class ArticlesComponent implements OnInit, OnDestroy, AfterViewInit {
 
   ngOnInit(): void {
     this.subscriptions.push(
-      this.articleService.getAll().subscribe(articles => this.dataSource = new MatTableDataSource(articles)),
+      this.articleService.getAll().subscribe(articles => {
+        this.dataSource = new MatTableDataSource(articles);
+        this.dataSource.paginator = this.paginator;
+      }),
       this.articleCategoryService.getAll().subscribe(articleCategories => this.articleCategories = articleCategories)
     );
+
+    // for (const article of as) {
+    //   this.articleService.create({id: null, ...article, createDate: new Date(article.createDate), updateDate: new Date(article.updateDate)}).subscribe();
+    // }
   }
 
   ngOnDestroy(): void {
@@ -57,6 +67,10 @@ export class ArticlesComponent implements OnInit, OnDestroy, AfterViewInit {
   public applyFilter(event: Event): void {
     const filterValue = (event.target as HTMLInputElement).value;
     this.dataSource.filter = filterValue.trim().toLowerCase();
+
+    if (this.dataSource.paginator) {
+      this.dataSource.paginator.firstPage();
+    }
   }
 
   /**

@@ -63,6 +63,7 @@
     <mat-row *matRowDef="let row; columns: displayedColumns;"></mat-row>
   </mat-table>
 </div>
+<mat-paginator [pageSizeOptions]="[100, 200, 500, 1000]"></mat-paginator>
 
 <div class="footer">
   <button mat-raised-button (click)="exportInventory()">

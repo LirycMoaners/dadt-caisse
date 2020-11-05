@@ -29,7 +29,7 @@
         ></textarea>
       </mat-form-field>
 
-      <mat-form-field *ngIf="contactGroups; else signIn">
+      <mat-form-field *ngIf="contactGroups; else sign">
         <mat-label>Groupe de contact Google</mat-label>
         <mat-select formControlName="contactGroup">
           <mat-option *ngFor="let contactGroup of contactGroups" [value]="contactGroup.resourceName">
@@ -37,9 +37,9 @@
           </mat-option>
         </mat-select>
       </mat-form-field>
-      <ng-template #signIn>
+      <ng-template #sign>
         <div>
-          <button mat-raised-button (click)="googleSignIn()">
+          <button mat-raised-button (click)="signIn()">
             Connexion Google
             <mat-icon>login</mat-icon>
           </button>
