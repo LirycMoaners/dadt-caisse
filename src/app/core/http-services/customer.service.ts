@@ -87,7 +87,7 @@ export class CustomerService extends DatabaseCollectionService<Customer> {
         return this.googleService.createContact(customer).pipe(
           mergeMap(person => {
             customer.resourceName = person.resourceName;
-            customer.etag = person.etag;
+            customer.etag = person.metadata.sources[0].etag;
             return super.create(customer);
           })
         );
@@ -121,7 +121,7 @@ export class CustomerService extends DatabaseCollectionService<Customer> {
         }
         return this.googleService.updateContact(customer).pipe(
           mergeMap(person => {
-            customer.etag = person.etag;
+            customer.etag = person.metadata.sources[0].etag;
             return super.update(customer);
           })
         );

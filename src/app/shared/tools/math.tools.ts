@@ -38,9 +38,23 @@ export class MathTools {
    * @param secondNumber Le deuxième chiffre à multiplier
    */
   public static multiply(firstNumber: number, secondNumber: number): number {
-    const multiplyString = Math.round(Math.round(firstNumber * 100) * Math.round(secondNumber * 100)).toString();
+    let multiplyString = Math.round(Math.round(firstNumber * 100) * Math.round(secondNumber * 100)).toString();
+    const isNegativ = multiplyString.includes('-');
+    if (isNegativ) {
+      multiplyString = multiplyString.replace('-', '');
+    }
+    if (multiplyString.length === 1) {
+      multiplyString = '00000' + multiplyString;
+    } else if (multiplyString.length === 2) {
+      multiplyString = '000' + multiplyString;
+    } else if (multiplyString.length === 3) {
+      multiplyString = '00' + multiplyString;
+    } else if (multiplyString.length === 4) {
+      multiplyString = '0' + multiplyString;
+    }
     return Number(
-      multiplyString.substring(0, multiplyString.length - 4)
+      (isNegativ ? '-' : '')
+      + multiplyString.substring(0, multiplyString.length - 4)
       + '.'
       + multiplyString.substring(multiplyString.length - 4, multiplyString.length - 2)
     );
