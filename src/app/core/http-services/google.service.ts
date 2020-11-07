@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
-import { asyncScheduler, combineLatest, concat, from, Observable, of, ReplaySubject } from 'rxjs';
-import { delay, first, map, mergeMap, takeLast } from 'rxjs/operators';
+import { asyncScheduler, combineLatest, concat, defer, from, Observable, of, ReplaySubject, scheduled } from 'rxjs';
+import { concatAll, concatMap, delay, first, map, mergeMap, takeLast } from 'rxjs/operators';
 import { Customer } from 'src/app/shared/models/customer.model';
 import { CustomerService } from './customer.service';
 import { SettingsService } from './settings.service';
@@ -15,6 +15,7 @@ export class GoogleService {
   private customerService: CustomerService;
   private contactGroup: string;
   private onGapiInit: ReplaySubject<void> = new ReplaySubject(1);
+  private isSynStarted = false;
 
   constructor(
     private readonly settingsService: SettingsService
@@ -36,7 +37,13 @@ export class GoogleService {
           }
           return of();
         }),
-        mergeMap((result) => result ? this.syncContacts(this.customerService) : of()),
+        mergeMap((result) => {
+          if (result && !this.isSynStarted) {
+            this.isSynStarted = true;
+            return this.syncContacts(this.customerService);
+          }
+          return of();
+        }),
       ).subscribe((result) => {
         if (result) {
           subscription.unsubscribe();
@@ -119,7 +126,7 @@ export class GoogleService {
               resourceName: person.resourceName,
               createDate: createDate ? new Date(createDate.value) : new Date(),
               updateDate: updateDate ? new Date(updateDate.value) : new Date(),
-              etag: person.etag
+              etag: person.metadata.sources[0].etag
             };
           });
         })
@@ -135,12 +142,11 @@ export class GoogleService {
         );
         const customersToUpdateInFirebase = googleCustomers.filter(googleCustomer => {
           const customer = firebaseCustomers.find(
-            firebaseCustomer => firebaseCustomer.resourceName === googleCustomer.resourceName
-              && firebaseCustomer.etag !== googleCustomer.etag
+            firebaseCustomer => firebaseCustomer.resourceName
+              && firebaseCustomer.resourceName.localeCompare(googleCustomer.resourceName) === 0
+              && firebaseCustomer.etag
+              && firebaseCustomer.etag.localeCompare(googleCustomer.etag) !== 0
           );
-          if (customer) {
-            googleCustomer.id = customer.id;
-          }
           return !!customer;
         });
         const customersToAddInGoogle = firebaseCustomers.filter(firebaseCustomer =>
@@ -155,14 +161,15 @@ export class GoogleService {
           ...customersToAddInFirebase.map(customer => customerService.create(customer, true)),
           ...customersToUpdateInFirebase.map(customer => customerService.update(customer, true)),
           ...customersToAddInGoogle.map(customer => this.createContact(customer).pipe(
-            delay(1000),
-            mergeMap(person => {
+            concatMap(person => {
               customer.resourceName = person.resourceName;
-              customer.etag = person.etag;
+              customer.etag = person.metadata.sources[0].etag;
               return customerService.update(customer, true);
-            })
+            }),
+            map(t => t),
+            delay(750)
           )),
-          ...customersToUpdateInGoogle.map(customer => this.updateContact(customer).pipe(delay(1000)))
+          ...customersToUpdateInGoogle.map(customer => this.updateContact(customer).pipe(delay(750)))
         );
       }),
       takeLast(1)
@@ -214,7 +221,8 @@ export class GoogleService {
           }
         ]
       }
-    }), asyncScheduler).pipe(
+    })).pipe(
+      first(),
       map(result => result.result)
     );
   }
@@ -224,55 +232,57 @@ export class GoogleService {
    * @param customer Le client à mettre à jour
    */
   public updateContact(customer: Customer): Observable<gapi.client.people.Person> {
-    return from(gapi.client.people.people.get({
+    return defer(() => gapi.client.people.people.get({
       resourceName: customer.resourceName,
       personFields: 'metadata'
     })).pipe(
-      mergeMap(person => gapi.client.people.people.updateContact({
-        resourceName: customer.resourceName,
-        updatePersonFields: 'names,emailAddresses,phoneNumbers,userDefined',
-        resource: {
-          memberships: [{
-            contactGroupMembership: {
-              contactGroupResourceName: this.contactGroup
-            }
-          }],
-          names: [{
-            givenName: customer.firstName,
-            familyName: customer.lastName
-          }],
-          emailAddresses: [{
-            value: customer.emailAddress
-          }],
-          phoneNumbers: [{
-            value: customer.phoneNumber
-          }],
-          userDefined: [
-            {
-              key: 'Caisse - Points',
-              value: customer.loyaltyPoints.toString(),
-            },
-            {
-              key: 'Caisse - Dernière remise fidélité donnée',
-              value: customer.lastDiscountGaveDate ? customer.lastDiscountGaveDate as string : 'N/A'
-            },
-            {
-              key: 'Caisse - Dernière remise fidélité utilisée',
-              value: customer.lastDiscountUsedDate ? customer.lastDiscountUsedDate as string : 'N/A'
-            },
-            {
-              key: 'Caisse - Création',
-              value: (customer.createDate as Date).toJSON(),
-            },
-            {
-              key: 'Caisse - Modification',
-              value: (customer.updateDate as Date).toJSON(),
-            }
-          ],
-          etag: person.result.etag
-        },
+      mergeMap(person => defer(() =>
+        gapi.client.people.people.updateContact({
+          resourceName: customer.resourceName,
+          updatePersonFields: 'names,emailAddresses,phoneNumbers,userDefined',
+          resource: {
+            memberships: [{
+              contactGroupMembership: {
+                contactGroupResourceName: this.contactGroup
+              }
+            }],
+            names: [{
+              givenName: customer.firstName,
+              familyName: customer.lastName
+            }],
+            emailAddresses: [{
+              value: customer.emailAddress
+            }],
+            phoneNumbers: [{
+              value: customer.phoneNumber
+            }],
+            userDefined: [
+              {
+                key: 'Caisse - Points',
+                value: customer.loyaltyPoints.toString(),
+              },
+              {
+                key: 'Caisse - Dernière remise fidélité donnée',
+                value: customer.lastDiscountGaveDate ? customer.lastDiscountGaveDate as string : 'N/A'
+              },
+              {
+                key: 'Caisse - Dernière remise fidélité utilisée',
+                value: customer.lastDiscountUsedDate ? customer.lastDiscountUsedDate as string : 'N/A'
+              },
+              {
+                key: 'Caisse - Création',
+                value: (customer.createDate as Date).toJSON(),
+              },
+              {
+                key: 'Caisse - Modification',
+                value: (customer.updateDate as Date).toJSON(),
+              }
+            ],
+            etag: person.result.etag
+          },
 
-      })),
+        })
+      )),
       map(result => result.result)
     );
   }

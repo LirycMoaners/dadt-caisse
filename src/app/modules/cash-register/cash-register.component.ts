@@ -21,6 +21,7 @@ import { NumberTools } from 'src/app/shared/tools/number.tools';
 import { PrintTools } from 'src/app/shared/tools/print.tools';
 import { SettingsService } from 'src/app/core/http-services/settings.service';
 import { Settings } from 'src/app/shared/models/settings.model';
+import { QuantityDialogComponent } from './quantity-dialog/quantity-dialog.component';
 
 
 @Component({
@@ -89,9 +90,15 @@ export class CashRegisterComponent implements OnInit, OnDestroy {
    * @param article L'article à ajouter
    */
   public addArticleToSale(article: Article): void {
-    this.dataSource.data.push(new SaleArticle(article));
-    this.dataSource._updateChangeSubscription();
-    this.articleControl.reset();
+    const dialogRef = this.dialog.open(QuantityDialogComponent);
+
+    dialogRef.afterClosed().subscribe((quantity: number) => {
+      const articleToAdd = {...article};
+      articleToAdd.quantity = quantity || 1;
+      this.dataSource.data.push(new SaleArticle(articleToAdd));
+      this.dataSource._updateChangeSubscription();
+      this.articleControl.reset();
+    });
   }
 
   /**
@@ -228,7 +235,20 @@ export class CashRegisterComponent implements OnInit, OnDestroy {
     return this.articles.filter(article =>
       article.reference.toLowerCase().includes(filterValue)
       || article.label.toLowerCase().includes(filterValue)
-    );
+    ).sort((articleA, articleB) => {
+      if (
+        (articleA.reference.startsWith(value) || articleA.label.startsWith(value))
+        && !articleB.reference.startsWith(value) && !articleB.label.startsWith(value)
+      ) {
+        return -1;
+      } else if (
+        !articleA.reference.startsWith(value) && !articleA.label.startsWith(value)
+        && (articleB.reference.startsWith(value) || articleB.label.startsWith(value))
+      ) {
+        return 1;
+      }
+      return articleA.reference.localeCompare(articleB.reference);
+    });
   }
 
   /**
