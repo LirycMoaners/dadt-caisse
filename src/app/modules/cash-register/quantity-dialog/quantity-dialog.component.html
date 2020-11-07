@@ -1,0 +1,18 @@
+<h1 mat-dialog-title>Quantité</h1>
+<mat-dialog-content>
+  <mat-form-field>
+    <mat-label>Quantité</mat-label>
+    <input
+      appNumeric
+      [decimals]="0"
+      matInput
+      type="text"
+      [ngModel]="quantity"
+      (change)="quantity = toNumber($event.target.value)"
+      cdkFocusInitial
+    >
+  </mat-form-field>
+</mat-dialog-content>
+<mat-dialog-actions align="end">
+  <button mat-raised-button color="accent" (click)="close()" cdkFocusRegionEnd>Valider</button>
+</mat-dialog-actions>

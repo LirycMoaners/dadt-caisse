@@ -1,6 +1,6 @@
-import { Component, OnInit, AfterViewInit, ViewChild, OnDestroy } from '@angular/core';
+import { Component, OnInit, AfterViewInit, ViewChild, OnDestroy, ElementRef } from '@angular/core';
 import { MatSort } from '@angular/material/sort';
-import { MatTableDataSource } from '@angular/material/table';
+import { MatTable, MatTableDataSource } from '@angular/material/table';
 import { MatDialog } from '@angular/material/dialog';
 import { of, Subscription } from 'rxjs';
 import { mergeMap } from 'rxjs/operators';
@@ -14,7 +14,6 @@ import { ArticleCategory } from 'src/app/shared/models/article-category.model';
 import { DatePipe } from '@angular/common';
 import { XlsxTools } from 'src/app/shared/tools/xlsx.tools';
 import { MathTools } from 'src/app/shared/tools/math.tools';
-import as from 'src/assets/secure/article.json';
 import { MatPaginator } from '@angular/material/paginator';
 
 @Component({
@@ -25,6 +24,7 @@ import { MatPaginator } from '@angular/material/paginator';
 export class ArticlesComponent implements OnInit, OnDestroy, AfterViewInit {
   @ViewChild(MatPaginator) paginator: MatPaginator;
   @ViewChild(MatSort) sort: MatSort;
+  @ViewChild(MatTable, {read: ElementRef}) table: ElementRef;
   public dataSource: MatTableDataSource<Article> = new MatTableDataSource();
   public displayedColumns: string[] = ['reference', 'label', 'category', 'buyPrice', 'sellPrice', 'quantity', 'actions'];
   public articleCategories: ArticleCategory[] = [];
@@ -39,15 +39,14 @@ export class ArticlesComponent implements OnInit, OnDestroy, AfterViewInit {
   ngOnInit(): void {
     this.subscriptions.push(
       this.articleService.getAll().subscribe(articles => {
-        this.dataSource = new MatTableDataSource(articles);
+        this.dataSource = new MatTableDataSource(
+          [...articles].sort((articleA, articleB) => articleA.reference.localeCompare(articleB.reference))
+        );
         this.dataSource.paginator = this.paginator;
+        this.paginator.page.subscribe(() => this.table.nativeElement.scrollIntoView(true));
       }),
       this.articleCategoryService.getAll().subscribe(articleCategories => this.articleCategories = articleCategories)
     );
-
-    // for (const article of as) {
-    //   this.articleService.create({id: null, ...article, createDate: new Date(article.createDate), updateDate: new Date(article.updateDate)}).subscribe();
-    // }
   }
 
   ngOnDestroy(): void {

@@ -1,5 +1,5 @@
-import { Component, OnInit, ViewChild, AfterViewInit } from '@angular/core';
-import { MatTableDataSource } from '@angular/material/table';
+import { Component, OnInit, ViewChild, AfterViewInit, ElementRef } from '@angular/core';
+import { MatTable, MatTableDataSource } from '@angular/material/table';
 import { MatSort } from '@angular/material/sort';
 import { MatDialog } from '@angular/material/dialog';
 import { of } from 'rxjs';
@@ -9,7 +9,6 @@ import { CustomerService } from 'src/app/core/http-services/customer.service';
 import { Customer } from 'src/app/shared/models/customer.model';
 import { CustomerDialogComponent } from './customer-dialog/customer-dialog.component';
 import { MatPaginator } from '@angular/material/paginator';
-import c from 'src/assets/secure/customer.json';
 
 @Component({
   selector: 'app-customers',
@@ -19,6 +18,7 @@ import c from 'src/assets/secure/customer.json';
 export class CustomersComponent implements OnInit, AfterViewInit {
   @ViewChild(MatPaginator) paginator: MatPaginator;
   @ViewChild(MatSort) sort: MatSort;
+  @ViewChild(MatTable, {read: ElementRef}) table: ElementRef;
   public dataSource: MatTableDataSource<Customer> = new MatTableDataSource();
   public displayedColumns: string[] = ['firstName', 'lastName', 'emailAddress', 'phoneNumber', 'loyaltyPoints', 'lastDiscountGaveDate', 'lastDiscountUsedDate', 'actions'];
 
@@ -29,23 +29,18 @@ export class CustomersComponent implements OnInit, AfterViewInit {
 
   ngOnInit(): void {
     this.customerService.getAll().subscribe(customers => {
-      this.dataSource = new MatTableDataSource(customers);
+      this.dataSource = new MatTableDataSource(
+        [...customers].sort((customerA, customerB) => {
+          let result = customerA.firstName.localeCompare(customerB.firstName);
+          if (result === 0) {
+            result = customerA.lastName.localeCompare(customerB.lastName);
+          }
+          return result;
+        })
+      );
       this.dataSource.paginator = this.paginator;
+      this.paginator.page.subscribe(() => this.table.nativeElement.scrollIntoView(true));
     });
-
-    // for (const customer of c) {
-    //   this.customerService.create({
-    //     id: null,
-    //     ...customer,
-    //     phoneNumber: customer.phoneNumber ? customer.phoneNumber : null,
-    //     emailAddress: null,
-    //     lastDiscountGaveDate: null,
-    //     lastDiscountUsedDate: null,
-    //     resourceName: null,
-    //     createDate: new Date('2020-11-05T19:00:00.000Z'),
-    //     updateDate: new Date('2020-11-05T19:00:00.000Z')
-    //   }).subscribe();
-    // }
   }
 
   ngAfterViewInit(): void {

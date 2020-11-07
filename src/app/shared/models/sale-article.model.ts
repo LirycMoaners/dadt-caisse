@@ -16,6 +16,6 @@ export class SaleArticle {
     this.label = article.label;
     this.categoryId = article.categoryId;
     this.price = article.sellPrice;
-    this.quantity = 1;
+    this.quantity = article.quantity;
   }
 }
