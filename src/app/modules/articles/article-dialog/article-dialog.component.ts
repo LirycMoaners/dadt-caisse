@@ -6,6 +6,7 @@ import { Subscription } from 'rxjs';
 import { Article } from 'src/app/shared/models/article.model';
 import { ArticleCategoryService } from 'src/app/core/http-services/article-category.service';
 import { ArticleCategory } from 'src/app/shared/models/article-category.model';
+import { NumberTools } from 'src/app/shared/tools/number.tools';
 
 @Component({
   selector: 'app-article-dialog',
@@ -16,7 +17,7 @@ export class ArticleDialogComponent implements OnInit, OnDestroy {
   public title = '';
   public articleFormGroup: FormGroup;
   public categories: ArticleCategory[] = [];
-  private subscription: Subscription;
+  private subscriptions: Subscription[] = [];
 
   constructor(
     private readonly ref: MatDialogRef<ArticleDialogComponent>,
@@ -30,12 +31,12 @@ export class ArticleDialogComponent implements OnInit, OnDestroy {
       reference: new FormControl(this.article ? this.article.reference : '', Validators.required),
       label: new FormControl(this.article ? this.article.label : '', Validators.required),
       categoryId: new FormControl(this.article ? this.article.categoryId : '', Validators.required),
-      buyPrice: new FormControl(this.article ? this.article.buyPrice : '', Validators.pattern('^[0-9]*([,|\.][0-9]{2})?$')),
-      sellPrice: new FormControl(this.article ? this.article.sellPrice : '', [Validators.required, Validators.pattern('^[0-9]*([,|\.][0-9]{2})?$')]),
-      quantity: new FormControl(this.article ? this.article.quantity : '', [Validators.pattern('^[0-9]*$')]),
+      buyPrice: new FormControl(this.article ? this.article.buyPrice : '', Validators.required),
+      sellPrice: new FormControl(this.article ? this.article.sellPrice : '', Validators.required),
+      quantity: new FormControl(this.article ? this.article.quantity : '', Validators.required),
       createDate: new FormControl(this.article ? this.article.createDate : ''),
       updateDate: new FormControl(this.article ? this.article.updateDate : '')
-    });
+    }, {updateOn: 'blur'});
 
     if (this.article) {
       this.title = 'Edition d\'article';
@@ -44,11 +45,24 @@ export class ArticleDialogComponent implements OnInit, OnDestroy {
       this.title = 'Ajout d\'article';
     }
 
-    this.subscription = this.categoryService.getAll().subscribe(categories => this.categories = categories);
+    this.subscriptions.push(
+      this.categoryService.getAll().subscribe(categories => this.categories = categories),
+      this.articleFormGroup.get('buyPrice').valueChanges.subscribe(value =>
+        typeof value === 'string' ? this.articleFormGroup.get('buyPrice').setValue(this.toNumber(value)) : null
+      ),
+      this.articleFormGroup.get('sellPrice').valueChanges.subscribe(value =>
+        typeof value === 'string' ? this.articleFormGroup.get('sellPrice').setValue(this.toNumber(value)) : null
+      ),
+      this.articleFormGroup.get('quantity').valueChanges.subscribe(value =>
+        typeof value === 'string' ? this.articleFormGroup.get('quantity').setValue(this.toNumber(value)) : null
+      )
+    );
   }
 
   ngOnDestroy(): void {
-    this.subscription.unsubscribe();
+    for (const subscription of this.subscriptions) {
+      subscription.unsubscribe();
+    }
   }
 
   /**
@@ -66,6 +80,13 @@ export class ArticleDialogComponent implements OnInit, OnDestroy {
     } else {
       this.articleFormGroup.markAllAsTouched();
     }
+  }
+
+  /**
+   * Fait appel à la méthode outils de conversion d'une chaine en nombre
+   */
+  public toNumber(value: string): number {
+    return NumberTools.toNumber(value);
   }
 
 }
