@@ -73,7 +73,7 @@
           <td></td>
           <td>{{ getSaleTotalBeforeDiscount() | currency:'EUR' }}</td>
         </tr>
-        <tr>
+        <tr class="bottom">
           <td>Total</td>
           <td></td>
           <td></td>
@@ -101,7 +101,7 @@
           <td>{{ settings.taxeRate }} %</td>
         </tr>
         <tr>
-          <td></td>
+          <td>{{ getPayementMethods() }}</td>
           <td></td>
           <td></td>
           <td></td>
