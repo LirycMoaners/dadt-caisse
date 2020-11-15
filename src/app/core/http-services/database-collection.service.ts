@@ -54,15 +54,15 @@ export class DatabaseCollectionService<T extends DatabaseObject> {
    * @param customer La donnée à ajouter
    */
   public create(data: T): Observable<T> {
-    data.id = null;
-    data.createDate = (data.createDate as Date).toJSON();
-    data.updateDate = (data.updateDate as Date).toJSON();
-    const newDataRef = this.datasRef.push(data);
+    const dataToCreate = {...data};
+    dataToCreate.createDate = (dataToCreate.createDate as Date).toJSON();
+    dataToCreate.updateDate = (dataToCreate.updateDate as Date).toJSON();
+    const newDataRef = this.datasRef.push(dataToCreate);
     return from(newDataRef).pipe(
       mergeMap(() => {
-        data.id = newDataRef.key;
-        data.createDate = new Date(data.createDate);
-        data.updateDate = new Date(data.updateDate);
+        dataToCreate.id = newDataRef.key;
+        dataToCreate.createDate = new Date(data.createDate);
+        dataToCreate.updateDate = new Date(data.updateDate);
         return of(data);
       })
     );
@@ -73,16 +73,14 @@ export class DatabaseCollectionService<T extends DatabaseObject> {
    * @param customer La donnée mise à jour
    */
   public update(data: T): Observable<T> {
-    const id = data.id;
-    data.id = null;
-    data.createDate = (data.createDate as Date).toJSON();
-    data.updateDate = (data.updateDate as Date).toJSON();
-    return from(this.datasRef.update(id, data)).pipe(
+    const dataToUpdate = {...data};
+    dataToUpdate.id = null;
+    dataToUpdate.createDate = (dataToUpdate.createDate as Date).toJSON();
+    dataToUpdate.updateDate = (dataToUpdate.updateDate as Date).toJSON();
+    return from(this.datasRef.update(data.id, dataToUpdate)).pipe(
       mergeMap(() => {
-        data.id = id;
-        data.createDate = new Date(data.createDate);
-        data.updateDate = new Date(data.updateDate);
-        return of(data);
+        dataToUpdate.updateDate = new Date(data.updateDate);
+        return of(dataToUpdate);
       })
     );
   }
