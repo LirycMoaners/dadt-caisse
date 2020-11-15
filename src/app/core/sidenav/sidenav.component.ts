@@ -10,6 +10,7 @@ import { Sale } from 'src/app/shared/models/sale.model';
 import { DatePipe } from '@angular/common';
 import { CustomerService } from '../http-services/customer.service';
 import { GoogleService } from '../http-services/google.service';
+import { MathTools } from 'src/app/shared/tools/math.tools';
 
 @Component({
   selector: 'app-sidenav',
@@ -53,7 +54,7 @@ export class SidenavComponent implements OnInit, OnDestroy {
       ).subscribe((sales: Sale[]) => {
         if (!!sales) {
           this.dayTotal = sales.filter(sale => datePipe.transform(sale.createDate, 'dd/MM/yyyy') === datePipe.transform(new Date(), 'dd/MM/yyyy'))
-            .reduce((total, sale) => total + sale.total, 0) + ' €';
+            .reduce((total, sale) => MathTools.sum(total, sale.total), 0) + ' €';
         }
       })
     );
