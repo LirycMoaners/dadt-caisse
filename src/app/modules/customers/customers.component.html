@@ -34,8 +34,8 @@
 
     <!-- Phone Number Column -->
     <ng-container matColumnDef="phoneNumber">
-      <mat-header-cell *matHeaderCellDef mat-sort-header> Téléphone </mat-header-cell>
-      <mat-cell *matCellDef="let element"> {{ element.phoneNumber ? (element.phoneNumber | phoneNumber) : '' }} </mat-cell>
+      <mat-header-cell *matHeaderCellDef mat-sort-header class="mat-column-phone"> Téléphone </mat-header-cell>
+      <mat-cell *matCellDef="let element" class="mat-column-phone"> {{ element.phoneNumber ? (element.phoneNumber | phoneNumber) : '' }} </mat-cell>
     </ng-container>
 
     <!-- Loyalty Points Column -->
