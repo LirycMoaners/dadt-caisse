@@ -7,9 +7,16 @@
       aria-label="Référence"
       matInput
       [formControl]="articleControl"
-      [matAutocomplete]="auto">
-    <mat-autocomplete #auto="matAutocomplete" [displayWith]="displayArticle" (optionSelected)="addArticleToSale($event.option.value)">
-      <mat-option *ngFor="let article of filteredArticles | async | slice : 0 : 50" [value]="article">
+      [matAutocomplete]="auto"
+      (click)="searchedArticleInput.select()"
+    >
+    <mat-autocomplete
+      #auto="matAutocomplete"
+      [displayWith]="displayArticle"
+      (optionSelected)="addArticleToSale($event.option.value, searchedArticleInput)"
+      [autoActiveFirstOption]="true"
+    >
+      <mat-option *ngFor="let article of filteredArticles$ | async | slice : 0 : 50" [value]="article">
         {{article.reference}} - {{article.label}}
       </mat-option>
     </mat-autocomplete>
@@ -128,7 +135,12 @@
         <button mat-icon-button (click)="deleteSaleArticle(element)"><mat-icon>delete</mat-icon></button>
       </mat-cell>
       <mat-footer-cell *matFooterCellDef class="mat-column-actions">
-        <button mat-raised-button color="accent" [disabled]="dataSource.data.length === 0" (click)="pay()">
+        <button
+          mat-raised-button
+          color="accent"
+          [disabled]="dataSource.data.length === 0"
+          (click)="pay()"
+        >
           Paiement
           <mat-icon>payments</mat-icon>
         </button>
