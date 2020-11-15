@@ -25,7 +25,7 @@ export class QuantityDialogComponent implements OnInit {
   }
 
   public close(): void {
-    if (this.quantity > 0) {
+    if (this.quantity !== 0) {
       this.dialogRef.close(this.quantity);
     }
   }
