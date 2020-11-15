@@ -14,14 +14,14 @@ export class NumericDirective {
    */
   private check(value: string): RegExpMatchArray {
       if (this.decimals <= 0) {
-          return String(value).match(new RegExp(/^\d+$/));
+          return String(value).match(new RegExp(/^-?\d?$/));
       } else {
           const regExpString =
-              '^\\s*((\\d+([\\.|\\,]\\d{0,' +
+              '^\\s*((-?\\d+([\\.|\\,]\\d{0,' +
               this.decimals +
-              '})?)|((\\d*([\\.|\\,]\\d{1,' +
+              '})?)|(-?\\d*([\\.|\\,]\\d{1,' +
               this.decimals +
-              '}))))\\s*$';
+              '})?))\\s*$';
           return String(value).match(new RegExp(regExpString));
       }
   }

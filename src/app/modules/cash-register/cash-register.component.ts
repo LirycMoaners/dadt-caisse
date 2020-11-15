@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy, ComponentFactoryResolver, ComponentRef, ViewContainerRef, NgZone } from '@angular/core';
+import { Component, OnInit, OnDestroy, ComponentFactoryResolver, ComponentRef, ViewContainerRef, NgZone, ElementRef } from '@angular/core';
 import { FormControl } from '@angular/forms';
 import { MatTableDataSource } from '@angular/material/table';
 import { MatDialog, MatDialogRef } from '@angular/material/dialog';
@@ -34,8 +34,10 @@ export class CashRegisterComponent implements OnInit, OnDestroy {
   public displayedColumns: string[] = ['reference', 'label', 'category', 'price', 'quantity', 'totalBeforeDiscount', 'discount', 'discountType', 'total', 'actions'];
   public articleControl = new FormControl();
   public articles: Article[] = [];
-  public filteredArticles: Observable<Article[]>;
+  public filteredArticles$: Observable<Article[]>;
   public lastSale: Sale;
+  private lastSearchInputValue: string;
+  private filteredArticles: Article[];
   private componentRef: ComponentRef<TicketComponent | BillComponent>;
   private settings: Settings;
   private readonly subscriptions: Subscription[] = [];
@@ -59,9 +61,15 @@ export class CashRegisterComponent implements OnInit, OnDestroy {
       this.settingsService.getSettings().subscribe(settings => this.settings = settings)
     );
 
-    this.filteredArticles = this.articleControl.valueChanges.pipe(
+    this.filteredArticles$ = this.articleControl.valueChanges.pipe(
       startWith(''),
-      map(value => this._filter(value))
+      map(value => {
+        if (typeof value === 'string') {
+          this.lastSearchInputValue = value;
+          this.filteredArticles = this._filter(value);
+        }
+        return this.filteredArticles;
+      })
     );
 
     this.saleService.currentSaleArticles$.pipe(first()).subscribe(saleArticles => this.dataSource = new MatTableDataSource(saleArticles));
@@ -89,7 +97,9 @@ export class CashRegisterComponent implements OnInit, OnDestroy {
    * Ajoute l'article à la vente en cours
    * @param article L'article à ajouter
    */
-  public addArticleToSale(article: Article): void {
+  public addArticleToSale(article: Article, input: HTMLInputElement): void {
+    input.blur();
+    input.value = this.lastSearchInputValue;
     const dialogRef = this.dialog.open(QuantityDialogComponent);
 
     dialogRef.afterClosed().subscribe((quantity: number) => {
@@ -97,7 +107,6 @@ export class CashRegisterComponent implements OnInit, OnDestroy {
       articleToAdd.quantity = quantity || 1;
       this.dataSource.data.push(new SaleArticle(articleToAdd));
       this.dataSource._updateChangeSubscription();
-      this.articleControl.reset();
     });
   }
 
@@ -158,6 +167,7 @@ export class CashRegisterComponent implements OnInit, OnDestroy {
             ...savedSale.articles.map(saleArticle => {
               const article = this.articles.find(a => a.id === saleArticle.id);
               article.quantity -= saleArticle.quantity;
+              article.updateDate = new Date();
               return this.articleService.update(article);
             }),
             savedSale.customer

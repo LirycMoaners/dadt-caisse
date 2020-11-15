@@ -124,10 +124,10 @@ export class PaymentDialogComponent implements OnInit, OnDestroy {
         discount: this.saleForm.controls.discount.value,
         discountType: this.saleForm.controls.discountType.value,
         total: this.getTotal(),
-        cashTotal: this.sale.cashTotal || 0,
-        cardTotal: this.sale.cardTotal || 0,
-        checkTotal: this.sale.checkTotal || 0,
-        creditTotal: this.sale.creditTotal || 0
+        cashTotal: this.saleForm.controls.cashTotal.value || 0,
+        cardTotal: this.saleForm.controls.cardTotal.value || 0,
+        checkTotal: this.saleForm.controls.checkTotal.value || 0,
+        creditTotal: this.saleForm.controls.creditTotal.value || 0
       };
       this.dialogRef.close(this.sale);
     } else {

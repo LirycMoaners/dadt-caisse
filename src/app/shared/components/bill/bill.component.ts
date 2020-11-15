@@ -41,4 +41,27 @@ export class BillComponent implements OnInit {
     return SaleTools.getSaleTotalBeforeTaxe(this.sale, this.settings);
   }
 
+  public getPayementMethods(): string {
+    return Object.keys(this.sale).reduce((result, key) => {
+      if (this.sale[key]) {
+        switch (key) {
+          case 'cardTotal':
+            result += result ? ', carte' : 'Payé par carte';
+            break;
+          case 'checkTotal':
+            result += result ? ', chèque' : 'Payé par chèque';
+            break;
+          case 'cashTotal':
+            result += result ? ', espèces' : 'Payé en espèces';
+            break;
+          case 'creditTotal':
+            result += result ? ', avoir' : 'Payé par avoir';
+            break;
+          default:
+        }
+      }
+      return result;
+    }, '');
+  }
+
 }
