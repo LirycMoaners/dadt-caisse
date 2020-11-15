@@ -110,7 +110,15 @@ export class CashLogPrintDialogComponent implements OnInit {
       if (dataByMonth.length === 0 || date.getMonth() !== lastDate.getMonth()) {
         dataByMonth.push({label: this.datePipe.transform(date, 'MMMM yyyy'), dataByDay: []});
       }
-      const data = this.getDataOnDate(lastBalance, date, sales, cashOuts, articleCategories, cashOutCategories);
+      const data = this.getDataOnDate(
+        lastBalance,
+        date,
+        dataByMonth[dataByMonth.length - 1].dataByDay.length,
+        sales,
+        cashOuts,
+        articleCategories,
+        cashOutCategories
+      );
       lastBalance = data.solde.result;
       dataByMonth[dataByMonth.length - 1].dataByDay.push(data);
       lastDate = new Date(date);
@@ -130,6 +138,7 @@ export class CashLogPrintDialogComponent implements OnInit {
   private getDataOnDate(
     balance: number,
     date: Date,
+    index: number,
     sales: Sale[],
     cashOuts: CashOut[],
     articleCategories: ArticleCategory[],
@@ -144,13 +153,13 @@ export class CashLogPrintDialogComponent implements OnInit {
     return {
       date: new Date(date),
       ...articleCategoryTotals,
-      total: this.getTotal(sales, date, articleCategories),
+      total: this.getTotal(sales, date, articleCategories, index),
       cartes: cardTotal || null,
       chèques: checkTotal || null,
       espèces: cashTotal || null,
       avoir: creditTotal || null,
       ...cashOutTotals,
-      solde: this.getBalance(balance, cashTotal, date, cashOutTotals, articleCategories, cashOutCategories)
+      solde: this.getBalance(balance, cashTotal, index, cashOutTotals, articleCategories, cashOutCategories)
     };
   }
 
@@ -199,18 +208,21 @@ export class CashLogPrintDialogComponent implements OnInit {
                 stringTotal.substring(0, stringTotal.length - 2) + '.' + stringTotal.substring(stringTotal.length - 2, stringTotal.length)
               );
             }
-            if (dataLine[articleCategoryTotal]) {
-              dataLine[articleCategoryTotal] = MathTools.sum(dataLine[articleCategoryTotal], saleLine[articleCategoryTotal]);
-            } else {
-              dataLine[articleCategoryTotal] = saleLine[articleCategoryTotal];
-            }
-            totalToCompare = MathTools.sum(totalToCompare, dataLine[articleCategoryTotal]);
+            totalToCompare = MathTools.sum(totalToCompare, saleLine[articleCategoryTotal]);
           }
         }
 
         if (totalToCompare !== sale.total) {
-          const dataLineKey = Object.keys(saleLine).find(key => !!dataLine[key]);
-          dataLine[dataLineKey] = MathTools.sum(dataLine[dataLineKey], MathTools.sum(sale.total, -totalToCompare));
+          const saleLineKey = Object.keys(saleLine).find(key => !!saleLine[key]);
+          saleLine[saleLineKey] = MathTools.sum(saleLine[saleLineKey], MathTools.sum(sale.total, -totalToCompare));
+        }
+
+        for (const articleCategoryTotal in saleLine) {
+          if (dataLine[articleCategoryTotal]) {
+            dataLine[articleCategoryTotal] = MathTools.sum(dataLine[articleCategoryTotal], saleLine[articleCategoryTotal]);
+          } else {
+            dataLine[articleCategoryTotal] = saleLine[articleCategoryTotal];
+          }
         }
 
         return dataLine;
@@ -228,10 +240,10 @@ export class CashLogPrintDialogComponent implements OnInit {
    * @param date La date concernée par le total
    * @param articleCategories Les catégories d'article
    */
-  private getTotal(sales: Sale[], date: Date, articleCategories: ArticleCategory[]): any {
+  private getTotal(sales: Sale[], date: Date, articleCategories: ArticleCategory[], index: number): any {
     return {
       formula: articleCategories.reduce(
-        (formula, _, index) => formula + '+' + String.fromCharCode(66 + index) + (5 + date.getDate()),
+        (formula, _, i) => formula + '+' + String.fromCharCode(66 + i) + (6 + index),
         ''
       ),
       result: sales
@@ -280,19 +292,19 @@ export class CashLogPrintDialogComponent implements OnInit {
   private getBalance(
     balance: number,
     cashTotal: number,
-    date: Date,
+    index: number,
     cashOutTotals: any,
     articleCategories: ArticleCategory[],
     cashOutCategories: CashOutCategory[]
   ): any {
     return {
       formula: String.fromCharCode(72 + articleCategories.length + cashOutCategories.length)
-        + ((date.getDate() === 1 ? 3 : 4) + date.getDate())
+        + ((index === 0 ? 4 : 5) + index)
         + '+'
         + String.fromCharCode(69 + articleCategories.length)
-        + (5 + date.getDate())
+        + (6 + index)
         + cashOutCategories.reduce(
-          (formula, _, index) => formula + '-' + String.fromCharCode(72 + articleCategories.length + index) + (5 + date.getDate()),
+          (formula, _, i) => formula + '-' + String.fromCharCode(72 + articleCategories.length + i) + (6 + index),
           ''
         ),
       result: Object.keys(cashOutTotals).reduce(
