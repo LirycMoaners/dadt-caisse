@@ -1,6 +1,6 @@
 import { AngularFireDatabase, AngularFireList } from '@angular/fire/database';
 import { from, Observable, of } from 'rxjs';
-import { map, mergeMap } from 'rxjs/operators';
+import { delay, map, mergeMap } from 'rxjs/operators';
 import { DatabaseObject } from 'src/app/shared/models/database-object.model';
 
 export class DatabaseCollectionService<T extends DatabaseObject> {
@@ -18,8 +18,9 @@ export class DatabaseCollectionService<T extends DatabaseObject> {
    */
   public getAll(): Observable<T[]> {
     return this.datasRef.snapshotChanges().pipe(
+      delay(0),
       map(changes => changes.map(c => {
-        const data = {id: c.payload.key, ...c.payload.val()};
+        const data = {...c.payload.val(), id: c.payload.key};
         data.createDate = new Date(data.createDate);
         data.updateDate = new Date(data.updateDate);
         return data;
