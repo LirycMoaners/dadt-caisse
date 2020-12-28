@@ -27,7 +27,7 @@ export class ArticleDialogComponent implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     this.articleFormGroup = new FormGroup({
-      id: new FormControl(this.article ? this.article.id : ''),
+      id: new FormControl(this.article ? this.article.id : null),
       reference: new FormControl(this.article ? this.article.reference : '', Validators.required),
       label: new FormControl(this.article ? this.article.label : '', Validators.required),
       categoryId: new FormControl(this.article ? this.article.categoryId : '', Validators.required),
