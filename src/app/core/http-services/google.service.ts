@@ -147,6 +147,9 @@ export class GoogleService {
               && firebaseCustomer.etag
               && firebaseCustomer.etag.localeCompare(googleCustomer.etag) !== 0
           );
+          if (!!customer) {
+            googleCustomer.id = customer.id;
+          }
           return !!customer;
         });
         const customersToAddInGoogle = firebaseCustomers.filter(firebaseCustomer =>
