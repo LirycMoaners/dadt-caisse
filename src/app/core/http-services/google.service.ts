@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
-import { asyncScheduler, combineLatest, concat, defer, from, Observable, of, ReplaySubject, scheduled } from 'rxjs';
-import { concatAll, concatMap, delay, first, map, mergeMap, takeLast } from 'rxjs/operators';
+import { combineLatest, concat, defer, from, Observable, of, ReplaySubject } from 'rxjs';
+import { concatMap, delay, first, map, mergeMap, takeLast } from 'rxjs/operators';
 import { Customer } from 'src/app/shared/models/customer.model';
 import { CustomerService } from './customer.service';
 import { SettingsService } from './settings.service';

@@ -1,23 +1,18 @@
 import { AngularFireDatabase, AngularFireList } from '@angular/fire/database';
-import { from, Observable, of } from 'rxjs';
+import { from, Observable, of, ReplaySubject } from 'rxjs';
 import { delay, map, mergeMap } from 'rxjs/operators';
 import { DatabaseObject } from 'src/app/shared/models/database-object.model';
 
 export class DatabaseCollectionService<T extends DatabaseObject> {
   private datasRef: AngularFireList<T>;
+  private $datas: ReplaySubject<T[]> = new ReplaySubject(1);
 
   constructor(
     private readonly database: AngularFireDatabase,
     collectionName: string
   ) {
     this.datasRef = this.database.list(collectionName);
-  }
-
-  /**
-   * Retourne le stream des données
-   */
-  public getAll(): Observable<T[]> {
-    return this.datasRef.snapshotChanges().pipe(
+    this.datasRef.snapshotChanges().pipe(
       delay(0),
       map(changes => changes.map(c => {
         const data = {...c.payload.val(), id: c.payload.key};
@@ -25,7 +20,14 @@ export class DatabaseCollectionService<T extends DatabaseObject> {
         data.updateDate = new Date(data.updateDate);
         return data;
       }))
-    );
+    ).subscribe(datas => this.$datas.next(datas));
+  }
+
+  /**
+   * Retourne le stream des données
+   */
+  public getAll(): Observable<T[]> {
+    return this.$datas;
   }
 
 
