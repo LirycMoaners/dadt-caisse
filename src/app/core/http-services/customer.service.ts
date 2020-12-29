@@ -1,20 +1,22 @@
 import { Injectable } from '@angular/core';
 import { Customer } from 'src/app/shared/models/customer.model';
-import { combineLatest, Observable, of } from 'rxjs';
+import { combineLatest, concat, Observable, of } from 'rxjs';
 import { SettingsService } from './settings.service';
-import { first, map, mergeMap } from 'rxjs/operators';
+import { concatMap, delay, first, map, mergeMap } from 'rxjs/operators';
 import { AngularFireDatabase } from '@angular/fire/database';
 import { DatabaseCollectionService } from './database-collection.service';
 import { GoogleService } from './google.service';
+import { AuthenticationService } from './authentication.service';
 
 @Injectable()
 export class CustomerService extends DatabaseCollectionService<Customer> {
   constructor(
     private readonly settingsService: SettingsService,
     database: AngularFireDatabase,
+    authenticationService: AuthenticationService,
     private readonly googleService: GoogleService
   ) {
-    super(database, 'customers');
+    super(database, authenticationService, 'customers');
   }
 
   /**
@@ -155,6 +157,60 @@ export class CustomerService extends DatabaseCollectionService<Customer> {
           super.delete(customer)
         ]).pipe(
           map(() => {})
+        );
+      })
+    );
+  }
+
+  /**
+   * Synchronise les contacts de Google et les clients de Firebase
+   * @param customerService Le service des clients
+   */
+  public syncContactsWithGoogle(): Observable<unknown> {
+    return combineLatest([
+      this.googleService.getAllContact(),
+      this.getAllOneTime()
+    ]).pipe(
+      mergeMap(([googleCustomers, firebaseCustomers]: [Customer[], Customer[]]) => {
+        firebaseCustomers = firebaseCustomers ? firebaseCustomers : [];
+        const customersToAddInFirebase = googleCustomers.filter(
+          googleCustomer => firebaseCustomers.every(
+            firebaseCustomer => firebaseCustomer.resourceName !== googleCustomer.resourceName
+          )
+        );
+        const customersToUpdateInFirebase = googleCustomers.filter(googleCustomer => {
+          const customer = firebaseCustomers.find(
+            firebaseCustomer => firebaseCustomer.resourceName
+              && firebaseCustomer.resourceName.localeCompare(googleCustomer.resourceName) === 0
+              && firebaseCustomer.etag
+              && firebaseCustomer.etag.localeCompare(googleCustomer.etag) !== 0
+          );
+          if (!!customer) {
+            googleCustomer.id = customer.id;
+          }
+          return !!customer;
+        });
+        const customersToAddInGoogle = firebaseCustomers.filter(firebaseCustomer =>
+          !firebaseCustomer.resourceName
+          || googleCustomers.every(googleCustomer => googleCustomer.resourceName !== firebaseCustomer.resourceName)
+        );
+        const customersToUpdateInGoogle = firebaseCustomers.filter(firebaseCustomer => googleCustomers.some(
+          googleCustomer => googleCustomer.resourceName === firebaseCustomer.resourceName
+            && (googleCustomer.updateDate as Date).getTime() < (firebaseCustomer.updateDate as Date).getTime()
+        ));
+        return concat(
+          ...customersToAddInFirebase.map(customer => this.create(customer, true)),
+          ...customersToUpdateInFirebase.map(customer => this.update(customer, true)),
+          ...customersToAddInGoogle.map(customer => this.googleService.createContact(customer).pipe(
+            concatMap(person => {
+              customer.resourceName = person.resourceName;
+              customer.etag = person.metadata.sources[0].etag;
+              return this.update(customer, true);
+            }),
+            map(t => t),
+            delay(750)
+          )),
+          ...customersToUpdateInGoogle.map(customer => this.googleService.updateContact(customer).pipe(delay(750)))
         );
       })
     );
