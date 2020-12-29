@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, ElementRef, OnInit, ViewChild } from '@angular/core';
 import { MatDialogRef } from '@angular/material/dialog';
 import { NumberTools } from 'src/app/shared/tools/number.tools';
 
@@ -8,6 +8,7 @@ import { NumberTools } from 'src/app/shared/tools/number.tools';
   styleUrls: ['./quantity-dialog.component.scss']
 })
 export class QuantityDialogComponent implements OnInit {
+  @ViewChild('quantityInput') quantityInput: ElementRef<HTMLInputElement>;
   public quantity = 1;
 
   constructor(
@@ -15,6 +16,7 @@ export class QuantityDialogComponent implements OnInit {
   ) { }
 
   ngOnInit(): void {
+    setTimeout(() => this.quantityInput.nativeElement.select(), 0);
   }
 
   /**

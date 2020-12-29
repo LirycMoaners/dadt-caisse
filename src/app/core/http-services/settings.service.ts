@@ -1,15 +1,17 @@
 import { Injectable } from '@angular/core';
 import { AngularFireDatabase, AngularFireObject } from '@angular/fire/database';
-import { from, Observable } from 'rxjs';
-import { map } from 'rxjs/operators';
+import { from, Observable, of } from 'rxjs';
+import { map, mergeMap } from 'rxjs/operators';
 import { Settings } from 'src/app/shared/models/settings.model';
+import { AuthenticationService } from './authentication.service';
 
 @Injectable()
 export class SettingsService {
   private settingsRef: AngularFireObject<Settings>;
 
   constructor(
-    private readonly database: AngularFireDatabase
+    private readonly database: AngularFireDatabase,
+    private readonly authenticationService: AuthenticationService
   ) {
     this.settingsRef = this.database.object('settings');
   }
@@ -18,8 +20,9 @@ export class SettingsService {
    * Appel au service de récupération des paramètres de l'application
    */
   public getSettings(): Observable<Settings> {
-    return this.settingsRef.snapshotChanges().pipe(
-      map(c => c.payload.val())
+    return this.authenticationService.user$.pipe(
+      mergeMap((user) => !!user ? this.settingsRef.snapshotChanges() : of(null)),
+      map(c => !!c ? c.payload.val() : null)
     );
   }
 
