@@ -28,19 +28,21 @@ export class CustomersComponent implements OnInit, AfterViewInit {
   ) { }
 
   ngOnInit(): void {
-    this.customerService.getAll().subscribe(customers => {
-      this.dataSource = new MatTableDataSource(
-        [...customers].sort((customerA, customerB) => {
-          let result = customerA.firstName.localeCompare(customerB.firstName);
-          if (result === 0) {
-            result = customerA.lastName.localeCompare(customerB.lastName);
-          }
-          return result;
-        })
-      );
-      this.dataSource.paginator = this.paginator;
-      this.paginator.page.subscribe(() => this.table.nativeElement.scrollIntoView(true));
-    });
+    setTimeout(() => {
+      this.customerService.getAll().subscribe(customers => {
+        this.dataSource = new MatTableDataSource(
+          [...customers].sort((customerA, customerB) => {
+            let result = customerA.firstName.localeCompare(customerB.firstName);
+            if (result === 0) {
+              result = customerA.lastName.localeCompare(customerB.lastName);
+            }
+            return result;
+          })
+        );
+        this.dataSource.paginator = this.paginator;
+        this.paginator.page.subscribe(() => this.table.nativeElement.scrollIntoView(true));
+      });
+    }, 0);
   }
 
   ngAfterViewInit(): void {

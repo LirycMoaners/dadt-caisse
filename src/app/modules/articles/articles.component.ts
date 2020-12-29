@@ -37,16 +37,18 @@ export class ArticlesComponent implements OnInit, OnDestroy, AfterViewInit {
   ) { }
 
   ngOnInit(): void {
-    this.subscriptions.push(
-      this.articleService.getAll().subscribe(articles => {
-        this.dataSource = new MatTableDataSource(
-          [...articles].sort((articleA, articleB) => articleA.reference.localeCompare(articleB.reference))
-        );
-        this.dataSource.paginator = this.paginator;
-        this.paginator.page.subscribe(() => this.table.nativeElement.scrollIntoView(true));
-      }),
-      this.articleCategoryService.getAll().subscribe(articleCategories => this.articleCategories = articleCategories)
-    );
+    setTimeout(() => {
+      this.subscriptions.push(
+        this.articleService.getAll().subscribe(articles => {
+          this.dataSource = new MatTableDataSource(
+            [...articles].sort((articleA, articleB) => articleA.reference.localeCompare(articleB.reference))
+          );
+          this.dataSource.paginator = this.paginator;
+          this.paginator.page.subscribe(() => this.table.nativeElement.scrollIntoView(true));
+        }),
+        this.articleCategoryService.getAll().subscribe(articleCategories => this.articleCategories = articleCategories)
+      );
+    }, 0);
   }
 
   ngOnDestroy(): void {

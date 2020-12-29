@@ -2,6 +2,7 @@ import { AngularFireDatabase, AngularFireList } from '@angular/fire/database';
 import { from, Observable, of, ReplaySubject } from 'rxjs';
 import { delay, map, mergeMap } from 'rxjs/operators';
 import { DatabaseObject } from 'src/app/shared/models/database-object.model';
+import { AuthenticationService } from './authentication.service';
 
 export class DatabaseCollectionService<T extends DatabaseObject> {
   private datasRef: AngularFireList<T>;
@@ -9,17 +10,19 @@ export class DatabaseCollectionService<T extends DatabaseObject> {
 
   constructor(
     private readonly database: AngularFireDatabase,
+    private readonly authenticationService: AuthenticationService,
     collectionName: string
   ) {
     this.datasRef = this.database.list(collectionName);
-    this.datasRef.snapshotChanges().pipe(
+    this.authenticationService.user$.pipe(
+      mergeMap((user) => !!user ? this.datasRef.snapshotChanges() : of(null)),
       delay(0),
-      map(changes => changes.map(c => {
+      map(changes => !!changes ? changes.map(c => {
         const data = {...c.payload.val(), id: c.payload.key};
         data.createDate = new Date(data.createDate);
         data.updateDate = new Date(data.updateDate);
         return data;
-      }))
+      }) : null)
     ).subscribe(datas => this.$datas.next(datas));
   }
 
