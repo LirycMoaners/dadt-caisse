@@ -8,7 +8,7 @@ import { NumberTools } from 'src/app/shared/tools/number.tools';
   styleUrls: ['./quantity-dialog.component.scss']
 })
 export class QuantityDialogComponent implements OnInit {
-  @ViewChild('quantityInput') quantityInput: ElementRef<HTMLInputElement>;
+  @ViewChild('quantityInput') quantityInput?: ElementRef<HTMLInputElement>;
   public quantity = 1;
 
   constructor(
@@ -16,7 +16,7 @@ export class QuantityDialogComponent implements OnInit {
   ) { }
 
   ngOnInit(): void {
-    setTimeout(() => this.quantityInput.nativeElement.select(), 0);
+    setTimeout(() => this.quantityInput?.nativeElement.select(), 0);
   }
 
   /**
@@ -26,10 +26,12 @@ export class QuantityDialogComponent implements OnInit {
     return NumberTools.toNumber(value);
   }
 
+  /**
+   * Ferme la modale en renvoyant la quantité saisie
+   */
   public close(): void {
     if (this.quantity !== 0) {
       this.dialogRef.close(this.quantity);
     }
   }
-
 }

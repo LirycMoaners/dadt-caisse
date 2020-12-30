@@ -1,9 +1,9 @@
-import { Component, OnInit, Inject, OnDestroy } from '@angular/core';
+import { Component, OnInit, Inject } from '@angular/core';
 import { Sale } from 'src/app/shared/models/sale.model';
 import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
-import { FormBuilder, FormGroup, ValidatorFn } from '@angular/forms';
+import { AbstractControl, FormBuilder, FormGroup, ValidationErrors, ValidatorFn } from '@angular/forms';
 import { PaymentMethod } from 'src/app/shared/models/payment-method.enum';
-import { Observable, Subscription } from 'rxjs';
+import { Observable } from 'rxjs';
 import { CustomerService } from 'src/app/core/http-services/customer.service';
 import { Customer } from 'src/app/shared/models/customer.model';
 import { startWith, map, first } from 'rxjs/operators';
@@ -17,15 +17,14 @@ import { SettingsService } from 'src/app/core/http-services/settings.service';
   templateUrl: './payment-dialog.component.html',
   styleUrls: ['./payment-dialog.component.scss']
 })
-export class PaymentDialogComponent implements OnInit, OnDestroy {
+export class PaymentDialogComponent implements OnInit {
   public saleForm: FormGroup;
   public PaymentMethod: typeof PaymentMethod = PaymentMethod;
-  public errorMessage: string;
-  public filteredCustomers: Observable<Customer[]>;
-  public settings: Settings;
-  private customers: Customer[];
+  public errorMessage = '';
+  public filteredCustomers$: Observable<Customer[]>;
+  public settings: Settings = new Settings();
+  private customers: Customer[] = [];
   private totalBeforeDiscount: number;
-  private readonly subscriptions: Subscription[] = [];
 
   constructor(
     public dialogRef: MatDialogRef<PaymentDialogComponent>,
@@ -33,45 +32,33 @@ export class PaymentDialogComponent implements OnInit, OnDestroy {
     private readonly fb: FormBuilder,
     private readonly customerService: CustomerService,
     private readonly settingsService: SettingsService
-  ) { }
-
-  ngOnInit(): void {
+  ) {
     this.totalBeforeDiscount = this.sale.total;
+    const customerValidator: ValidatorFn = (control) =>
+      (!control.value || control.value.id)
+        ? null
+        : {customerNotExist: 'Ce client n\'existe pas ! Veuillez en sélectionner un ou laisser le champ vide.'};
 
-    this.subscriptions.push(
-      this.customerService.getAll().pipe(first()).subscribe(customers => {
-        this.customers = customers;
+    this.saleForm = this.fb.group({
+      customer: [undefined, [customerValidator]],
+      discount: [undefined, []],
+      discountType: [undefined, []],
+      isFidelityDiscount: [false, []],
+      cashTotal: [0, []],
+      cardTotal: [0, []],
+      checkTotal: [0, []],
+      creditTotal: [0, []]
+    }, { validators: [SaleTools.totalEqualToCumulatedValidator(this.sale)] });
 
-        const customerValidator: ValidatorFn = (control) =>
-          (!control.value || control.value.id)
-            ? null
-            : {customerNotExist: 'Ce client n\'existe pas ! Veuillez en sélectionner un ou laisser le champ vide.'};
-
-        this.saleForm = this.fb.group({
-          customer: ['', [customerValidator]],
-          discount: [0, []],
-          discountType: ['', []],
-          isFidelityDiscount: [false, []],
-          cashTotal: [0, []],
-          cardTotal: [0, []],
-          checkTotal: [0, []],
-          creditTotal: [0, []]
-        }, { validators: [SaleTools.totalEqualToCumulatedValidator(this.sale)] });
-
-        this.filteredCustomers = this.saleForm.get('customer').valueChanges.pipe(
-          startWith(''),
-          map(value => this._filter(value))
-        );
-      })
+    this.filteredCustomers$ = (this.saleForm.get('customer') as AbstractControl).valueChanges.pipe(
+      startWith(''),
+      map(value => this._filter(value))
     );
-
-    this.settingsService.getSettings().pipe(first()).subscribe(settings => this.settings = settings);
   }
 
-  ngOnDestroy(): void {
-    for (const subscription of this.subscriptions) {
-      subscription.unsubscribe();
-    }
+  ngOnInit(): void {
+    this.customerService.getAll().pipe(first()).subscribe(customers => this.customers = customers);
+    this.settingsService.getSettings().pipe(first()).subscribe(settings => this.settings = settings);
   }
 
   /**
@@ -88,10 +75,10 @@ export class PaymentDialogComponent implements OnInit, OnDestroy {
    */
   public selectPaymentMethod(paymentMethod: PaymentMethod): void {
     const lastSaleFormValue = {
-      customer: this.saleForm.get('customer').value,
-      discount: this.saleForm.get('discount').value,
-      discountType: this.saleForm.get('discountType').value,
-      isFidelityDiscount: this.saleForm.get('isFidelityDiscount').value,
+      customer: this.saleForm.get('customer')?.value,
+      discount: this.saleForm.get('discount')?.value,
+      discountType: this.saleForm.get('discountType')?.value,
+      isFidelityDiscount: this.saleForm.get('isFidelityDiscount')?.value,
       cashTotal: 0,
       cardTotal: 0,
       checkTotal: 0,
@@ -118,7 +105,7 @@ export class PaymentDialogComponent implements OnInit, OnDestroy {
    */
   public pay(): void {
     if (this.saleForm.valid) {
-      this.errorMessage = null;
+      this.errorMessage = '';
       this.sale = {
         ...this.saleForm.value,
         discount: this.saleForm.controls.discount.value,
@@ -138,8 +125,8 @@ export class PaymentDialogComponent implements OnInit, OnDestroy {
       for (const control in this.saleForm.controls) {
         if (this.saleForm.controls[control]) {
           for (const error in this.saleForm.controls[control].errors) {
-            if (this.saleForm.controls[control].errors[error]) {
-              this.errorMessage += (this.errorMessage ? ' ' : '') + this.saleForm.controls[control].errors[error];
+            if ((this.saleForm.controls[control].errors as ValidationErrors)[error]) {
+              this.errorMessage += (this.errorMessage ? ' ' : '') + (this.saleForm.controls[control].errors as ValidationErrors)[error];
             }
           }
         }
@@ -152,9 +139,9 @@ export class PaymentDialogComponent implements OnInit, OnDestroy {
    * @param discount La remise sous forme de chaine
    */
   public changeDiscount(discount: string): void {
-    this.saleForm.get('discount').setValue(this.toNumber(discount));
-    this.saleForm.get('discountType').setValue(
-      discount ? this.saleForm.get('discountType').value ? this.saleForm.get('discountType').value : '€' : null
+    this.saleForm.get('discount')?.setValue(this.toNumber(discount));
+    this.saleForm.get('discountType')?.setValue(
+      discount ? this.saleForm.get('discountType')?.value ? this.saleForm.get('discountType')?.value : '€' : null
     );
     this.sale.total = this.getTotal();
   }
@@ -171,14 +158,14 @@ export class PaymentDialogComponent implements OnInit, OnDestroy {
    */
   public getTotal(): number {
     let total: string;
-    if (this.saleForm.get('discount').value) {
-      if (this.saleForm.get('discountType').value === '%') {
+    if (this.saleForm.get('discount')?.value) {
+      if (this.saleForm.get('discountType')?.value === '%') {
         total = (
           Math.round(this.totalBeforeDiscount * 100)
-          - Math.round(this.totalBeforeDiscount * this.saleForm.get('discount').value)
+          - Math.round(this.totalBeforeDiscount * this.saleForm.get('discount')?.value)
         ).toString();
       } else {
-        total = (Math.round(this.totalBeforeDiscount * 100) - Math.round(this.saleForm.get('discount').value * 100)).toString();
+        total = (Math.round(this.totalBeforeDiscount * 100) - Math.round(this.saleForm.get('discount')?.value * 100)).toString();
       }
     } else {
       total = Math.round(this.totalBeforeDiscount * 100).toString();
@@ -194,16 +181,16 @@ export class PaymentDialogComponent implements OnInit, OnDestroy {
   public switchFidelityDiscount(isFidelityDiscount: boolean): void {
     this.saleForm.controls.isFidelityDiscount.setValue(isFidelityDiscount);
     if (isFidelityDiscount) {
-      this.saleForm.get('discount').setValue(this.settings.discount, {disabled: true});
-      this.saleForm.get('discount').disable();
-      this.saleForm.get('discountType').setValue(this.settings.discountType, {disabled: true});
-      this.saleForm.get('discountType').disable();
+      this.saleForm.get('discount')?.setValue(this.settings.discount, {disabled: true});
+      this.saleForm.get('discount')?.disable();
+      this.saleForm.get('discountType')?.setValue(this.settings.discountType, {disabled: true});
+      this.saleForm.get('discountType')?.disable();
 
     } else {
-      this.saleForm.get('discount').setValue(null);
-      this.saleForm.get('discount').enable();
-      this.saleForm.get('discountType').setValue(null);
-      this.saleForm.get('discountType').enable();
+      this.saleForm.get('discount')?.setValue(null);
+      this.saleForm.get('discount')?.enable();
+      this.saleForm.get('discountType')?.setValue(null);
+      this.saleForm.get('discountType')?.enable();
     }
     this.sale.total = this.getTotal();
   }

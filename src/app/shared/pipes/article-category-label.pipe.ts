@@ -13,10 +13,10 @@ export class ArticleCategoryPipe implements PipeTransform {
     private articleCategoryService: ArticleCategoryService
   ) {}
 
-  transform(categoryId: string): Observable<string> {
+  transform(categoryId: string): Observable<string | undefined> {
     return this.articleCategoryService.getAll().pipe(
       map(articleCategories => articleCategories.find(articleCategory => articleCategory.id === categoryId)),
-      map(articleCategory => articleCategory ? articleCategory.label : null)
+      map(articleCategory => articleCategory ? articleCategory.label : undefined)
     );
   }
 }

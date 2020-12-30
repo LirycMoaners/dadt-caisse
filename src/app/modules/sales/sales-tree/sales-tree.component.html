@@ -11,7 +11,7 @@
         <mat-datepicker #date disabled="false"></mat-datepicker>
       </mat-form-field>
     </div>
-    <mat-tree [dataSource]="dataSourceByDate" [treeControl]="treeControlByDate">
+    <mat-tree *ngIf="dataSourceByDate" [dataSource]="dataSourceByDate" [treeControl]="treeControlByDate">
       <mat-tree-node
         *matTreeNodeDef="let saleFlatNode"
         matTreeNodePadding
@@ -30,7 +30,7 @@
             {{saleFlatNode.isExpanded ? 'expand_more' : 'chevron_right'}}
           </mat-icon>
         </button>
-        {{ saleFlatNode.level === 3 ? (saleFlatNode.label | date:'HH:mm:ss') + ' - ' + (saleFlatNode.value.total | currency:'EUR') : saleFlatNode.label }}
+        {{ saleFlatNode.level === 3 ? ((saleFlatNode.label | date:'HH:mm:ss') || '') + ' / ' + ((saleFlatNode.value.total | currency:'EUR') || '') : saleFlatNode.label }}
       </mat-tree-node>
     </mat-tree>
   </mat-tab>
@@ -43,7 +43,7 @@
         <input matInput [(ngModel)]="textFilter" (ngModelChange)="filterByText()" placeholder="Rechercher">
       </mat-form-field>
     </div>
-    <mat-tree [dataSource]="dataSourceByCustomer" [treeControl]="treeControlByCustomer">
+    <mat-tree *ngIf="dataSourceByCustomer" [dataSource]="dataSourceByCustomer" [treeControl]="treeControlByCustomer">
       <mat-tree-node
         *matTreeNodeDef="let saleFlatNode"
         matTreeNodePadding
@@ -62,7 +62,7 @@
             {{saleFlatNode.isExpanded ? 'expand_more' : 'chevron_right'}}
           </mat-icon>
         </button>
-        {{ saleFlatNode.level === 1 ? (saleFlatNode.label | date:'dd/MM/yyyy à HH:mm:ss') + ' - ' + (saleFlatNode.value.total | currency:'EUR') : saleFlatNode.label }}
+        {{ saleFlatNode.level === 1 ? ((saleFlatNode.label | date:'dd/MM/yyyy à HH:mm:ss') || '') + ' / ' + ((saleFlatNode.value.total | currency:'EUR') || '') : saleFlatNode.label }}
       </mat-tree-node>
     </mat-tree>
   </mat-tab>

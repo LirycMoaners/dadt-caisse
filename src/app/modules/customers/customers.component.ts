@@ -16,9 +16,9 @@ import { MatPaginator } from '@angular/material/paginator';
   styleUrls: ['./customers.component.scss']
 })
 export class CustomersComponent implements OnInit, AfterViewInit {
-  @ViewChild(MatPaginator) paginator: MatPaginator;
-  @ViewChild(MatSort) sort: MatSort;
-  @ViewChild(MatTable, {read: ElementRef}) table: ElementRef;
+  @ViewChild(MatPaginator) paginator?: MatPaginator;
+  @ViewChild(MatSort) sort?: MatSort;
+  @ViewChild(MatTable, {read: ElementRef}) table?: ElementRef;
   public dataSource: MatTableDataSource<Customer> = new MatTableDataSource();
   public displayedColumns: string[] = ['firstName', 'lastName', 'emailAddress', 'phoneNumber', 'loyaltyPoints', 'lastDiscountGaveDate', 'lastDiscountUsedDate', 'actions'];
 
@@ -39,14 +39,16 @@ export class CustomersComponent implements OnInit, AfterViewInit {
             return result;
           })
         );
-        this.dataSource.paginator = this.paginator;
-        this.paginator.page.subscribe(() => this.table.nativeElement.scrollIntoView(true));
+        this.dataSource.paginator = this.paginator as MatPaginator;
+        this.paginator?.page.subscribe(() => this.table?.nativeElement.scrollIntoView(true));
       });
     }, 0);
   }
 
   ngAfterViewInit(): void {
-    this.sort.sortChange.subscribe(() => this.dataSource.data = this.dataSource.sortData(this.dataSource.data, this.sort));
+    this.sort?.sortChange.subscribe(() =>
+      this.dataSource.data = this.dataSource.sortData(this.dataSource.data, (this.sort as MatSort))
+    );
   }
 
   /**

@@ -14,7 +14,7 @@ export class AuthenticationService {
   /**
    * Current logged in user
    */
-  public user$: Observable<firebase.User>;
+  public user$: Observable<firebase.default.User | null>;
 
   constructor(
     private readonly fireAuth: AngularFireAuth
@@ -42,7 +42,7 @@ export class AuthenticationService {
    */
   public signInWithGoogle(): Promise<any> {
     return new Promise<any>((resolve, reject) =>
-      this.fireAuth.signInWithPopup(new firebase.auth.GoogleAuthProvider()).then(
+      this.fireAuth.signInWithPopup(new firebase.default.auth.GoogleAuthProvider()).then(
         res => {
           resolve(res);
         }, error => {

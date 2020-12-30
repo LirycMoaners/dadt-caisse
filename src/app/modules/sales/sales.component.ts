@@ -11,8 +11,8 @@ import { Sale } from 'src/app/shared/models/sale.model';
 })
 export class SalesComponent implements OnInit, OnDestroy {
   private readonly subscriptions: Subscription[] = [];
-  public sales: Sale[];
-  public currentSale: Sale = null;
+  public sales: Sale[] = [];
+  public currentSale: Sale | undefined = undefined;
 
   constructor(
     private readonly saleService: SaleService
@@ -36,7 +36,7 @@ export class SalesComponent implements OnInit, OnDestroy {
    * Passe la vente au composant de détail pour l'afficher
    * @param sale La vente à afficher
    */
-  public showSaleDetails(sale: Sale): void {
+  public showSaleDetails(sale: Sale | undefined): void {
     this.currentSale = sale;
   }
 }

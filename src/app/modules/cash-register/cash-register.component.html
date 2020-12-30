@@ -56,7 +56,7 @@
           matInput
           type="text"
           [ngModel]="element.price"
-          (change)="element.price = toNumber($event.target.value)"
+          (change)="element.price = toNumber($any($event.target).value)"
         >
       </mat-cell>
       <mat-footer-cell *matFooterCellDef class="mat-column-price"></mat-footer-cell>
@@ -72,7 +72,7 @@
           matInput
           type="text"
           [ngModel]="element.quantity"
-          (change)="element.quantity = toNumber($event.target.value)"
+          (change)="element.quantity = toNumber($any($event.target).value)"
         >
       </mat-cell>
       <mat-footer-cell *matFooterCellDef class="mat-column-quantity"></mat-footer-cell>
@@ -99,7 +99,7 @@
           [ngModel]="element.discount"
           appNumeric
           [decimals]='2'
-          (change)="changeDiscount(element, $event.target.value)"
+          (change)="changeDiscount(element, $any($event.target).value)"
         >
       </mat-cell>
       <mat-footer-cell *matFooterCellDef class="mat-column-discount"></mat-footer-cell>

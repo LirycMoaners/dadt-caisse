@@ -1,6 +1,6 @@
 import { DatabaseObject } from './database-object.model';
 
-export class Article extends DatabaseObject {
+export interface Article extends DatabaseObject {
   reference: string;
   label: string;
   categoryId: string;

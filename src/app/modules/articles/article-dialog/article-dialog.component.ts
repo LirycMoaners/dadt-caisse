@@ -1,5 +1,5 @@
 import { Component, OnInit, Inject, OnDestroy } from '@angular/core';
-import { FormGroup, FormControl, Validators } from '@angular/forms';
+import { FormGroup, FormControl, Validators, AbstractControl } from '@angular/forms';
 import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { Subscription } from 'rxjs';
 
@@ -23,9 +23,7 @@ export class ArticleDialogComponent implements OnInit, OnDestroy {
     private readonly ref: MatDialogRef<ArticleDialogComponent>,
     @Inject(MAT_DIALOG_DATA) private readonly article: Article,
     private readonly categoryService: ArticleCategoryService
-  ) { }
-
-  ngOnInit(): void {
+  ) {
     this.articleFormGroup = new FormGroup({
       id: new FormControl(this.article ? this.article.id : null),
       reference: new FormControl(this.article ? this.article.reference : '', Validators.required),
@@ -44,17 +42,19 @@ export class ArticleDialogComponent implements OnInit, OnDestroy {
     } else {
       this.title = 'Ajout d\'article';
     }
+  }
 
+  ngOnInit(): void {
     this.subscriptions.push(
       this.categoryService.getAll().subscribe(categories => this.categories = categories),
-      this.articleFormGroup.get('buyPrice').valueChanges.subscribe(value =>
-        typeof value === 'string' ? this.articleFormGroup.get('buyPrice').setValue(this.toNumber(value)) : null
+      (this.articleFormGroup.get('buyPrice') as AbstractControl).valueChanges.subscribe(value =>
+        typeof value === 'string' ? this.articleFormGroup.get('buyPrice')?.setValue(this.toNumber(value)) : null
       ),
-      this.articleFormGroup.get('sellPrice').valueChanges.subscribe(value =>
-        typeof value === 'string' ? this.articleFormGroup.get('sellPrice').setValue(this.toNumber(value)) : null
+      (this.articleFormGroup.get('sellPrice') as AbstractControl).valueChanges.subscribe(value =>
+        typeof value === 'string' ? this.articleFormGroup.get('sellPrice')?.setValue(this.toNumber(value)) : null
       ),
-      this.articleFormGroup.get('quantity').valueChanges.subscribe(value =>
-        typeof value === 'string' ? this.articleFormGroup.get('quantity').setValue(this.toNumber(value)) : null
+      (this.articleFormGroup.get('quantity') as AbstractControl).valueChanges.subscribe(value =>
+        typeof value === 'string' ? this.articleFormGroup.get('quantity')?.setValue(this.toNumber(value)) : null
       )
     );
   }

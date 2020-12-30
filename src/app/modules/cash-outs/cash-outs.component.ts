@@ -10,9 +10,9 @@ import { CashOut } from 'src/app/shared/models/cash-out.model';
 })
 export class CashOutsComponent implements OnInit, OnDestroy {
   private readonly subscriptions: Subscription[] = [];
-  public cashOuts: CashOut[];
-  public currentCashOut: CashOut = null;
-  public filterDate: Date;
+  public cashOuts: CashOut[] = [];
+  public currentCashOut: CashOut | null = null;
+  public filterDate?: Date;
 
   constructor(
     private readonly cashOutService: CashOutService
@@ -25,8 +25,8 @@ export class CashOutsComponent implements OnInit, OnDestroy {
         if (!this.filterDate) {
           setTimeout(() => this.filterDate = new Date(), 0);
         }
-        if (this.currentCashOut) {
-          const cashOutToExpand = this.cashOuts.find(cashOut => cashOut.id === this.currentCashOut.id);
+        if (!!this.currentCashOut) {
+          const cashOutToExpand = this.cashOuts.find(cashOut => cashOut.id === this.currentCashOut?.id);
           if (
             cashOutToExpand
             && cashOutToExpand.createDate.toString().substring(0, 9) !== this.currentCashOut.createDate.toString().substring(0, 9)

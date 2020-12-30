@@ -1,4 +1,4 @@
-import { Component, Input, OnInit } from '@angular/core';
+import { Component, Input } from '@angular/core';
 import { SaleArticle } from '../../models/sale-article.model';
 import { Sale } from '../../models/sale.model';
 import { Settings } from '../../models/settings.model';
@@ -11,15 +11,12 @@ import { SaleTools } from '../../tools/sale.tools';
   templateUrl: './ticket.component.html',
   styleUrls: ['./ticket.component.scss']
 })
-export class TicketComponent implements OnInit {
-  @Input() sale: Sale;
-  @Input() settings: Settings;
-  @Input() isDuplicata: boolean;
+export class TicketComponent {
+  @Input() sale: Sale = new Sale();
+  @Input() settings: Settings = new Settings();
+  @Input() isDuplicata = false;
 
   constructor() { }
-
-  ngOnInit(): void {
-  }
 
   /**
    * Retourne le total d'une ligne d'article
@@ -78,8 +75,8 @@ export class TicketComponent implements OnInit {
    * Retourne le nombre de points total d'un client juste après la vente
    */
   public getTotalLoyaltyPoints(): number {
-    const sum = MathTools.sum(this.getLoyaltyPoints(), this.sale.customer.loyaltyPoints);
-    return sum >= this.settings.pointsForDiscount ? MathTools.sum(sum, -this.settings.pointsForDiscount) : sum;
+    const sum = MathTools.sum(this.getLoyaltyPoints(), this.sale.customer?.loyaltyPoints as number);
+    return sum >= (this.settings.pointsForDiscount as number) ? MathTools.sum(sum, -(this.settings.pointsForDiscount as number)) : sum;
   }
 
 }

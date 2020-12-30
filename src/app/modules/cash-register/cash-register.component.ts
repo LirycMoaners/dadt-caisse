@@ -1,7 +1,7 @@
 import { Component, OnInit, OnDestroy, ComponentFactoryResolver, ComponentRef, ViewContainerRef, NgZone } from '@angular/core';
 import { FormControl } from '@angular/forms';
 import { MatTableDataSource } from '@angular/material/table';
-import { MatDialog, MatDialogRef } from '@angular/material/dialog';
+import { MatDialog } from '@angular/material/dialog';
 import { Subscription, Observable, of, combineLatest } from 'rxjs';
 import { startWith, map, mergeMap, first } from 'rxjs/operators';
 
@@ -35,11 +35,11 @@ export class CashRegisterComponent implements OnInit, OnDestroy {
   public articleControl = new FormControl();
   public articles: Article[] = [];
   public filteredArticles$: Observable<Article[]>;
-  public lastSale: Sale;
-  private lastSearchInputValue: string;
-  private filteredArticles: Article[];
-  private componentRef: ComponentRef<TicketComponent | BillComponent>;
-  private settings: Settings;
+  public lastSale?: Sale;
+  private lastSearchInputValue = '';
+  private filteredArticles: Article[] = [];
+  private componentRef?: ComponentRef<TicketComponent | BillComponent>;
+  private settings: Settings = new Settings();
   private readonly subscriptions: Subscription[] = [];
 
   constructor(
@@ -51,16 +51,7 @@ export class CashRegisterComponent implements OnInit, OnDestroy {
     private readonly saleService: SaleService,
     private readonly customerService: CustomerService,
     private readonly settingsService: SettingsService
-  ) { }
-
-  ngOnInit(): void {
-    this.subscriptions.push(
-      this.articleService.getAll().subscribe(articles =>
-        this.articles = [...articles].sort((articleA, articleB) => articleA.reference.localeCompare(articleB.reference))
-      ),
-      this.settingsService.getSettings().subscribe(settings => this.settings = settings)
-    );
-
+  ) {
     this.filteredArticles$ = this.articleControl.valueChanges.pipe(
       startWith(''),
       map(value => {
@@ -70,6 +61,15 @@ export class CashRegisterComponent implements OnInit, OnDestroy {
         }
         return this.filteredArticles;
       })
+    );
+  }
+
+  ngOnInit(): void {
+    this.subscriptions.push(
+      this.articleService.getAll().subscribe(articles =>
+        this.articles = [...articles].sort((articleA, articleB) => articleA.reference.localeCompare(articleB.reference))
+      ),
+      this.settingsService.getSettings().subscribe(settings => this.settings = settings)
     );
 
     this.saleService.currentSaleArticles$.pipe(first()).subscribe(saleArticles => this.dataSource = new MatTableDataSource(saleArticles));
@@ -144,7 +144,7 @@ export class CashRegisterComponent implements OnInit, OnDestroy {
    * Construit l'objet de vente avant d'ouvrir la modale de paiement
    */
   public pay(): void {
-    let savedSale: Sale;
+    let savedSale: Sale | undefined;
     const sale: Sale = new Sale();
     sale.total = this.getSaleArticlesTotal();
 
@@ -158,28 +158,24 @@ export class CashRegisterComponent implements OnInit, OnDestroy {
           result.updateDate = new Date();
           return this.saleService.create(result);
         }
-        return of(null);
+        return of(undefined);
       }),
       mergeMap(s => {
         savedSale = s;
         return !!savedSale
           ? combineLatest([
             ...savedSale.articles.map(saleArticle => {
-              const article = this.articles.find(a => a.id === saleArticle.id);
+              const article = this.articles.find(a => a.id === saleArticle.id) as Article;
               article.quantity -= saleArticle.quantity;
               article.updateDate = new Date();
               return this.articleService.update(article);
             }),
             savedSale.customer
               ? this.customerService.addPoints({...savedSale.customer}, savedSale.total, savedSale.isFidelityDiscount).pipe(
-                mergeMap(isFidelityDiscount => {
-                  if (isFidelityDiscount) {
-                    let ref: MatDialogRef<FidelityDialogComponent>;
-                    this.ngZone.run(() => ref = this.dialog.open(FidelityDialogComponent));
-                    return ref.afterClosed();
-                  }
-                  return of(null);
-                })
+                mergeMap(isFidelityDiscount => isFidelityDiscount
+                  ? this.ngZone.run(() => this.dialog.open(FidelityDialogComponent)).afterClosed()
+                  : of(null)
+                )
               )
               : of(null)
           ])
@@ -207,7 +203,7 @@ export class CashRegisterComponent implements OnInit, OnDestroy {
    */
   public printBill(): void {
     this.componentRef = PrintTools.createComponent(this.cfr, this.viewContainerRef, BillComponent, this.componentRef);
-    (this.componentRef.instance as BillComponent).sale = this.lastSale;
+    (this.componentRef.instance as BillComponent).sale = this.lastSale as Sale;
     setTimeout(() => print(), 0);
   }
 
@@ -218,7 +214,7 @@ export class CashRegisterComponent implements OnInit, OnDestroy {
    */
   public changeDiscount(saleArticle: SaleArticle, discount: string): void {
     saleArticle.discount = this.toNumber(discount);
-    saleArticle.discountType = discount ? saleArticle.discountType ? saleArticle.discountType : '€' : null;
+    saleArticle.discountType = discount ? saleArticle.discountType ? saleArticle.discountType : '€' : undefined;
   }
 
   /**
@@ -267,7 +263,7 @@ export class CashRegisterComponent implements OnInit, OnDestroy {
   private printTicket(isDuplicata = false): void {
     this.componentRef = PrintTools.createComponent(this.cfr, this.viewContainerRef, TicketComponent, this.componentRef);
     (this.componentRef.instance as TicketComponent).isDuplicata = isDuplicata;
-    (this.componentRef.instance as TicketComponent).sale = this.lastSale;
+    (this.componentRef.instance as TicketComponent).sale = this.lastSale as Sale;
     (this.componentRef.instance as TicketComponent).settings = this.settings;
     setTimeout(() => print(), 1000);
   }
