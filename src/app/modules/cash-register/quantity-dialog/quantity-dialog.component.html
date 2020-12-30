@@ -11,6 +11,7 @@
       [ngModel]="quantity"
       (change)="quantity = toNumber($event.target.value)"
       cdkFocusInitial
+      (keyup.enter)="close()"
     >
   </mat-form-field>
 </mat-dialog-content>

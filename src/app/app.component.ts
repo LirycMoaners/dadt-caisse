@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { SwUpdate } from '@angular/service-worker';
 import { of } from 'rxjs';
-import { mergeMap, first } from 'rxjs/operators';
+import { mergeMap } from 'rxjs/operators';
 import { CustomerService } from './core/http-services/customer.service';
 import { GoogleService } from './core/http-services/google.service';
 
