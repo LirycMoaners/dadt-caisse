@@ -39,9 +39,9 @@ export class CustomerService extends DatabaseCollectionService<Customer> {
   /**
    * Retourne l'observable de tous les clients
    */
-  public getAllOneTime(): Observable<Customer[]> {
+  public getAllOneTime(): Observable<Customer[] | undefined> {
     return super.getAllOneTime().pipe(
-      map(customers => customers.map(customer => {
+      map(customers => customers?.map(customer => {
         customer.lastDiscountGaveDate = customer.lastDiscountGaveDate && customer.lastDiscountGaveDate !== 'N/A'
           ? new Date(customer.lastDiscountGaveDate)
           : null;
@@ -62,12 +62,15 @@ export class CustomerService extends DatabaseCollectionService<Customer> {
     return this.settingsService.getSettings().pipe(
       first(),
       mergeMap(settings => {
-        const newPoints = customer.loyaltyPoints + Math.round(Math.trunc(total) * settings.pointsToEuro / settings.eurosToPoint);
-        const isDiscountGave = newPoints >= settings.pointsForDiscount;
-        customer.loyaltyPoints = isDiscountGave ? newPoints - settings.pointsForDiscount : newPoints;
-        customer.lastDiscountGaveDate = isDiscountGave ? new Date() : customer.lastDiscountGaveDate;
-        customer.lastDiscountUsedDate = isFidelityDiscount ? new Date() : customer.lastDiscountUsedDate;
-        return this.update(customer).pipe(mergeMap(() => of(isDiscountGave)));
+        if (settings.pointsForDiscount) {
+          const newPoints = customer.loyaltyPoints + Math.round(Math.trunc(total) * settings.pointsToEuro / settings.eurosToPoint);
+          const isDiscountGave = newPoints >= settings.pointsForDiscount;
+          customer.loyaltyPoints = isDiscountGave ? newPoints - settings.pointsForDiscount : newPoints;
+          customer.lastDiscountGaveDate = isDiscountGave ? new Date() : customer.lastDiscountGaveDate;
+          customer.lastDiscountUsedDate = isFidelityDiscount ? new Date() : customer.lastDiscountUsedDate;
+          return this.update(customer).pipe(mergeMap(() => of(isDiscountGave)));
+        }
+        return of(false);
       })
     );
   }
@@ -89,7 +92,7 @@ export class CustomerService extends DatabaseCollectionService<Customer> {
         return this.googleService.createContact(customer).pipe(
           mergeMap(person => {
             customer.resourceName = person.resourceName;
-            customer.etag = person.metadata.sources[0].etag;
+            customer.etag = (person.metadata?.sources as gapi.client.people.Source[])[0].etag;
             return super.create(customer);
           })
         );
@@ -123,7 +126,7 @@ export class CustomerService extends DatabaseCollectionService<Customer> {
         }
         return this.googleService.updateContact(customer).pipe(
           mergeMap(person => {
-            customer.etag = person.metadata.sources[0].etag;
+            customer.etag = (person.metadata?.sources as gapi.client.people.Source[])[0].etag;
             return super.update(customer);
           })
         );
@@ -171,18 +174,20 @@ export class CustomerService extends DatabaseCollectionService<Customer> {
       this.googleService.getAllContact(),
       this.getAllOneTime()
     ]).pipe(
-      mergeMap(([googleCustomers, firebaseCustomers]: [Customer[], Customer[]]) => {
-        firebaseCustomers = firebaseCustomers ? firebaseCustomers : [];
+      mergeMap(([googleCustomers, firebaseCustomers]: [Customer[], Customer[] | undefined]) => {
+        firebaseCustomers = !!firebaseCustomers ? firebaseCustomers : [];
         const customersToAddInFirebase = googleCustomers.filter(
-          googleCustomer => firebaseCustomers.every(
+          googleCustomer => firebaseCustomers?.every(
             firebaseCustomer => firebaseCustomer.resourceName !== googleCustomer.resourceName
           )
         );
         const customersToUpdateInFirebase = googleCustomers.filter(googleCustomer => {
-          const customer = firebaseCustomers.find(
-            firebaseCustomer => firebaseCustomer.resourceName
+          const customer = firebaseCustomers?.find(
+            firebaseCustomer => !!firebaseCustomer.resourceName
+              && !!googleCustomer.resourceName
               && firebaseCustomer.resourceName.localeCompare(googleCustomer.resourceName) === 0
-              && firebaseCustomer.etag
+              && !!firebaseCustomer.etag
+              && !!googleCustomer.etag
               && firebaseCustomer.etag.localeCompare(googleCustomer.etag) !== 0
           );
           if (!!customer) {
@@ -204,7 +209,7 @@ export class CustomerService extends DatabaseCollectionService<Customer> {
           ...customersToAddInGoogle.map(customer => this.googleService.createContact(customer).pipe(
             concatMap(person => {
               customer.resourceName = person.resourceName;
-              customer.etag = person.metadata.sources[0].etag;
+              customer.etag = (person.metadata?.sources as gapi.client.people.Source[])[0].etag;
               return this.update(customer, true);
             }),
             map(t => t),

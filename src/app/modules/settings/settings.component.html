@@ -29,7 +29,7 @@
         ></textarea>
       </mat-form-field>
 
-      <mat-form-field *ngIf="contactGroups; else sign">
+      <mat-form-field *ngIf="contactGroups.length; else sign">
         <mat-label>Groupe de contact Google</mat-label>
         <mat-select formControlName="contactGroup">
           <mat-option *ngFor="let contactGroup of contactGroups" [value]="contactGroup.resourceName">
@@ -112,7 +112,7 @@
       <button mat-raised-button (click)="addArticleCategory()">+ Ajouter</button>
     </h2>
     <mat-list formArrayName="articleCategories">
-      <div mat-list-item *ngFor="let control of form.controls['articleCategories']['controls']; let i = index">
+      <div mat-list-item *ngFor="let control of $any(form.get('articleCategories'))['controls']; let i = index">
         <mat-form-field [formGroupName]="i">
           <input matInput formControlName="label">
           <button mat-icon-button matSuffix (click)="deleteArticleCategory(i)">
@@ -129,7 +129,7 @@
       <button mat-raised-button (click)="addCashOutCategory()">+ Ajouter</button>
     </h2>
     <mat-list formArrayName="cashOutCategories">
-      <div mat-list-item *ngFor="let control of form.controls['cashOutCategories']['controls']; let i = index">
+      <div mat-list-item *ngFor="let control of $any(form.get('cashOutCategories'))['controls']; let i = index">
         <mat-form-field [formGroupName]="i">
           <input matInput formControlName="label">
           <button mat-icon-button matSuffix (click)="deleteCashOutCategory(i)">

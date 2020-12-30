@@ -1,4 +1,4 @@
-import { Component, ViewChild, OnInit, OnDestroy } from '@angular/core';
+import { Component, ViewChild, OnDestroy } from '@angular/core';
 import { Breakpoints, BreakpointObserver } from '@angular/cdk/layout';
 import { Observable, Subscription } from 'rxjs';
 import { map, shareReplay } from 'rxjs/operators';
@@ -15,15 +15,15 @@ import { MathTools } from 'src/app/shared/tools/math.tools';
   templateUrl: './sidenav.component.html',
   styleUrls: ['./sidenav.component.scss']
 })
-export class SidenavComponent implements OnInit, OnDestroy {
-  @ViewChild('drawer') public drawer: MatSidenav;
+export class SidenavComponent implements OnDestroy {
+  @ViewChild('drawer') public drawer?: MatSidenav;
   public routes: Routes;
   public isHandset$: Observable<boolean> = this.breakpointObserver.observe(Breakpoints.Handset).pipe(
     map(result => result.matches),
     shareReplay()
   );
   public isDayTotalShown = false;
-  public dayTotal: string;
+  public dayTotal = 'N/A';
   public isSignedIn = false;
   private readonly subscriptions: Subscription[] = [];
 
@@ -36,8 +36,11 @@ export class SidenavComponent implements OnInit, OnDestroy {
     private readonly saleService: SaleService
   ) {
     const datePipe: DatePipe = new DatePipe('fr-FR');
+    this.routes = this.router.config.filter(route => route.path !== '' && route.path !== '**' && route.path !== 'login');
     this.subscriptions.push(
-      this.isHandset$.subscribe(isHandset => this.closeSidenav = isHandset ? () => this.drawer.close() : () => null),
+      this.isHandset$.subscribe(isHandset =>
+        this.closeSidenav = isHandset ? () => (!!this.drawer ? this.drawer.close() : () => null) : () => null
+      ),
       this.saleService.getAll().subscribe((sales: Sale[]) => {
         if (!!sales) {
           this.isSignedIn = true;
@@ -48,10 +51,6 @@ export class SidenavComponent implements OnInit, OnDestroy {
         }
       })
     );
-  }
-
-  ngOnInit(): void {
-    this.routes = this.router.config.filter(route => route.path !== '' && route.path !== '**' && route.path !== 'login');
   }
 
   ngOnDestroy(): void {

@@ -1,7 +1,7 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
-import { FormArray, FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { AbstractControl, FormArray, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { combineLatest, Observable, of, Subscription } from 'rxjs';
-import { map, mergeMap } from 'rxjs/operators';
+import { filter, map, mergeMap } from 'rxjs/operators';
 import { ArticleCategoryService } from 'src/app/core/http-services/article-category.service';
 import { CashOutCategoryService } from 'src/app/core/http-services/cash-out-category.service';
 import { GoogleService } from 'src/app/core/http-services/google.service';
@@ -17,7 +17,7 @@ import { Settings } from 'src/app/shared/models/settings.model';
 })
 export class SettingsComponent implements OnInit, OnDestroy {
   public form: FormGroup;
-  public contactGroups: gapi.client.people.ContactGroup[];
+  public contactGroups: gapi.client.people.ContactGroup[] = [];
   private readonly subscriptions: Subscription[] = [];
 
   constructor(
@@ -26,10 +26,11 @@ export class SettingsComponent implements OnInit, OnDestroy {
     private readonly articleCategoryService: ArticleCategoryService,
     private readonly cashOutCategoryService: CashOutCategoryService,
     private readonly googleService: GoogleService
-  ) { }
+  ) {
+    this.form = this.fb.group({});
+  }
 
   ngOnInit(): void {
-    this.form = this.fb.group({});
     this.subscriptions.push(
       this.settingsService.getSettings().pipe(
         mergeMap((settings) => {
@@ -46,9 +47,9 @@ export class SettingsComponent implements OnInit, OnDestroy {
           }));
           return combineLatest([
             settings.contactGroup ? this.googleSignIn() : of(),
-            this.form.get('settings').valueChanges.pipe(
+            (this.form.get('settings') as AbstractControl).valueChanges.pipe(
               mergeMap((s: Settings) =>
-                this.form.get('settings').valid ? this.settingsService.updateSettings(s) : of(null)
+                this.form.get('settings')?.valid ? this.settingsService.updateSettings(s) : of(null)
               )
             )
           ]);
@@ -168,9 +169,10 @@ export class SettingsComponent implements OnInit, OnDestroy {
    */
   private googleSignIn(): Observable<void>{
     return this.googleService.signIn().pipe(
-      mergeMap(result => result ? this.googleService.getContactGroupList() : of()),
-      map((contactGroups: gapi.client.people.ContactGroup[]) => {
-        this.contactGroups = contactGroups;
+      filter(result => !!result),
+      mergeMap(() => this.googleService.getContactGroupList()),
+      map((contactGroups: gapi.client.people.ContactGroup[] | undefined) => {
+        this.contactGroups = contactGroups as gapi.client.people.ContactGroup[];
       })
     );
   }

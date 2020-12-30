@@ -15,7 +15,7 @@ export class PrintTools {
     cfr: ComponentFactoryResolver,
     viewContainerRef: ViewContainerRef,
     component: Type<TicketComponent | BillComponent>,
-    previousComponentRef: ComponentRef<TicketComponent | BillComponent>
+    previousComponentRef?: ComponentRef<TicketComponent | BillComponent>
   ): ComponentRef<TicketComponent | BillComponent> {
     if (!previousComponentRef || previousComponentRef.componentType !== component) {
       if (previousComponentRef) {

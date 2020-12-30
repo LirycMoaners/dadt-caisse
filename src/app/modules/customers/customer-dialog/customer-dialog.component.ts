@@ -1,4 +1,4 @@
-import { Component, OnInit, Inject } from '@angular/core';
+import { Component, Inject } from '@angular/core';
 import { FormGroup, FormControl, Validators } from '@angular/forms';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 
@@ -9,16 +9,14 @@ import { Customer } from 'src/app/shared/models/customer.model';
   templateUrl: './customer-dialog.component.html',
   styleUrls: ['./customer-dialog.component.scss']
 })
-export class CustomerDialogComponent implements OnInit {
-  public title = '';
+export class CustomerDialogComponent {
+  public title: string;
   public customerFormGroup: FormGroup;
 
   constructor(
     private readonly ref: MatDialogRef<CustomerDialogComponent>,
     @Inject(MAT_DIALOG_DATA) private readonly customer: Customer
-  ) { }
-
-  ngOnInit(): void {
+  ) {
     this.customerFormGroup = new FormGroup({
       id: new FormControl(this.customer ? this.customer.id : ''),
       firstName: new FormControl(this.customer ? this.customer.firstName : '', Validators.required),
@@ -35,7 +33,6 @@ export class CustomerDialogComponent implements OnInit {
 
     if (this.customer) {
       this.title = 'Edition de client';
-      this.customerFormGroup.setValue(this.customer);
     } else {
       this.title = 'Ajout de client';
     }

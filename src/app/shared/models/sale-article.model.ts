@@ -1,7 +1,7 @@
 import { Article } from './article.model';
 
 export class SaleArticle {
-  id: string;
+  id: string | null;
   reference: string;
   label: string;
   categoryId: string;

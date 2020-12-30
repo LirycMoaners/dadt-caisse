@@ -1,11 +1,11 @@
 export class Settings {
-  address: string;
-  taxeRate: number;
-  ticketFooter: string;
-  eurosToPoint: number;
-  pointsToEuro: number;
-  pointsForDiscount: number;
-  discount: number;
-  discountType: '%' | '€';
+  address?: string;
+  taxeRate = 0;
+  ticketFooter?: string;
+  eurosToPoint = 1;
+  pointsToEuro = 1;
+  pointsForDiscount?: number;
+  discount?: number;
+  discountType?: '%' | '€';
   contactGroup?: string;
 }

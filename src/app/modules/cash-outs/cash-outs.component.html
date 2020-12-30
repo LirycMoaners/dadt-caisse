@@ -9,7 +9,7 @@
 
 <div class="container">
   <div class="tree">
-    <app-cash-outs-tree *ngIf="cashOuts" [cashOuts]="cashOuts" [expandDate]="filterDate" (cashOutSelected)="showCashOutDetails($event)"></app-cash-outs-tree>
+    <app-cash-outs-tree [cashOuts]="cashOuts" [expandDate]="filterDate" (cashOutSelected)="showCashOutDetails($event)"></app-cash-outs-tree>
     <button mat-raised-button color="accent" (click)="addCashOut()">+ Ajouter</button>
   </div>
   <app-cash-out-details *ngIf="currentCashOut" [cashOut]="currentCashOut" (cashOutDeleted)="currentCashOut = null"></app-cash-out-details>

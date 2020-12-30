@@ -2,9 +2,9 @@ import { CashOutCategory } from './cash-out-category.model';
 import { DatabaseObject } from './database-object.model';
 
 export class CashOut extends DatabaseObject {
-  label: string;
+  label = '';
   cashOutCategory: CashOutCategory;
-  total: number;
+  total = 0;
 
   constructor() {
     super();

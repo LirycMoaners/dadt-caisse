@@ -1,6 +1,6 @@
 <div class="header">
-  <h2>Vente du {{ sale.createDate | date:'dd/MM/yyyy à HH:mm:ss' }}</h2>
-  <h3>Client(e) : {{ sale.customer ? sale.customer.lastName + ' ' + sale.customer.firstName : 'Non renseigné' }}</h3>
+  <h2>Vente du {{ sale?.createDate | date:'dd/MM/yyyy à HH:mm:ss' }}</h2>
+  <h3>Client(e) : {{ sale?.customer ? sale?.customer?.lastName + ' ' + sale?.customer?.firstName : 'Non renseigné' }}</h3>
 </div>
 
 <div class="container">
@@ -13,7 +13,7 @@
           <mat-header-cell *matHeaderCellDef> Référence </mat-header-cell>
           <mat-cell *matCellDef="let element">{{element.reference}}</mat-cell>
           <mat-footer-cell *matFooterCellDef class="saleTotalLabel">
-            <div *ngIf="sale.discount">Total HR</div>
+            <div *ngIf="sale?.discount">Total HR</div>
             <div>Total</div>
           </mat-footer-cell>
         </ng-container>
@@ -55,8 +55,8 @@
             {{(element.price * element.quantity) | currency:'EUR'}}
           </mat-cell>
           <mat-footer-cell *matFooterCellDef class="saleDiscountLabel">
-            <div *ngIf="sale.discount"></div>
-            <div>{{ sale.isFidelityDiscount ? '(fidélité)' : '' }}</div>
+            <div *ngIf="sale?.discount"></div>
+            <div>{{ sale?.isFidelityDiscount ? '(fidélité)' : '' }}</div>
           </mat-footer-cell>
         </ng-container>
 
@@ -68,7 +68,7 @@
           </mat-cell>
           <mat-footer-cell *matFooterCellDef class="saleDiscount">
             <div></div>
-            <div *ngIf="sale.discount">- {{ sale.discount }} {{ sale.discountType }}</div>
+            <div *ngIf="sale?.discount">- {{ sale?.discount }} {{ sale?.discountType }}</div>
           </mat-footer-cell>
         </ng-container>
 
@@ -79,8 +79,8 @@
             {{getSaleArticleTotal(element) | currency:'EUR'}}
           </mat-cell>
           <mat-footer-cell *matFooterCellDef class="saleTotal">
-            <div *ngIf="sale.discount">{{ getSaleTotalBeforeDiscount() | currency:'EUR' }}</div>
-            <div>{{ sale.total | currency:'EUR' }}</div>
+            <div *ngIf="sale?.discount">{{ getSaleTotalBeforeDiscount() | currency:'EUR' }}</div>
+            <div>{{ sale?.total | currency:'EUR' }}</div>
           </mat-footer-cell>
         </ng-container>
 
@@ -105,7 +105,7 @@
               matInput
               type="text"
               formControlName="cashTotal"
-              (change)="element.cashTotal = toNumber($event.target.value)"
+              (change)="element.cashTotal = toNumber($any($event.target).value)"
             >
           </mat-form-field>
         </mat-cell>
@@ -122,7 +122,7 @@
               matInput
               type="text"
               formControlName="cardTotal"
-              (change)="element.cardTotal = toNumber($event.target.value)"
+              (change)="element.cardTotal = toNumber($any($event.target).value)"
             >
           </mat-form-field>
         </mat-cell>
@@ -139,7 +139,7 @@
               matInput
               type="text"
               formControlName="checkTotal"
-              (change)="element.checkTotal = toNumber($event.target.value)"
+              (change)="element.checkTotal = toNumber($any($event.target).value)"
             >
           </mat-form-field>
         </mat-cell>
@@ -156,7 +156,7 @@
               matInput
               type="text"
               formControlName="creditTotal"
-              (change)="element.creditTotal = toNumber($event.target.value)"
+              (change)="element.creditTotal = toNumber($any($event.target).value)"
             >
           </mat-form-field>
         </mat-cell>
