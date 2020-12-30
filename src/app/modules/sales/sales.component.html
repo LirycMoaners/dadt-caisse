@@ -1,5 +1,5 @@
 <div class="container">
-  <app-sales-tree *ngIf="sales" [sales]="sales" (saleSelected)="showSaleDetails($event)"></app-sales-tree>
+  <app-sales-tree *ngIf="sales.length" [sales]="sales" (saleSelected)="showSaleDetails($event)"></app-sales-tree>
   <app-sale-details *ngIf="currentSale" [sale]="currentSale"></app-sale-details>
   <div class="space" *ngIf="!currentSale"></div>
 </div>

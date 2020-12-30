@@ -11,7 +11,7 @@
         formControlName="customer"
         [matAutocomplete]="auto">
       <mat-autocomplete #auto="matAutocomplete" [displayWith]="displayCustomer">
-        <mat-option *ngFor="let customer of filteredCustomers | async" [value]="customer">
+        <mat-option *ngFor="let customer of filteredCustomers$ | async" [value]="customer">
           {{customer.lastName}} {{customer.firstName}}
         </mat-option>
       </mat-autocomplete>
@@ -26,7 +26,7 @@
           formControlName="discount"
           appNumeric
           [decimals]='2'
-          (change)="changeDiscount($event.target.value)"
+          (change)="changeDiscount($any($event.target)?.value)"
         >
       </mat-form-field>
       <mat-form-field>
@@ -60,7 +60,7 @@
             matInput
             type="text"
             formControlName="cashTotal"
-            (change)="saleForm.get('cashTotal').setValue(toNumber($event.target.value))"
+            (change)="saleForm.get('cashTotal')?.setValue(toNumber($any($event.target).value))"
             placeholder="Liquide"
           >
         </mat-form-field>
@@ -74,7 +74,7 @@
             matInput
             type="text"
             formControlName="cardTotal"
-            (change)="saleForm.get('cardTotal').setValue(toNumber($event.target.value))"
+            (change)="saleForm.get('cardTotal')?.setValue(toNumber($any($event.target).value))"
             placeholder="Carte"
           >
         </mat-form-field>
@@ -88,7 +88,7 @@
             matInput
             type="text"
             formControlName="checkTotal"
-            (change)="saleForm.get('checkTotal').setValue(toNumber($event.target.value))"
+            (change)="saleForm.get('checkTotal')?.setValue(toNumber($any($event.target).value))"
             placeholder="Chèque"
           >
         </mat-form-field>
@@ -102,7 +102,7 @@
             matInput
             type="text"
             formControlName="creditTotal"
-            (change)="saleForm.get('creditTotal').setValue(toNumber($event.target.value))"
+            (change)="saleForm.get('creditTotal')?.setValue(toNumber($any($event.target).value))"
             placeholder="Avoir"
           >
         </mat-form-field>
@@ -110,7 +110,7 @@
       </div>
     </div>
   </form>
-  <mat-error *ngIf="errorMessage">{{ errorMessage }}</mat-error>
+  <mat-error>{{ errorMessage }}</mat-error>
 </mat-dialog-content>
 <mat-dialog-actions align="end">
   <button mat-raised-button mat-dialog-close>Annuler</button>

@@ -1,8 +1,8 @@
 import { ArrayDataSource } from '@angular/cdk/collections';
 import { FlatTreeControl } from '@angular/cdk/tree';
 import { FormStyle, getLocaleMonthNames, TranslationWidth } from '@angular/common';
-import { EventEmitter } from '@angular/core';
-import { Component, Input, OnInit, Output } from '@angular/core';
+import { EventEmitter, OnInit } from '@angular/core';
+import { Component, Input, Output } from '@angular/core';
 import { FlatNode } from 'src/app/shared/models/flat-node.interface';
 import { Sale } from 'src/app/shared/models/sale.model';
 
@@ -12,37 +12,37 @@ import { Sale } from 'src/app/shared/models/sale.model';
   styleUrls: ['./sales-tree.component.scss']
 })
 export class SalesTreeComponent implements OnInit {
-  @Input() sales: Sale[];
-  @Output() saleSelected: EventEmitter<Sale> = new EventEmitter();
-  public dateFilter: Date;
-  public textFilter: string;
-  public dataSourceByDate: ArrayDataSource<FlatNode<Sale>>;
-  public dataSourceByCustomer: ArrayDataSource<FlatNode<Sale>>;
-  public treeControlByDate: FlatTreeControl<FlatNode<Sale>>;
-  public treeControlByCustomer: FlatTreeControl<FlatNode<Sale>>;
-  private saleFlatNodesByDate: FlatNode<Sale>[];
-  private saleFlatNodesByCustomer: FlatNode<Sale>[];
-  private months: string[];
+  @Input() sales: Sale[] = [];
+  @Output() saleSelected: EventEmitter<Sale | undefined> = new EventEmitter();
+  public dateFilter: Date = new Date();
+  public textFilter: string | undefined;
+  public dataSourceByDate?: ArrayDataSource<FlatNode<Sale | undefined>>;
+  public dataSourceByCustomer?: ArrayDataSource<FlatNode<Sale | undefined>>;
+  public treeControlByDate: FlatTreeControl<FlatNode<Sale | undefined>>;
+  public treeControlByCustomer: FlatTreeControl<FlatNode<Sale | undefined>>;
+  private saleFlatNodesByDate?: FlatNode<Sale | undefined>[];
+  private saleFlatNodesByCustomer?: FlatNode<Sale | undefined>[];
+  private months: readonly string[];
 
-  constructor() { }
+  constructor() {
+    this.months = getLocaleMonthNames('fr', FormStyle.Format, TranslationWidth.Wide);
+    this.treeControlByDate = new FlatTreeControl<FlatNode<Sale | undefined>>(
+      (saleFlatNode) => saleFlatNode.level,
+      (saleFlatNode) => saleFlatNode.isExpandable
+    );
+    this.treeControlByCustomer = new FlatTreeControl<FlatNode<Sale | undefined>>(
+      (saleFlatNode) => saleFlatNode.level,
+      (saleFlatNode) => saleFlatNode.isExpandable
+    );
+  }
 
   ngOnInit(): void {
-    this.months = getLocaleMonthNames('fr', FormStyle.Format, TranslationWidth.Wide);
     this.saleFlatNodesByDate = this.getSaleFlatNodesByDate(this.sales);
-    this.dataSourceByDate = new ArrayDataSource<FlatNode<Sale>>(this.saleFlatNodesByDate);
-    this.treeControlByDate = new FlatTreeControl<FlatNode<Sale>>(
-      (saleFlatNode) => saleFlatNode.level,
-      (saleFlatNode) => saleFlatNode.isExpandable
-    );
-    this.treeControlByDate.dataNodes = this.saleFlatNodesByDate;
+    this.dataSourceByDate = new ArrayDataSource<FlatNode<Sale | undefined>>(this.saleFlatNodesByDate);
     this.saleFlatNodesByCustomer = this.getSaleFlatNodesByCustomer(this.sales);
-    this.dataSourceByCustomer = new ArrayDataSource<FlatNode<Sale>>(this.saleFlatNodesByCustomer);
-    this.treeControlByCustomer = new FlatTreeControl<FlatNode<Sale>>(
-      (saleFlatNode) => saleFlatNode.level,
-      (saleFlatNode) => saleFlatNode.isExpandable
-    );
+    this.dataSourceByCustomer = new ArrayDataSource<FlatNode<Sale | undefined>>(this.saleFlatNodesByCustomer);
+    this.treeControlByDate.dataNodes = this.saleFlatNodesByDate;
     this.treeControlByCustomer.dataNodes = this.saleFlatNodesByCustomer;
-    this.dateFilter = new Date();
     this.filterByDate();
   }
 
@@ -50,8 +50,8 @@ export class SalesTreeComponent implements OnInit {
    * Filtre les ventes suivant la date saisie par l'utilisateur
    */
   public filterByDate(): void {
-    this.saleSelected.emit(null);
-    this.saleFlatNodesByDate.forEach(saleFlatNode => {
+    this.saleSelected.emit(undefined);
+    this.saleFlatNodesByDate?.forEach(saleFlatNode => {
       saleFlatNode.isExpanded = false;
       saleFlatNode.isSelected = false;
     });
@@ -60,15 +60,15 @@ export class SalesTreeComponent implements OnInit {
       if (
         this.sales.find(sale => sale.createDate.toString().substring(0, 9) === this.dateFilter.toString().substring(0, 9))
       ) {
-        const yearNode = this.saleFlatNodesByDate.find(
+        const yearNode = this.saleFlatNodesByDate?.find(
           saleFlatNode => saleFlatNode.label === this.dateFilter.getFullYear().toString()
-        );
+        ) as FlatNode<Sale | undefined>;
         yearNode.isExpanded = true;
         const monthNode = this.treeControlByDate.getDescendants(yearNode)
-          .find(saleFlatNode => saleFlatNode.label === this.months[this.dateFilter.getMonth()]);
+          .find(saleFlatNode => saleFlatNode.label === this.months[this.dateFilter.getMonth()]) as FlatNode<Sale | undefined>;
         monthNode.isExpanded = true;
         const dayNode = this.treeControlByDate.getDescendants(monthNode)
-          .find(saleFlatNode => saleFlatNode.label === this.dateFilter.getDate().toString());
+          .find(saleFlatNode => saleFlatNode.label === this.dateFilter.getDate().toString()) as FlatNode<Sale | undefined>;
         dayNode.isExpanded = true;
       }
     }
@@ -78,14 +78,14 @@ export class SalesTreeComponent implements OnInit {
    * Filtre les ventes suivant le client saisi par l'utilisateur
    */
   public filterByText(): void {
-    this.saleSelected.emit(null);
-    this.saleFlatNodesByCustomer.forEach(saleFlatNode => {
+    this.saleSelected.emit(undefined);
+    this.saleFlatNodesByCustomer?.forEach(saleFlatNode => {
       saleFlatNode.isExpanded = false;
       saleFlatNode.isSelected = false;
     });
 
     if (this.textFilter) {
-      const customerNode = this.saleFlatNodesByCustomer.find(saleFlatNode => saleFlatNode.label.includes(this.textFilter));
+      const customerNode = this.saleFlatNodesByCustomer?.find(saleFlatNode => saleFlatNode.label.includes(this.textFilter as string));
       if (customerNode) {
         customerNode.isExpanded = true;
       }
@@ -121,7 +121,7 @@ export class SalesTreeComponent implements OnInit {
    */
   public onClickSaleFlatNode(saleFlatNode: FlatNode<Sale>, isByDate = true): void {
     const saleFlatNodes = isByDate ? this.saleFlatNodesByDate : this.saleFlatNodesByCustomer;
-    saleFlatNodes.forEach(sfn => sfn.isSelected = false);
+    saleFlatNodes?.forEach(sfn => sfn.isSelected = false);
     saleFlatNode.isSelected = true;
     this.saleSelected.emit(saleFlatNode.value);
   }
@@ -131,8 +131,8 @@ export class SalesTreeComponent implements OnInit {
    */
   public collapseAll(isByDate = true): void {
     const saleFlatNodes = isByDate ? this.saleFlatNodesByDate : this.saleFlatNodesByCustomer;
-    const selectedSaleFlatNode = saleFlatNodes.find(saleFlatNode => saleFlatNode.isSelected);
-    saleFlatNodes.forEach(saleFlatNode => saleFlatNode.isExpanded = false);
+    const selectedSaleFlatNode = saleFlatNodes?.find(saleFlatNode => saleFlatNode.isSelected);
+    saleFlatNodes?.forEach(saleFlatNode => saleFlatNode.isExpanded = false);
     if (selectedSaleFlatNode) {
       let parent = this.getParentNode(selectedSaleFlatNode, isByDate);
       while (parent) {
@@ -146,11 +146,11 @@ export class SalesTreeComponent implements OnInit {
    * Convertis les ventes en noeud pour l'affichage de l'arbre par date
    * @param sales Les vente à convertir
    */
-  private getSaleFlatNodesByDate(sales: Sale[]): FlatNode<Sale>[] {
+  private getSaleFlatNodesByDate(sales: Sale[]): FlatNode<Sale | undefined>[] {
     const orderedSales: Sale[] = [...sales].sort((saleA, saleB) =>
       (saleB.createDate as Date).valueOf() - (saleA.createDate as Date).valueOf()
     );
-    const saleFlatNodesByDate: FlatNode<Sale>[] = [];
+    const saleFlatNodesByDate: FlatNode<Sale | undefined>[] = [];
     let startLevelToPush: number;
     let currentTreeSaleLabel: string;
 
@@ -186,7 +186,7 @@ export class SalesTreeComponent implements OnInit {
           level: i,
           isExpandable: i === 3 ? false : true,
           label: currentTreeSaleLabel,
-          value: i === 3 ? sale : null
+          value: i === 3 ? sale : undefined
         });
       }
     }
@@ -198,7 +198,7 @@ export class SalesTreeComponent implements OnInit {
    * Convertis les ventes en noeud pour l'affichage de l'arbre par client
    * @param sales Les vente à convertir
    */
-  private getSaleFlatNodesByCustomer(sales: Sale[]): FlatNode<Sale>[] {
+  private getSaleFlatNodesByCustomer(sales: Sale[]): FlatNode<Sale | undefined>[] {
     const orderedSales: Sale[] = [...sales].sort((saleA, saleB) => {
       if (!saleA.customer) {
         return 1;
@@ -215,7 +215,7 @@ export class SalesTreeComponent implements OnInit {
       }
       return (saleB.createDate as Date).valueOf() - (saleA.createDate as Date).valueOf();
     });
-    const saleFlatNodesByCustomer: FlatNode<Sale>[] = [];
+    const saleFlatNodesByCustomer: FlatNode<Sale | undefined>[] = [];
     let startLevelToPush: number;
     let currentTreeSaleLabel: string;
 
@@ -238,7 +238,7 @@ export class SalesTreeComponent implements OnInit {
           level: i,
           isExpandable: i === 1 ? false : true,
           label: currentTreeSaleLabel,
-          value: i === 1 ? sale : null
+          value: i === 1 ? sale : undefined
         });
       }
     }
@@ -250,17 +250,16 @@ export class SalesTreeComponent implements OnInit {
    * Retourne le noeud parent de celui passé en paramètre
    * @param saleFlatNode Le noeud pour lequel on cherche le parent
    */
-  private getParentNode(saleFlatNode: FlatNode<Sale>, isByDate: boolean): FlatNode<Sale> {
+  private getParentNode(saleFlatNode: FlatNode<Sale | undefined>, isByDate: boolean): FlatNode<Sale | undefined> | undefined {
     const saleFlatNodes = isByDate ? this.saleFlatNodesByDate : this.saleFlatNodesByCustomer;
-    const nodeIndex = saleFlatNodes.indexOf(saleFlatNode);
+    const nodeIndex = (saleFlatNodes as FlatNode<Sale | undefined>[]).indexOf(saleFlatNode);
 
     for (let i = nodeIndex - 1; i >= 0; i--) {
-      if (saleFlatNodes[i].level === saleFlatNode.level - 1) {
-        return saleFlatNodes[i];
+      if ((saleFlatNodes as FlatNode<Sale | undefined>[])[i].level === saleFlatNode.level - 1) {
+        return (saleFlatNodes as FlatNode<Sale | undefined>[])[i];
       }
     }
 
-    return null;
+    return undefined;
   }
-
 }

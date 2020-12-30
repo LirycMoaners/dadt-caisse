@@ -13,11 +13,11 @@ import { CashOut } from 'src/app/shared/models/cash-out.model';
   styleUrls: ['./cash-out-details.component.scss']
 })
 export class CashOutDetailsComponent implements OnInit, OnChanges {
-  @Input() cashOut: CashOut;
+  @Input() cashOut: CashOut = new CashOut();
   @Output() cashOutDeleted: EventEmitter<void> = new EventEmitter();
-  public cashOutForm: FormGroup;
-  public cashOutCategories: CashOutCategory[];
-  public errorMessage: string;
+  public cashOutForm: FormGroup = new FormGroup({});
+  public cashOutCategories: CashOutCategory[] = [];
+  public errorMessage = '';
   public cashOutCategoryCompareFunction =
     (cashOutCategoryA: CashOutCategory, cashOutCategoryB: CashOutCategory) => cashOutCategoryA.id === cashOutCategoryB.id
 
@@ -57,7 +57,7 @@ export class CashOutDetailsComponent implements OnInit, OnChanges {
     if (this.cashOutForm.valid) {
       this.cashOut = {
         id: this.cashOut.id,
-        createDate: this.cashOutForm.get('createDate').value,
+        createDate: this.cashOutForm.get('createDate')?.value,
         updateDate: new Date(),
         ...this.cashOutForm.value
       };

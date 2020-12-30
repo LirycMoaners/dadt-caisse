@@ -1,5 +1,5 @@
 <button mat-raised-button (click)="collapseAll()">Tout réduire</button>
-<mat-tree [dataSource]="dataSource" [treeControl]="treeControl">
+<mat-tree *ngIf="dataSource" [dataSource]="dataSource" [treeControl]="treeControl">
   <mat-tree-node
     *matTreeNodeDef="let cashOutFlatNode"
     matTreeNodePadding

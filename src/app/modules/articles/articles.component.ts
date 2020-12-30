@@ -4,7 +4,7 @@ import { MatTable, MatTableDataSource } from '@angular/material/table';
 import { MatDialog } from '@angular/material/dialog';
 import { of, Subscription } from 'rxjs';
 import { mergeMap } from 'rxjs/operators';
-import { Workbook } from 'exceljs';
+import { Workbook, Column } from 'exceljs';
 
 import { Article } from '../../shared/models/article.model';
 import { ArticleService } from '../../core/http-services/article.service';
@@ -22,9 +22,9 @@ import { MatPaginator } from '@angular/material/paginator';
   styleUrls: ['./articles.component.scss']
 })
 export class ArticlesComponent implements OnInit, OnDestroy, AfterViewInit {
-  @ViewChild(MatPaginator) paginator: MatPaginator;
-  @ViewChild(MatSort) sort: MatSort;
-  @ViewChild(MatTable, {read: ElementRef}) table: ElementRef;
+  @ViewChild(MatPaginator) paginator?: MatPaginator;
+  @ViewChild(MatSort) sort?: MatSort;
+  @ViewChild(MatTable, {read: ElementRef}) table?: ElementRef;
   public dataSource: MatTableDataSource<Article> = new MatTableDataSource();
   public displayedColumns: string[] = ['reference', 'label', 'category', 'buyPrice', 'sellPrice', 'quantity', 'actions'];
   public articleCategories: ArticleCategory[] = [];
@@ -43,8 +43,8 @@ export class ArticlesComponent implements OnInit, OnDestroy, AfterViewInit {
           this.dataSource = new MatTableDataSource(
             [...articles].sort((articleA, articleB) => articleA.reference.localeCompare(articleB.reference))
           );
-          this.dataSource.paginator = this.paginator;
-          this.paginator.page.subscribe(() => this.table.nativeElement.scrollIntoView(true));
+          this.dataSource.paginator = this.paginator as MatPaginator;
+          this.paginator?.page.subscribe(() => this.table?.nativeElement.scrollIntoView(true));
         }),
         this.articleCategoryService.getAll().subscribe(articleCategories => this.articleCategories = articleCategories)
       );
@@ -58,7 +58,9 @@ export class ArticlesComponent implements OnInit, OnDestroy, AfterViewInit {
   }
 
   ngAfterViewInit(): void {
-    this.sort.sortChange.subscribe(() => this.dataSource.data = this.dataSource.sortData(this.dataSource.data, this.sort));
+    this.sort?.sortChange.subscribe(() =>
+      this.dataSource.data = this.dataSource.sortData(this.dataSource.data, (this.sort as MatSort))
+    );
   }
 
   /**
@@ -132,12 +134,12 @@ export class ArticlesComponent implements OnInit, OnDestroy, AfterViewInit {
     worksheet.autoFilter = {from: 'A1', to: 'F1'};
 
     worksheet.columns = [
-      { header: 'Référence', key: 'reference', width: 22 },
-      { header: 'Désignation', key: 'label', width: 22 },
-      { header: 'Catégorie', key: 'articleCategory', width: 16 },
-      { header: 'Prix d\'achat', key: 'buyPrice', width: 15, style: { numFmt: '0.00' } },
-      { header: 'Quantité', key: 'quantity', width: 12 },
-      { header: 'Total', key: 'total', width: 12, style: { numFmt: '0.00' } }
+      { header: 'Référence', key: 'reference', width: 22 } as Column,
+      { header: 'Désignation', key: 'label', width: 22 } as Column,
+      { header: 'Catégorie', key: 'articleCategory', width: 16 } as Column,
+      { header: 'Prix d\'achat', key: 'buyPrice', width: 15, style: { numFmt: '0.00' } } as Column,
+      { header: 'Quantité', key: 'quantity', width: 12 } as Column,
+      { header: 'Total', key: 'total', width: 12, style: { numFmt: '0.00' } } as Column
     ];
 
     worksheet.getCell('A1').border = {
@@ -177,7 +179,7 @@ export class ArticlesComponent implements OnInit, OnDestroy, AfterViewInit {
       worksheet.addRow({
         reference: article.reference,
         label: article.label,
-        articleCategory: this.articleCategories.find(ac => ac.id === article.categoryId).label,
+        articleCategory: this.articleCategories.find(ac => ac.id === article.categoryId)?.label,
         buyPrice: article.buyPrice,
         quantity: article.quantity,
         total: {

@@ -18,8 +18,15 @@ $dadt-caisse-accent: mat-palette($mat-grey, 50);
 // The warn palette is optional (defaults to red).
 $dadt-caisse-warn: mat-palette($mat-red);
 
-// Create the theme object (a Sass map containing all of the palettes).
-$dadt-caisse-theme: mat-dark-theme($dadt-caisse-primary, $dadt-caisse-accent, $dadt-caisse-warn);
+// Create the theme object. A theme consists of configurations for individual
+// theming systems such as "color" or "typography".
+$dadt-caisse-theme: mat-dark-theme((
+  color: (
+    primary: $dadt-caisse-primary,
+    accent: $dadt-caisse-accent,
+    warn: $dadt-caisse-warn
+  )
+));
 
 // Include theme styles for core and each component used in your app.
 // Alternatively, you can import and @include the theme mixins for each component

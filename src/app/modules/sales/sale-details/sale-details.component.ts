@@ -4,7 +4,6 @@ import {
   ComponentRef,
   Input,
   OnChanges,
-  OnInit,
   SimpleChanges,
   ViewContainerRef
 } from '@angular/core';
@@ -27,15 +26,15 @@ import { SaleTools } from 'src/app/shared/tools/sale.tools';
   templateUrl: './sale-details.component.html',
   styleUrls: ['./sale-details.component.scss']
 })
-export class SaleDetailsComponent implements OnInit, OnChanges {
-  @Input() sale: Sale;
+export class SaleDetailsComponent implements OnChanges {
+  @Input() sale?: Sale;
   public dataSource: MatTableDataSource<SaleArticle> = new MatTableDataSource();
   public displayedColumns: string[] = ['reference', 'label', 'category', 'price', 'quantity', 'totalBeforeDiscount', 'discount', 'total'];
   public saleDataSource: MatTableDataSource<Sale> = new MatTableDataSource();
   public saleDisplayedColumns: string[] = ['cash', 'card', 'check', 'credit'];
-  public saleForm: FormGroup;
-  public errorMessage: string;
-  private componentRef: ComponentRef<TicketComponent | BillComponent>;
+  public saleForm: FormGroup = new FormGroup({});
+  public errorMessage = '';
+  private componentRef?: ComponentRef<TicketComponent | BillComponent>;
 
   constructor(
     private readonly cfr: ComponentFactoryResolver,
@@ -43,9 +42,7 @@ export class SaleDetailsComponent implements OnInit, OnChanges {
     private readonly fb: FormBuilder,
     private readonly saleService: SaleService,
     private readonly settingsService: SettingsService
-  ) { }
-
-  ngOnInit(): void { }
+  ) {}
 
   ngOnChanges(changes: SimpleChanges): void {
     if (changes.sale && this.sale) {
@@ -73,13 +70,13 @@ export class SaleDetailsComponent implements OnInit, OnChanges {
       this.componentRef
     );
 
-    this.componentRef.instance.sale = this.sale;
+    this.componentRef.instance.sale = this.sale as Sale;
     if (type === 'ticket') {
       (this.componentRef.instance as TicketComponent).isDuplicata = true;
     }
 
     this.settingsService.getSettings().pipe(first()).subscribe(settings => {
-      this.componentRef.instance.settings = settings;
+      (this.componentRef as ComponentRef<TicketComponent | BillComponent>).instance.settings = settings;
       setTimeout(() => print(), 1000);
     });
   }
@@ -95,7 +92,7 @@ export class SaleDetailsComponent implements OnInit, OnChanges {
    * Retourne le total de la vente avant application de la remise globale de la vente
    */
   public getSaleTotalBeforeDiscount(): number {
-    return SaleTools.getSaleTotalBeforeDiscount(this.sale);
+    return SaleTools.getSaleTotalBeforeDiscount(this.sale as Sale);
   }
 
   /**
@@ -112,10 +109,10 @@ export class SaleDetailsComponent implements OnInit, OnChanges {
   public save(): void {
     if (this.saleForm.valid) {
       this.errorMessage = '';
-      this.sale.updateDate = new Date();
-      this.saleService.update(this.sale).subscribe(() => this.saleForm.markAsUntouched());
+      (this.sale as Sale).updateDate = new Date();
+      this.saleService.update(this.sale as Sale).subscribe(() => this.saleForm.markAsUntouched());
     } else {
-      this.errorMessage = this.saleForm.errors.totalNotEqualToCumulated;
+      this.errorMessage = this.saleForm.errors?.totalNotEqualToCumulated;
     }
   }
 

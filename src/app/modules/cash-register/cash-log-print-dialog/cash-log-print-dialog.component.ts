@@ -1,5 +1,5 @@
 import { DatePipe } from '@angular/common';
-import { Component, OnInit } from '@angular/core';
+import { Component } from '@angular/core';
 import { FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
 import { MatDialogRef } from '@angular/material/dialog';
 import { AddWorksheetOptions, Workbook, Worksheet } from 'exceljs';
@@ -24,7 +24,7 @@ import { XlsxTools } from 'src/app/shared/tools/xlsx.tools';
   templateUrl: './cash-log-print-dialog.component.html',
   styleUrls: ['./cash-log-print-dialog.component.scss']
 })
-export class CashLogPrintDialogComponent implements OnInit {
+export class CashLogPrintDialogComponent {
   public periodForm: FormGroup;
   public datePipe: DatePipe = new DatePipe('fr-FR');
 
@@ -35,9 +35,7 @@ export class CashLogPrintDialogComponent implements OnInit {
     private readonly cashOutService: CashOutService,
     private readonly articleCategoryService: ArticleCategoryService,
     private readonly cashOutCategoryService: CashOutCategoryService
-  ) { }
-
-  ngOnInit(): void {
+  ) {
     this.periodForm = this.fb.group({
       from: new FormControl({value: '', disabled: true}, Validators.required),
       to: new FormControl({value: '', disabled: true}, Validators.required),
@@ -51,9 +49,9 @@ export class CashLogPrintDialogComponent implements OnInit {
   public export(): void {
     if (
       this.periodForm.get('balance')
-      && this.periodForm.get('from').value
-      && this.periodForm.get('to').value
-      && this.periodForm.get('from').value < this.periodForm.get('to').value
+      && this.periodForm.get('from')?.value
+      && this.periodForm.get('to')?.value
+      && this.periodForm.get('from')?.value < this.periodForm.get('to')?.value
     ) {
       combineLatest([
         this.saleService.getAll().pipe(first()),
@@ -62,7 +60,7 @@ export class CashLogPrintDialogComponent implements OnInit {
         this.cashOutCategoryService.getAll().pipe(first())
       ]).subscribe(([sales, cashOuts, articleCategories, cashOutCategories]: [Sale[], CashOut[], ArticleCategory[], CashOutCategory[]]) => {
         const dataByMonth = this.getDataByMonth(
-          this.periodForm.get('balance').value,
+          this.periodForm.get('balance')?.value,
           sales,
           cashOuts,
           articleCategories,
@@ -99,15 +97,15 @@ export class CashLogPrintDialogComponent implements OnInit {
     articleCategories: ArticleCategory[],
     cashOutCategories: CashOutCategory[]
   ): any[] {
-    const dataByMonth = [];
-    let lastDate: Date;
+    const dataByMonth: any[] = [];
+    let lastDate: Date | undefined;
     let lastBalance = balance;
     for (
-      const date: Date = this.periodForm.get('from').value;
-      date.valueOf() <= this.periodForm.get('to').value.valueOf();
+      const date: Date = this.periodForm.get('from')?.value;
+      date.valueOf() <= this.periodForm.get('to')?.value.valueOf();
       date.setDate(date.getDate() + 1)
     ) {
-      if (dataByMonth.length === 0 || date.getMonth() !== lastDate.getMonth()) {
+      if (dataByMonth.length === 0 || date.getMonth() !== lastDate?.getMonth()) {
         dataByMonth.push({label: this.datePipe.transform(date, 'MMMM yyyy'), dataByDay: []});
       }
       const data = this.getDataOnDate(
@@ -149,7 +147,7 @@ export class CashLogPrintDialogComponent implements OnInit {
       date,
       articleCategories
     );
-    const cashOutTotals = this.getCashOutCategoryTotals(cashOuts, date, balance, cashOutCategories);
+    const cashOutTotals = this.getCashOutCategoryTotals(cashOuts, date, cashOutCategories);
     return {
       date: new Date(date),
       ...articleCategoryTotals,
@@ -173,12 +171,12 @@ export class CashLogPrintDialogComponent implements OnInit {
     return sales
       .filter(sale => this.datePipe.transform(sale.createDate, 'dd/MM/yyyy') === this.datePipe.transform(date, 'dd/MM/yyyy'))
       .reduce((dataLine, sale) => {
-        dataLine.cardTotal = MathTools.sum(dataLine.cardTotal, sale.cardTotal);
-        dataLine.cashTotal = MathTools.sum(dataLine.cashTotal, sale.cashTotal);
-        dataLine.checkTotal = MathTools.sum(dataLine.checkTotal, sale.checkTotal);
-        dataLine.creditTotal = MathTools.sum(dataLine.creditTotal, sale.creditTotal);
+        dataLine.cardTotal = MathTools.sum(dataLine.cardTotal as number, sale.cardTotal);
+        dataLine.cashTotal = MathTools.sum(dataLine.cashTotal as number, sale.cashTotal);
+        dataLine.checkTotal = MathTools.sum(dataLine.checkTotal as number, sale.checkTotal);
+        dataLine.creditTotal = MathTools.sum(dataLine.creditTotal as number, sale.creditTotal);
 
-        const saleLine = {};
+        const saleLine: any = {};
 
         for (const articleCategory of articleCategories) {
           const total = sale.articles
@@ -213,13 +211,13 @@ export class CashLogPrintDialogComponent implements OnInit {
         }
 
         if (totalToCompare !== sale.total) {
-          const saleLineKey = Object.keys(saleLine).find(key => !!saleLine[key]);
+          const saleLineKey = Object.keys(saleLine).find(key => !!saleLine[key]) as string;
           saleLine[saleLineKey] = MathTools.sum(saleLine[saleLineKey], MathTools.sum(sale.total, -totalToCompare));
         }
 
         for (const articleCategoryTotal in saleLine) {
           if (dataLine[articleCategoryTotal]) {
-            dataLine[articleCategoryTotal] = MathTools.sum(dataLine[articleCategoryTotal], saleLine[articleCategoryTotal]);
+            dataLine[articleCategoryTotal] = MathTools.sum(dataLine[articleCategoryTotal] as number, saleLine[articleCategoryTotal]);
           } else {
             dataLine[articleCategoryTotal] = saleLine[articleCategoryTotal];
           }
@@ -230,7 +228,7 @@ export class CashLogPrintDialogComponent implements OnInit {
         articleCategories.reduce((initObject, articleCategory) => {
           initObject[articleCategory.label] = null;
           return initObject;
-        }, {cardTotal: 0, cashTotal: 0, checkTotal: 0, creditTotal: 0})
+        }, {cardTotal: 0, cashTotal: 0, checkTotal: 0, creditTotal: 0} as { [index: string]: number | null })
       );
   }
 
@@ -258,16 +256,15 @@ export class CashLogPrintDialogComponent implements OnInit {
    * Retourne un objet contenant les différents totaux des retraits caisse pour une date donnée
    * @param cashOuts Les retraits caisse
    * @param date La date concernée par les totaux
-   * @param balance Le solde modifié par les retraits caisse
    * @param cashOutCategories Les catégories de retrait caisse
    */
-  private getCashOutCategoryTotals(cashOuts: CashOut[], date: Date, balance: number, cashOutCategories: CashOutCategory[]): any {
+  private getCashOutCategoryTotals(cashOuts: CashOut[], date: Date, cashOutCategories: CashOutCategory[]): any {
     return cashOuts
       .filter(cashOut => this.datePipe.transform(cashOut.createDate, 'dd/MM/yyyy') === this.datePipe.transform(date, 'dd/MM/yyyy'))
       .reduce(
         (dataLine, cashOut) => {
           if (dataLine[cashOut.cashOutCategory.label]) {
-            dataLine[cashOut.cashOutCategory.label] = MathTools.sum(dataLine[cashOut.cashOutCategory.label], cashOut.total);
+            dataLine[cashOut.cashOutCategory.label] = MathTools.sum(dataLine[cashOut.cashOutCategory.label] as number, cashOut.total);
           } else {
             dataLine[cashOut.cashOutCategory.label] = cashOut.total;
           }
@@ -277,7 +274,7 @@ export class CashLogPrintDialogComponent implements OnInit {
         cashOutCategories.reduce((initObject, cashOutCategory) => {
           initObject[cashOutCategory.label] = null;
           return initObject;
-        }, {libellé: ''})
+        }, {libellé: ''} as { [index: string]: string | number | null })
       );
   }
 
@@ -387,7 +384,7 @@ export class CashLogPrintDialogComponent implements OnInit {
         sharedFormula: '',
         date1904: false
       }
-      : this.periodForm.get('balance').value;
+      : this.periodForm.get('balance')?.value;
     return worksheet;
   }
 

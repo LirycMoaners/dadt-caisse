@@ -1,13 +1,13 @@
 import { DatabaseObject } from './database-object.model';
 
-export class Customer extends DatabaseObject {
+export interface Customer extends DatabaseObject {
   firstName: string;
   lastName: string;
   emailAddress: string;
   phoneNumber: string;
   loyaltyPoints: number;
-  lastDiscountGaveDate: Date | string;
-  lastDiscountUsedDate: Date | string;
-  resourceName: string;
+  lastDiscountGaveDate: Date | string | null;
+  lastDiscountUsedDate: Date | string | null;
+  resourceName: string | undefined;
   etag?: string;
 }

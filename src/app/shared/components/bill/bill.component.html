@@ -79,7 +79,7 @@
           <td></td>
           <td></td>
           <td></td>
-          <td>{{ sale.discount ? '- ' + sale.discount : '' }} {{ sale.discountType }}</td>
+          <td>{{ sale.discount ? '- ' + (sale.discount || '') : '' }} {{ sale.discountType }}</td>
           <td>{{ sale.total | currency:'EUR' }}</td>
         </tr>
         <tr>

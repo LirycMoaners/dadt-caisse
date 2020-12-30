@@ -21,7 +21,7 @@
         matInput
         type="text"
         formControlName="balance"
-        (change)="periodForm.get('balance').setValue(toNumber($event.target.value))"
+        (change)="periodForm.get('balance')?.setValue(toNumber($any($event.target).value))"
       >
     </mat-form-field>
   </form>

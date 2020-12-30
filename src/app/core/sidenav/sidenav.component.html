@@ -18,7 +18,7 @@
         [routerLink]="route.path"
         routerLinkActive="list-item-active"
         (click)="closeSidenav()"
-      >{{ route.data.title }}</a>
+      >{{ route.data?.title }}</a>
     </mat-nav-list>
     <mat-form-field class="day-total">
       <input
@@ -47,7 +47,7 @@
     </div>
   </mat-sidenav>
   <mat-sidenav-content>
-    <app-toolbar *ngIf="(isHandset$ | async) && isSignedIn" (menuButtonClicked)="drawer.toggle()"></app-toolbar>
+    <app-toolbar *ngIf="(isHandset$ | async) && isSignedIn" (menuButtonClicked)="drawer?.toggle()"></app-toolbar>
     <ng-content></ng-content>
   </mat-sidenav-content>
 </mat-sidenav-container>

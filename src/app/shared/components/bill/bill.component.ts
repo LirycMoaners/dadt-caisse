@@ -1,4 +1,4 @@
-import { Component, Input, OnInit } from '@angular/core';
+import { Component, Input } from '@angular/core';
 import { SaleArticle } from '../../models/sale-article.model';
 import { Sale } from '../../models/sale.model';
 import { Settings } from '../../models/settings.model';
@@ -10,14 +10,12 @@ import { SaleTools } from '../../tools/sale.tools';
   templateUrl: './bill.component.html',
   styleUrls: ['./bill.component.scss']
 })
-export class BillComponent implements OnInit {
-  @Input() sale: Sale;
-  @Input() settings: Settings;
+export class BillComponent {
+  @Input() sale: Sale = new Sale();
+  @Input() settings: Settings = new Settings();
   public today = new Date();
 
   constructor() { }
-
-  ngOnInit(): void { }
 
   /**
    * Retourne le total d'un article d'une vente
@@ -42,9 +40,9 @@ export class BillComponent implements OnInit {
   }
 
   public getPayementMethods(): string {
-    return Object.keys(this.sale).reduce((result, key) => {
-      if (this.sale[key]) {
-        switch (key) {
+    return Object.entries(this.sale).reduce((result, entry) => {
+      if (entry[1]) {
+        switch (entry[0]) {
           case 'cardTotal':
             result += result ? ', carte' : 'Payé par carte';
             break;
