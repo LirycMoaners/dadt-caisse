@@ -11,7 +11,7 @@
 </div>
 
 <div class="container">
-  <mat-table [dataSource]="dataSource" matSort>
+  <mat-table [dataSource]="dataSource" matSort matSortActive="reference"  matSortDirection="asc">
     <!-- Reference Column -->
     <ng-container matColumnDef="reference">
       <mat-header-cell *matHeaderCellDef mat-sort-header class="mat-column-reference"> Référence </mat-header-cell>
@@ -27,7 +27,7 @@
     </ng-container>
 
     <!-- Category Column -->
-    <ng-container matColumnDef="category">
+    <ng-container matColumnDef="categoryId">
       <mat-header-cell *matHeaderCellDef mat-sort-header> Catégorie </mat-header-cell>
       <mat-cell *matCellDef="let element"> {{element.categoryId | articleCategoryLabel | async}} </mat-cell>
     </ng-container>

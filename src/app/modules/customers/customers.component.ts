@@ -1,4 +1,4 @@
-import { Component, OnInit, ViewChild, AfterViewInit, ElementRef } from '@angular/core';
+import { Component, OnInit, ViewChild, ElementRef } from '@angular/core';
 import { MatTable, MatTableDataSource } from '@angular/material/table';
 import { MatSort } from '@angular/material/sort';
 import { MatDialog } from '@angular/material/dialog';
@@ -15,7 +15,7 @@ import { MatPaginator } from '@angular/material/paginator';
   templateUrl: './customers.component.html',
   styleUrls: ['./customers.component.scss']
 })
-export class CustomersComponent implements OnInit, AfterViewInit {
+export class CustomersComponent implements OnInit {
   @ViewChild(MatPaginator) paginator?: MatPaginator;
   @ViewChild(MatSort) sort?: MatSort;
   @ViewChild(MatTable, {read: ElementRef}) table?: ElementRef;
@@ -30,25 +30,29 @@ export class CustomersComponent implements OnInit, AfterViewInit {
   ngOnInit(): void {
     setTimeout(() => {
       this.customerService.getAll().subscribe(customers => {
-        this.dataSource = new MatTableDataSource(
-          [...customers].sort((customerA, customerB) => {
-            let result = customerA.firstName.localeCompare(customerB.firstName);
-            if (result === 0) {
-              result = customerA.lastName.localeCompare(customerB.lastName);
-            }
-            return result;
-          })
-        );
         this.dataSource.paginator = this.paginator as MatPaginator;
+        this.dataSource.sort = this.sort as MatSort;
+        this.dataSource.sortingDataAccessor = (data, attribute) => {
+          switch (attribute) {
+            case 'lastDiscountGaveDate':
+            case 'lastDiscountUsedDate':
+              return (data[attribute] as Date).toString();
+            case 'loyaltyPoints':
+              return data[attribute];
+            default:
+              return data[attribute as 'firstName' | 'lastName' | 'emailAddress' | 'phoneNumber'].toLocaleUpperCase();
+          }
+        };
+        this.dataSource.data = [...customers].sort((customerA, customerB) => {
+          let result = customerA.firstName.toLocaleUpperCase().localeCompare(customerB.firstName.toLocaleUpperCase());
+          if (result === 0) {
+            result = customerA.lastName.toLocaleUpperCase().localeCompare(customerB.lastName.toLocaleUpperCase());
+          }
+          return result;
+        });
         this.paginator?.page.subscribe(() => this.table?.nativeElement.scrollIntoView(true));
       });
     }, 0);
-  }
-
-  ngAfterViewInit(): void {
-    this.sort?.sortChange.subscribe(() =>
-      this.dataSource.data = this.dataSource.sortData(this.dataSource.data, (this.sort as MatSort))
-    );
   }
 
   /**
@@ -79,7 +83,7 @@ export class CustomersComponent implements OnInit, AfterViewInit {
     const dialogRef = this.dialog.open(CustomerDialogComponent, {data: customer});
 
     dialogRef.afterClosed().pipe(
-      mergeMap((newCustomer: Customer) => this.customerService.update(newCustomer))
+      mergeMap((newCustomer: Customer) => !!newCustomer ? this.customerService.update(newCustomer) : of(null))
     ).subscribe();
   }
 
