@@ -11,6 +11,7 @@ import { SaleTools } from 'src/app/shared/tools/sale.tools';
 import { NumberTools } from 'src/app/shared/tools/number.tools';
 import { Settings } from 'src/app/shared/models/settings.model';
 import { SettingsService } from 'src/app/core/http-services/settings.service';
+import { MathTools } from 'src/app/shared/tools/math.tools';
 
 @Component({
   selector: 'app-payment-dialog',
@@ -157,21 +158,17 @@ export class PaymentDialogComponent implements OnInit {
    * Retourne le total d'une ligne d'article
    */
   public getTotal(): number {
-    let total: string;
     if (this.saleForm.get('discount')?.value) {
       if (this.saleForm.get('discountType')?.value === '%') {
-        total = (
-          Math.round(this.totalBeforeDiscount * 100)
-          - Math.round(this.totalBeforeDiscount * this.saleForm.get('discount')?.value)
-        ).toString();
+        return MathTools.multiply(
+          this.totalBeforeDiscount,
+          MathTools.multiply(MathTools.sum(100, -this.saleForm.get('discount')?.value), 0.01)
+        );
       } else {
-        total = (Math.round(this.totalBeforeDiscount * 100) - Math.round(this.saleForm.get('discount')?.value * 100)).toString();
+        return MathTools.sum(this.totalBeforeDiscount, -this.saleForm.get('discount')?.value);
       }
-    } else {
-      total = Math.round(this.totalBeforeDiscount * 100).toString();
     }
-    total = total.substring(0, total.length - 2) + '.' + total.substring(total.length - 2, total.length);
-    return Number(total);
+    return this.totalBeforeDiscount;
   }
 
   /**
