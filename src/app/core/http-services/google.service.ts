@@ -3,9 +3,7 @@ import { combineLatest, defer, from, Observable, of, ReplaySubject } from 'rxjs'
 import { first, map, mergeMap } from 'rxjs/operators';
 import { Customer } from 'src/app/shared/models/customer.model';
 import { SettingsService } from './settings.service';
-import clientKeysProd from '../../../assets/secure/google-client.prod.json';
-import clientKeysDev from '../../../assets/secure/google-client.dev.json';
-import { environment } from 'src/environments/environment';
+import clientKeys from '../../../assets/secrets/google-client.json';
 import { Settings } from 'src/app/shared/models/settings.model';
 
 
@@ -253,7 +251,7 @@ export class GoogleService {
    */
   private initClient(): Observable<void> {
     return from(
-      gapi.client.init(environment.production ? clientKeysProd : clientKeysDev)
+      gapi.client.init(clientKeys)
     ).pipe(
       map(() => {
         this.GoogleAuth = gapi.auth2.getAuthInstance();
