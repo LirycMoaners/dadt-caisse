@@ -7,46 +7,34 @@ export class SaleArticleTools {
    * Retourne le total d'une ligne d'article
    */
   public static getSaleArticleTotal(saleArticle: SaleArticle): number {
-    let total: string;
+    const totalBeforeDiscount = MathTools.multiply(saleArticle.price, saleArticle.quantity);
     if (saleArticle.discount) {
       if (saleArticle.discountType === '%') {
-        total = (
-          Math.round(saleArticle.price * 100 * saleArticle.quantity)
-          - Math.round(saleArticle.price * saleArticle.discount * saleArticle.quantity)
-        ).toString();
+        return MathTools.multiply(totalBeforeDiscount, MathTools.multiply(MathTools.sum(100, -saleArticle.discount), 0.01));
       } else {
-        total = (Math.round(saleArticle.price * saleArticle.quantity * 100) - Math.round(saleArticle.discount * 100)).toString();
+        return MathTools.sum(totalBeforeDiscount, - saleArticle.discount);
       }
-    } else {
-      total = Math.round(saleArticle.price * 100 * saleArticle.quantity).toString();
     }
-    total = total.substring(0, total.length - 2) + '.' + total.substring(total.length - 2, total.length);
-    return Number(total);
+    return totalBeforeDiscount;
   }
 
   /**
    * Retourne le total de la vente
    */
   public static getSaleArticlesTotal(saleArticles: SaleArticle[]): number {
-    let totalString: string = saleArticles.reduce((total, saleArticle) => {
-      return total + Math.round(this.getSaleArticleTotal(saleArticle) * 100);
-    }, 0).toString();
-    totalString = totalString.substring(0, totalString.length - 2)
-      + '.'
-      + totalString.substring(totalString.length - 2, totalString.length);
-    return Number(totalString);
+    return saleArticles.reduce(
+      (total, saleArticle) => MathTools.sum(total, this.getSaleArticleTotal(saleArticle)),
+      0
+    );
   }
 
   /**
    * Retourne le total de la vente avant les remises
    */
   public static getSaleArticlesTotalBeforeDiscount(saleArticles: SaleArticle[]): number {
-    return saleArticles.reduce((total, saleArticle) => {
-      const totalString = Math.round(Math.round(saleArticle.price * 100) * saleArticle.quantity).toString();
-      return MathTools.sum(
-        total,
-        Number(totalString.substring(0, totalString.length - 2) + '.' + totalString.substring(totalString.length - 2, totalString.length))
-      );
-    }, 0);
+    return saleArticles.reduce(
+      (total, saleArticle) => MathTools.sum(total, MathTools.multiply(saleArticle.price, saleArticle.quantity)),
+      0
+    );
   }
 }
