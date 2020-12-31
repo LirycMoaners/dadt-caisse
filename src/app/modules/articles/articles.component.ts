@@ -1,4 +1,4 @@
-import { Component, OnInit, AfterViewInit, ViewChild, OnDestroy, ElementRef } from '@angular/core';
+import { Component, OnInit, ViewChild, OnDestroy, ElementRef } from '@angular/core';
 import { MatSort } from '@angular/material/sort';
 import { MatTable, MatTableDataSource } from '@angular/material/table';
 import { MatDialog } from '@angular/material/dialog';
@@ -21,12 +21,12 @@ import { MatPaginator } from '@angular/material/paginator';
   templateUrl: './articles.component.html',
   styleUrls: ['./articles.component.scss']
 })
-export class ArticlesComponent implements OnInit, OnDestroy, AfterViewInit {
+export class ArticlesComponent implements OnInit, OnDestroy {
   @ViewChild(MatPaginator) paginator?: MatPaginator;
   @ViewChild(MatSort) sort?: MatSort;
   @ViewChild(MatTable, {read: ElementRef}) table?: ElementRef;
   public dataSource: MatTableDataSource<Article> = new MatTableDataSource();
-  public displayedColumns: string[] = ['reference', 'label', 'category', 'buyPrice', 'sellPrice', 'quantity', 'actions'];
+  public displayedColumns: string[] = ['reference', 'label', 'categoryId', 'buyPrice', 'sellPrice', 'quantity', 'actions'];
   public articleCategories: ArticleCategory[] = [];
   private readonly subscriptions: Subscription[] = [];
 
@@ -40,10 +40,21 @@ export class ArticlesComponent implements OnInit, OnDestroy, AfterViewInit {
     setTimeout(() => {
       this.subscriptions.push(
         this.articleService.getAll().subscribe(articles => {
-          this.dataSource = new MatTableDataSource(
-            [...articles].sort((articleA, articleB) => articleA.reference.localeCompare(articleB.reference))
-          );
           this.dataSource.paginator = this.paginator as MatPaginator;
+          this.dataSource.sort = this.sort as MatSort;
+          this.dataSource.sortingDataAccessor = (data, attribute) => {
+            switch (attribute) {
+              case 'buyPrice':
+              case 'sellPrice':
+              case 'quantity':
+                return data[attribute];
+              default:
+                return data[attribute as 'reference' | 'label' | 'categoryId'].toLocaleUpperCase();
+            }
+          };
+          this.dataSource.data = [...articles].sort((articleA, articleB) =>
+            articleA.reference.toLocaleUpperCase().localeCompare(articleB.reference.toLocaleUpperCase())
+          );
           this.paginator?.page.subscribe(() => this.table?.nativeElement.scrollIntoView(true));
         }),
         this.articleCategoryService.getAll().subscribe(articleCategories => this.articleCategories = articleCategories)
@@ -55,12 +66,6 @@ export class ArticlesComponent implements OnInit, OnDestroy, AfterViewInit {
     for (const subscription of this.subscriptions) {
       subscription.unsubscribe();
     }
-  }
-
-  ngAfterViewInit(): void {
-    this.sort?.sortChange.subscribe(() =>
-      this.dataSource.data = this.dataSource.sortData(this.dataSource.data, (this.sort as MatSort))
-    );
   }
 
   /**
