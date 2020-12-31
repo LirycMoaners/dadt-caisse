@@ -11,7 +11,7 @@
 </div>
 
 <div class="container">
-  <mat-table [dataSource]="dataSource" matSort>
+  <mat-table [dataSource]="dataSource" matSort matSortActive="firstName"  matSortDirection="asc">
     <!-- Firstname Column -->
     <ng-container matColumnDef="firstName">
       <mat-header-cell *matHeaderCellDef mat-sort-header class="mat-column-first-name"> Prénom </mat-header-cell>

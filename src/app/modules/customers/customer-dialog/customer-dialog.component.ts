@@ -23,7 +23,7 @@ export class CustomerDialogComponent {
       lastName: new FormControl(this.customer ? this.customer.lastName : '', Validators.required),
       emailAddress: new FormControl(this.customer ? this.customer.emailAddress : '', [Validators.email]),
       phoneNumber: new FormControl(this.customer ? this.customer.phoneNumber : '', [Validators.pattern('^[0-9]{10}$')]),
-      loyaltyPoints: new FormControl(this.customer ? this.customer.loyaltyPoints : '', [Validators.pattern('^[0-9]*$')]),
+      loyaltyPoints: new FormControl(this.customer ? this.customer.loyaltyPoints : 0, [Validators.pattern('^[0-9]*$')]),
       createDate: new FormControl(this.customer ? this.customer.createDate : ''),
       updateDate: new FormControl(this.customer ? this.customer.updateDate : ''),
       lastDiscountGaveDate: new FormControl(this.customer ? this.customer.lastDiscountGaveDate : ''),
