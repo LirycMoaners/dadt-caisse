@@ -79,4 +79,11 @@ export class TicketComponent {
     return sum >= (this.settings.pointsForDiscount as number) ? MathTools.sum(sum, -(this.settings.pointsForDiscount as number)) : sum;
   }
 
+  /**
+   * Imprime le ticket
+   */
+  public print(): void {
+    setTimeout(() => print(), 0);
+  }
+
 }
