@@ -30,8 +30,10 @@ export class QuantityDialogComponent implements OnInit {
    * Ferme la modale en renvoyant la quantité saisie
    */
   public close(): void {
-    if (this.quantity !== 0) {
-      this.dialogRef.close(this.quantity);
-    }
+    setTimeout(() => {
+      if (this.quantity !== 0) {
+        this.dialogRef.close(this.quantity);
+      }
+    }, 0);
   }
 }
