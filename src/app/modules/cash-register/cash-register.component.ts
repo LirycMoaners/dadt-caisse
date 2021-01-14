@@ -204,7 +204,7 @@ export class CashRegisterComponent implements OnInit, OnDestroy {
   public printBill(): void {
     this.componentRef = PrintTools.createComponent(this.cfr, this.viewContainerRef, BillComponent, this.componentRef);
     (this.componentRef.instance as BillComponent).sale = this.lastSale as Sale;
-    setTimeout(() => print(), 0);
+    (this.componentRef.instance as BillComponent).print();
   }
 
   /**
@@ -265,7 +265,7 @@ export class CashRegisterComponent implements OnInit, OnDestroy {
     (this.componentRef.instance as TicketComponent).isDuplicata = isDuplicata;
     (this.componentRef.instance as TicketComponent).sale = this.lastSale as Sale;
     (this.componentRef.instance as TicketComponent).settings = this.settings;
-    setTimeout(() => print(), 1000);
+    (this.componentRef.instance as TicketComponent).print();
   }
 
 }
