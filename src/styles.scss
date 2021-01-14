@@ -58,7 +58,11 @@ $dadt-caisse-theme: mat-dark-theme((
   -webkit-font-smoothing: antialiased;
 }
 
-html, body { height: 100%; }
+html, body {
+  @media screen {
+    height: 100%;
+  }
+}
 body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; }
 
 .list-item-active {
