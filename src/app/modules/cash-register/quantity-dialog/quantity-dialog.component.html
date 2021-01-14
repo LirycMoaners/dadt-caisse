@@ -9,7 +9,7 @@
       matInput
       type="text"
       [ngModel]="quantity"
-      (ngModelChange)="quantity = toNumber($event)"
+      (change)="quantity = toNumber($any($event.target).value)"
       cdkFocusInitial
       (keydown.enter)="close()"
     >
