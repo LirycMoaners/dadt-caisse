@@ -62,4 +62,11 @@ export class BillComponent {
     }, '');
   }
 
+  /**
+   * Imprime le ticket
+   */
+  public print(): void {
+    setTimeout(() => print(), 0);
+  }
+
 }
