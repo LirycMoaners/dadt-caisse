@@ -5,6 +5,7 @@
 
 .mat-tab-group {
   flex: 1;
+  overflow: hidden;
 
   ::ng-deep {
     .mat-tab-label {
@@ -26,12 +27,16 @@
 
           .mat-form-field {
             flex: 1;
+
+            .mat-form-field-infix {
+              width: auto;
+            }
           }
         }
 
         .mat-tree {
           flex: 1;
-          overflow-x: auto;
+          overflow: auto;
 
           .mat-tree-node {
             &:hover {
