@@ -40,8 +40,8 @@ export class DatabaseCollectionService<T extends DatabaseObject> {
   public getAllOneTime(): Observable<T[] | undefined> {
     return from(this.datasRef.query.once('value')).pipe(
       map((data) => data.val() ? Object.entries(data.val() as T).map((entry: [string, T]) => ({
-        id: entry[0],
         ...entry[1],
+        id: entry[0],
         createDate: new Date(entry[1].createDate),
         updateDate: new Date(entry[1].updateDate)
       } as T)) : undefined)
@@ -85,6 +85,8 @@ export class DatabaseCollectionService<T extends DatabaseObject> {
     dataToUpdate.updateDate = (dataToUpdate.updateDate as Date).toJSON();
     return from(this.datasRef.update(data.id as string, dataToUpdate)).pipe(
       mergeMap(() => {
+        dataToUpdate.id = data.id;
+        dataToUpdate.createDate = new Date(data.createDate);
         dataToUpdate.updateDate = new Date(data.updateDate);
         return of(dataToUpdate);
       })

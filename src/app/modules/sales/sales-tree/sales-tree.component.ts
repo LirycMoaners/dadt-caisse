@@ -1,7 +1,7 @@
 import { ArrayDataSource } from '@angular/cdk/collections';
 import { FlatTreeControl } from '@angular/cdk/tree';
 import { FormStyle, getLocaleMonthNames, TranslationWidth } from '@angular/common';
-import { EventEmitter, OnInit } from '@angular/core';
+import { ElementRef, EventEmitter, OnInit, ViewChild } from '@angular/core';
 import { Component, Input, Output } from '@angular/core';
 import { FlatNode } from 'src/app/shared/models/flat-node.interface';
 import { Sale } from 'src/app/shared/models/sale.model';
@@ -14,12 +14,18 @@ import { Sale } from 'src/app/shared/models/sale.model';
 export class SalesTreeComponent implements OnInit {
   @Input() sales: Sale[] = [];
   @Output() saleSelected: EventEmitter<Sale | undefined> = new EventEmitter();
+  @ViewChild('customers', {read: ElementRef}) set content(content: ElementRef) {
+    if (content) {
+      this.customers = content;
+    }
+  }
   public dateFilter: Date = new Date();
   public textFilter: string | undefined;
   public dataSourceByDate?: ArrayDataSource<FlatNode<Sale | undefined>>;
   public dataSourceByCustomer?: ArrayDataSource<FlatNode<Sale | undefined>>;
   public treeControlByDate: FlatTreeControl<FlatNode<Sale | undefined>>;
   public treeControlByCustomer: FlatTreeControl<FlatNode<Sale | undefined>>;
+  private customers?: ElementRef;
   private saleFlatNodesByDate?: FlatNode<Sale | undefined>[];
   private saleFlatNodesByCustomer?: FlatNode<Sale | undefined>[];
   private months: readonly string[];
@@ -88,6 +94,12 @@ export class SalesTreeComponent implements OnInit {
       const customerNode = this.saleFlatNodesByCustomer?.find(saleFlatNode => saleFlatNode.label.includes(this.textFilter as string));
       if (customerNode) {
         customerNode.isExpanded = true;
+        setTimeout(() => {
+          const customerIndex = this.saleFlatNodesByCustomer?.filter(s => s.level === 0).findIndex(s => s.label === customerNode.label);
+          if (customerIndex !== undefined && customerIndex !== -1) {
+            (this.customers?.nativeElement as HTMLElement).scrollTo({top: customerIndex * 48});
+          }
+        }, 0);
       }
     }
   }
@@ -153,14 +165,25 @@ export class SalesTreeComponent implements OnInit {
     const saleFlatNodesByDate: FlatNode<Sale | undefined>[] = [];
     let startLevelToPush: number;
     let currentTreeSaleLabel: string;
+    let indexStartSale: number;
+    let saleFlatNodeOfYear: FlatNode<Sale | undefined>[];
 
     for (const sale of orderedSales) {
       startLevelToPush = 0;
-      if (saleFlatNodesByDate.some(saleFlatNode => saleFlatNode.label === (sale.createDate as Date).getFullYear().toString())) {
+      indexStartSale = saleFlatNodesByDate.findIndex(saleFlatNode =>
+        saleFlatNode.label === (sale.createDate as Date).getFullYear().toString()
+      );
+      if (indexStartSale !== -1) {
         startLevelToPush++;
-        if (saleFlatNodesByDate.some(saleFlatNode => saleFlatNode.label === this.months[(sale.createDate as Date).getMonth()])) {
+        saleFlatNodeOfYear = saleFlatNodesByDate.slice(indexStartSale);
+        indexStartSale = saleFlatNodeOfYear.findIndex(saleFlatNode =>
+          saleFlatNode.label === this.months[(sale.createDate as Date).getMonth()]
+        );
+        if (indexStartSale !== -1) {
           startLevelToPush++;
-          if (saleFlatNodesByDate.some(saleFlatNode => saleFlatNode.label === (sale.createDate as Date).getDate().toString())) {
+          if (saleFlatNodeOfYear.slice(indexStartSale).some(saleFlatNode =>
+            saleFlatNode.label === (sale.createDate as Date).getDate().toString()
+          )) {
             startLevelToPush++;
           }
         }

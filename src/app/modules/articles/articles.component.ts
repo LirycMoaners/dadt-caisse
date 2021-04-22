@@ -55,6 +55,9 @@ export class ArticlesComponent implements OnInit, OnDestroy {
           this.dataSource.data = [...articles].sort((articleA, articleB) =>
             articleA.reference.toLocaleUpperCase().localeCompare(articleB.reference.toLocaleUpperCase())
           );
+          this.dataSource.filterPredicate = (article: Article, filter: string) =>
+            article.reference.toLocaleLowerCase().startsWith(filter) ||
+            article.label.toLocaleLowerCase().startsWith(filter);
           this.paginator?.page.subscribe(() => this.table?.nativeElement.scrollIntoView(true));
         }),
         this.articleCategoryService.getAll().subscribe(articleCategories => this.articleCategories = articleCategories)
@@ -120,10 +123,8 @@ export class ArticlesComponent implements OnInit, OnDestroy {
    */
   public exportInventory(articleCategory?: ArticleCategory): void {
     const datePipe = new DatePipe('fr-FR');
-    const articles = (
-      articleCategory
-      ? this.dataSource.data.filter(article => article.categoryId === articleCategory.id)
-      : this.dataSource.data
+    const articles = this.dataSource.data.filter(article => (
+      articleCategory ? article.categoryId === articleCategory.id : true) && article.quantity > 0
     ).sort((articleA, articleB) => articleA.reference.localeCompare(articleB.reference));
 
     const workbook = new Workbook();

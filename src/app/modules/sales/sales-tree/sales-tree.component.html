@@ -1,6 +1,6 @@
 
 <mat-tab-group>
-  <mat-tab label="Date">
+  <mat-tab label="Date" *ngIf="dataSourceByDate">
     <div class="head">
       <button mat-icon-button (click)="collapseAll()">
         <mat-icon>remove</mat-icon>
@@ -11,7 +11,7 @@
         <mat-datepicker #date disabled="false"></mat-datepicker>
       </mat-form-field>
     </div>
-    <mat-tree *ngIf="dataSourceByDate" [dataSource]="dataSourceByDate" [treeControl]="treeControlByDate">
+    <mat-tree [dataSource]="dataSourceByDate" [treeControl]="treeControlByDate">
       <mat-tree-node
         *matTreeNodeDef="let saleFlatNode"
         matTreeNodePadding
@@ -34,7 +34,7 @@
       </mat-tree-node>
     </mat-tree>
   </mat-tab>
-  <mat-tab label="Client">
+  <mat-tab label="Client" *ngIf="dataSourceByCustomer">
     <div class="head">
       <button mat-icon-button (click)="collapseAll(false)">
         <mat-icon>remove</mat-icon>
@@ -43,7 +43,7 @@
         <input matInput [(ngModel)]="textFilter" (ngModelChange)="filterByText()" placeholder="Rechercher">
       </mat-form-field>
     </div>
-    <mat-tree *ngIf="dataSourceByCustomer" [dataSource]="dataSourceByCustomer" [treeControl]="treeControlByCustomer">
+    <mat-tree #customers [dataSource]="dataSourceByCustomer" [treeControl]="treeControlByCustomer">
       <mat-tree-node
         *matTreeNodeDef="let saleFlatNode"
         matTreeNodePadding
