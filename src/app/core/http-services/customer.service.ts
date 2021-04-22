@@ -176,25 +176,6 @@ export class CustomerService extends DatabaseCollectionService<Customer> {
     ]).pipe(
       mergeMap(([googleCustomers, firebaseCustomers]: [Customer[], Customer[] | undefined]) => {
         firebaseCustomers = !!firebaseCustomers ? firebaseCustomers : [];
-        const customersToAddInFirebase = googleCustomers.filter(
-          googleCustomer => firebaseCustomers?.every(
-            firebaseCustomer => firebaseCustomer.resourceName !== googleCustomer.resourceName
-          )
-        );
-        const customersToUpdateInFirebase = googleCustomers.filter(googleCustomer => {
-          const customer = firebaseCustomers?.find(
-            firebaseCustomer => !!firebaseCustomer.resourceName
-              && !!googleCustomer.resourceName
-              && firebaseCustomer.resourceName.localeCompare(googleCustomer.resourceName) === 0
-              && !!firebaseCustomer.etag
-              && !!googleCustomer.etag
-              && firebaseCustomer.etag.localeCompare(googleCustomer.etag) !== 0
-          );
-          if (!!customer) {
-            googleCustomer.id = customer.id;
-          }
-          return !!customer;
-        });
         const customersToAddInGoogle = firebaseCustomers.filter(firebaseCustomer =>
           !firebaseCustomer.resourceName
           || googleCustomers.every(googleCustomer => googleCustomer.resourceName !== firebaseCustomer.resourceName)
@@ -204,8 +185,6 @@ export class CustomerService extends DatabaseCollectionService<Customer> {
             && (googleCustomer.updateDate as Date).getTime() < (firebaseCustomer.updateDate as Date).getTime()
         ));
         return concat(
-          ...customersToAddInFirebase.map(customer => this.create(customer, true)),
-          ...customersToUpdateInFirebase.map(customer => this.update(customer, true)),
           ...customersToAddInGoogle.map(customer => this.googleService.createContact(customer).pipe(
             concatMap(person => {
               customer.resourceName = person.resourceName;
